@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #0d7377;
+  --color-primary-dark: #095456;
+  --color-primary-light: #14a3a8;
+  --color-accent: #d4a843;
+  --color-accent-dark: #b08a2e;
+  --color-accent-light: #e8c96a;
+  --color-bg: #f8f9fa;
+  --color-bg-alt: #ffffff;
+  --color-text: #1a1a2e;
+  --color-text-light: #6b7280;
+  --color-border: #e5e7eb;
+  --background: #f8f9fa;
+  --foreground: #1a1a2e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: #0d7377;
+  --color-primary-dark: #095456;
+  --color-primary-light: #14a3a8;
+  --color-accent: #d4a843;
+  --color-accent-dark: #b08a2e;
+  --color-accent-light: #e8c96a;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Kazakh ornament border pattern */
+.ornament-border {
+  border-image: repeating-linear-gradient(
+    90deg,
+    var(--color-accent) 0px,
+    var(--color-accent) 8px,
+    transparent 8px,
+    transparent 16px,
+    var(--color-primary) 16px,
+    var(--color-primary) 24px,
+    transparent 24px,
+    transparent 32px
+  ) 4;
+}
+
+.ornament-top {
+  position: relative;
+}
+
+.ornament-top::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-accent) 0px,
+    var(--color-accent) 12px,
+    var(--color-primary) 12px,
+    var(--color-primary) 24px
+  );
+}
+
+/* Calendar styles */
+.calendar-day {
+  transition: all 0.15s ease;
+}
+
+.calendar-day:hover {
+  background-color: var(--color-primary-light);
+  color: white;
+}
+
+.calendar-day.has-event {
+  position: relative;
+}
+
+.calendar-day.has-event::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
+
+/* Chatbot styles */
+.chatbot-bubble {
+  animation: bounce-in 0.3s ease;
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.chat-message {
+  animation: slide-up 0.2s ease;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Hero slider */
+.hero-slide {
+  animation: fade-in 0.8s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-dark);
+}

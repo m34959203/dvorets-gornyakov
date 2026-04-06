@@ -1,0 +1,57 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://dvorets:dvorets_pass@postgres:5432/dvorets_db
+      - JWT_SECRET=${JWT_SECRET:-change-this-to-a-random-64-char-string}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHANNEL_ID=${TELEGRAM_CHANNEL_ID:-}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_DEFAULT_LOCALE=kk
+      - NODE_ENV=production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/public/uploads
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dvorets_db
+      POSTGRES_USER: dvorets
+      POSTGRES_PASSWORD: dvorets_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dvorets -d dvorets_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:
+  caddy_config:
