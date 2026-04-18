@@ -1,5 +1,51 @@
+import type { Metadata } from "next";
 import { getMessages, isValidLocale, type Locale } from "@/lib/i18n";
 import NewsCard from "@/components/features/NewsCard";
+
+const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
+const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
+
+function getBaseUrl(): string {
+  const env = process.env.NEXT_PUBLIC_APP_URL;
+  const fallback = env || "https://dvorets-gornyakov.kz";
+  return fallback.replace(/\/$/, "");
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: lp } = await params;
+  const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const title =
+    locale === "kk"
+      ? `Жаңалықтар — ${SITE_NAME_KK}`
+      : `Новости — ${SITE_NAME_RU}`;
+  const description =
+    locale === "kk"
+      ? "Ш. Ділдебаев атындағы тау-кенші сарайының соңғы жаңалықтары, хабарландырулары мен іс-шаралары."
+      : "Последние новости, анонсы и события Дворца горняков им. Ш. Дільдебаева.";
+  const baseUrl = getBaseUrl();
+  const canonical = `${baseUrl}/${locale}/news`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: [],
+    },
+    alternates: {
+      canonical,
+      languages: {
+        kk: `${baseUrl}/kk/news`,
+        ru: `${baseUrl}/ru/news`,
+      },
+    },
+  };
+}
 
 const demoNews = [
   { id: "1", slug: "nauryz-2026", title_kk: "Наурыз мерекесіне шақырамыз!", title_ru: "Приглашаем на праздник Наурыз!", excerpt_kk: "Сарайда Наурыз мерекесіне арналған мерекелік іс-шаралар өтеді", excerpt_ru: "Во дворце пройдут праздничные мероприятия, посвящённые Наурызу", image_url: null, category: "events", published_at: "2026-03-15T10:00:00Z" },

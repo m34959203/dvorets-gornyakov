@@ -1,5 +1,51 @@
+import type { Metadata } from "next";
 import { isValidLocale, type Locale, getMessages } from "@/lib/i18n";
 import ContactForm from "@/components/features/ContactForm";
+
+const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
+const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
+
+function getBaseUrl(): string {
+  const env = process.env.NEXT_PUBLIC_APP_URL;
+  const fallback = env || "https://dvorets-gornyakov.kz";
+  return fallback.replace(/\/$/, "");
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: lp } = await params;
+  const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const title =
+    locale === "kk"
+      ? `Байланыс — ${SITE_NAME_KK}`
+      : `Контакты — ${SITE_NAME_RU}`;
+  const description =
+    locale === "kk"
+      ? "Ш. Ділдебаев атындағы тау-кенші сарайының мекенжайы, телефоны, электрондық поштасы мен жұмыс уақыты."
+      : "Адрес, телефон, электронная почта и часы работы Дворца горняков им. Ш. Дільдебаева.";
+  const baseUrl = getBaseUrl();
+  const canonical = `${baseUrl}/${locale}/contacts`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: [],
+    },
+    alternates: {
+      canonical,
+      languages: {
+        kk: `${baseUrl}/kk/contacts`,
+        ru: `${baseUrl}/ru/contacts`,
+      },
+    },
+  };
+}
 
 export default async function ContactsPage({
   params,

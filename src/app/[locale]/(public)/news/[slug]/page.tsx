@@ -1,8 +1,90 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { isValidLocale, type Locale, getMessages } from "@/lib/i18n";
+import { isValidLocale, type Locale, getMessages, getLocalizedField } from "@/lib/i18n";
+import { getOne } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
-const demoArticles: Record<string, { title_kk: string; title_ru: string; content_kk: string; content_ru: string; category: string; published_at: string }> = {
+const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
+const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
+
+function getBaseUrl(): string {
+  const env = process.env.NEXT_PUBLIC_APP_URL;
+  const fallback = env || "https://dvorets-gornyakov.kz";
+  return fallback.replace(/\/$/, "");
+}
+
+type NewsRow = {
+  slug: string;
+  title_kk: string;
+  title_ru: string;
+  excerpt_kk: string | null;
+  excerpt_ru: string | null;
+  image_url: string | null;
+};
+
+async function loadNewsMeta(slug: string): Promise<NewsRow | null> {
+  try {
+    return await getOne<NewsRow>(
+      `SELECT slug, title_kk, title_ru, excerpt_kk, excerpt_ru, image_url
+         FROM news WHERE slug = $1 AND status = 'published'`,
+      [slug]
+    );
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale: lp, slug } = await params;
+  const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const row = await loadNewsMeta(slug);
+
+  const baseUrl = getBaseUrl();
+  const canonical = `${baseUrl}/${locale}/news/${slug}`;
+  const languages = {
+    kk: `${baseUrl}/kk/news/${slug}`,
+    ru: `${baseUrl}/ru/news/${slug}`,
+  };
+
+  if (!row) {
+    return { title: "Not found" };
+  }
+
+  const title = getLocalizedField(row, "title", locale);
+  const description = getLocalizedField(row, "excerpt", locale);
+  const images = row.image_url ? [row.image_url] : [];
+  return {
+    title: `${title} — ${locale === "kk" ? SITE_NAME_KK : SITE_NAME_RU}`,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      images,
+    },
+    alternates: {
+      canonical,
+      languages,
+    },
+  };
+}
+
+interface DemoArticle {
+  title_kk: string;
+  title_ru: string;
+  content_kk: string;
+  content_ru: string;
+  category: string;
+  published_at: string;
+  video_url?: string | null;
+  embed_code?: string;
+}
+
+const demoArticles: Record<string, DemoArticle> = {
   "nauryz-2026": {
     title_kk: "Наурыз мерекесіне шақырамыз!",
     title_ru: "Приглашаем на праздник Наурыз!",
@@ -22,7 +104,7 @@ export default async function NewsArticlePage({
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
   const messages = getMessages(locale);
 
-  const article = demoArticles[slug] || {
+  const article: DemoArticle = demoArticles[slug] || {
     title_kk: "Мақала табылмады",
     title_ru: "Статья не найдена",
     content_kk: "Бұл мақала табылмады.",
@@ -33,6 +115,8 @@ export default async function NewsArticlePage({
 
   const title = locale === "kk" ? article.title_kk : article.title_ru;
   const content = locale === "kk" ? article.content_kk : article.content_ru;
+  const embedCode = article.embed_code && article.embed_code.trim() ? article.embed_code : "";
+  const videoUrl = article.video_url || "";
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -58,6 +142,19 @@ export default async function NewsArticlePage({
             )}
           </div>
         </header>
+
+        {embedCode ? (
+          <div
+            className="aspect-video rounded-xl overflow-hidden mb-8 bg-black"
+            dangerouslySetInnerHTML={{ __html: embedCode }}
+          />
+        ) : videoUrl ? (
+          <video
+            controls
+            className="w-full aspect-video rounded-xl mb-8 bg-black"
+            src={videoUrl}
+          />
+        ) : null}
 
         <div className="prose prose-lg max-w-none text-gray-700 whitespace-pre-wrap">
           {content}

@@ -17,6 +17,8 @@ interface NewsItem {
   excerpt_kk: string | null;
   excerpt_ru: string | null;
   image_url: string | null;
+  video_url: string | null;
+  embed_code: string | null;
   category: string | null;
   status: NewsStatus;
   published_at: string | null;
@@ -31,6 +33,8 @@ interface FormState {
   excerpt_kk: string;
   excerpt_ru: string;
   image_url: string;
+  video_url: string;
+  embed_code: string;
   category: string;
   status: NewsStatus;
 }
@@ -43,9 +47,15 @@ const EMPTY_FORM: FormState = {
   excerpt_kk: "",
   excerpt_ru: "",
   image_url: "",
+  video_url: "",
+  embed_code: "",
   category: "general",
   status: "draft",
 };
+
+type TranslateField = "title" | "excerpt" | "content";
+type TranslateDir = "ru2kk" | "kk2ru";
+type TranslateKey = `${TranslateField}_${TranslateDir}`;
 
 const STATUSES: NewsStatus[] = ["draft", "published", "archived"];
 
@@ -83,6 +93,22 @@ export default function AdminNewsPage() {
   const [saving, setSaving] = useState(false);
   const [formErr, setFormErr] = useState<string>("");
   const [uploading, setUploading] = useState(false);
+  const [translating, setTranslating] = useState<Record<TranslateKey, boolean>>({
+    title_ru2kk: false,
+    title_kk2ru: false,
+    excerpt_ru2kk: false,
+    excerpt_kk2ru: false,
+    content_ru2kk: false,
+    content_kk2ru: false,
+  });
+  const [translateErr, setTranslateErr] = useState<Record<TranslateKey, string>>({
+    title_ru2kk: "",
+    title_kk2ru: "",
+    excerpt_ru2kk: "",
+    excerpt_kk2ru: "",
+    content_ru2kk: "",
+    content_kk2ru: "",
+  });
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -135,6 +161,8 @@ export default function AdminNewsPage() {
       excerpt_kk: row.excerpt_kk || "",
       excerpt_ru: row.excerpt_ru || "",
       image_url: row.image_url || "",
+      video_url: row.video_url || "",
+      embed_code: row.embed_code || "",
       category: row.category || "general",
       status: row.status,
     });
@@ -153,6 +181,8 @@ export default function AdminNewsPage() {
           excerpt_kk: fresh.excerpt_kk || "",
           excerpt_ru: fresh.excerpt_ru || "",
           image_url: fresh.image_url || "",
+          video_url: fresh.video_url || "",
+          embed_code: fresh.embed_code || "",
           category: fresh.category || "general",
           status: fresh.status,
         });
@@ -208,6 +238,8 @@ export default function AdminNewsPage() {
       excerpt_kk: form.excerpt_kk || undefined,
       excerpt_ru: form.excerpt_ru || undefined,
       image_url: form.image_url || "",
+      video_url: form.video_url || "",
+      embed_code: form.embed_code || "",
       category: form.category || undefined,
       status: form.status,
     };
@@ -248,6 +280,54 @@ export default function AdminNewsPage() {
       await load();
     } catch {
       setFormErr(locale === "kk" ? "Желі қатесі" : "Сетевая ошибка");
+    }
+  };
+
+  const translate = async (field: TranslateField, dir: TranslateDir) => {
+    const key: TranslateKey = `${field}_${dir}`;
+    const from = dir === "ru2kk" ? "ru" : "kk";
+    const to = dir === "ru2kk" ? "kk" : "ru";
+    const srcKey = `${field}_${from}` as
+      | "title_ru"
+      | "title_kk"
+      | "excerpt_ru"
+      | "excerpt_kk"
+      | "content_ru"
+      | "content_kk";
+    const dstKey = `${field}_${to}` as typeof srcKey;
+    const text = form[srcKey];
+    if (!text || !text.trim()) {
+      setTranslateErr((s) => ({
+        ...s,
+        [key]: locale === "kk" ? "Бастапқы мәтін бос" : "Исходный текст пустой",
+      }));
+      return;
+    }
+    setTranslating((s) => ({ ...s, [key]: true }));
+    setTranslateErr((s) => ({ ...s, [key]: "" }));
+    try {
+      const r = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, from, to }),
+      });
+      const body = await r.json();
+      if (!r.ok) {
+        setTranslateErr((s) => ({
+          ...s,
+          [key]: body.error || (locale === "kk" ? "Аударма қатесі" : "Ошибка перевода"),
+        }));
+        return;
+      }
+      const translated = (body.data?.translated as string) || "";
+      setForm((f) => ({ ...f, [dstKey]: translated }));
+    } catch {
+      setTranslateErr((s) => ({
+        ...s,
+        [key]: locale === "kk" ? "Желі қатесі" : "Сетевая ошибка",
+      }));
+    } finally {
+      setTranslating((s) => ({ ...s, [key]: false }));
     }
   };
 
@@ -364,7 +444,24 @@ export default function AdminNewsPage() {
                     )}
                   </td>
                   <td className="max-w-md truncate px-4 py-3 font-medium text-gray-900">
-                    {it.title_ru}
+                    <div className="flex items-center gap-2">
+                      <span className="truncate">{it.title_ru}</span>
+                      {(it.video_url || (it.embed_code && it.embed_code.trim())) && (
+                        <span
+                          title={locale === "kk" ? "Бейне" : "Видео"}
+                          className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-white"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className="h-3 w-3"
+                            aria-hidden="true"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-gray-700">{it.category || "—"}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-xs text-gray-500">
@@ -420,40 +517,72 @@ export default function AdminNewsPage() {
 
             <form onSubmit={onSubmit} className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field label={locale === "kk" ? "Тақырып (KK)" : "Заголовок (KK)"}>
+                <FieldWithTranslate
+                  label={locale === "kk" ? "Тақырып (KK)" : "Заголовок (KK)"}
+                  translateLabel="→ RU"
+                  translating={translating.title_kk2ru}
+                  error={translateErr.title_kk2ru}
+                  onTranslate={() => translate("title", "kk2ru")}
+                >
                   <input
                     required
                     value={form.title_kk}
                     onChange={(e) => setForm({ ...form, title_kk: e.target.value })}
                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
                   />
-                </Field>
-                <Field label={locale === "kk" ? "Тақырып (RU)" : "Заголовок (RU)"}>
+                </FieldWithTranslate>
+                <FieldWithTranslate
+                  label={locale === "kk" ? "Тақырып (RU)" : "Заголовок (RU)"}
+                  translateLabel="→ KK"
+                  translating={translating.title_ru2kk}
+                  error={translateErr.title_ru2kk}
+                  onTranslate={() => translate("title", "ru2kk")}
+                >
                   <input
                     required
                     value={form.title_ru}
                     onChange={(e) => setForm({ ...form, title_ru: e.target.value })}
                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
                   />
-                </Field>
+                </FieldWithTranslate>
               </div>
 
-              <Field label={locale === "kk" ? "Қысқаша (KK)" : "Краткое описание (KK)"}>
-                <input
-                  value={form.excerpt_kk}
-                  onChange={(e) => setForm({ ...form, excerpt_kk: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                />
-              </Field>
-              <Field label={locale === "kk" ? "Қысқаша (RU)" : "Краткое описание (RU)"}>
-                <input
-                  value={form.excerpt_ru}
-                  onChange={(e) => setForm({ ...form, excerpt_ru: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                />
-              </Field>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FieldWithTranslate
+                  label={locale === "kk" ? "Қысқаша (KK)" : "Краткое описание (KK)"}
+                  translateLabel="→ RU"
+                  translating={translating.excerpt_kk2ru}
+                  error={translateErr.excerpt_kk2ru}
+                  onTranslate={() => translate("excerpt", "kk2ru")}
+                >
+                  <input
+                    value={form.excerpt_kk}
+                    onChange={(e) => setForm({ ...form, excerpt_kk: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                  />
+                </FieldWithTranslate>
+                <FieldWithTranslate
+                  label={locale === "kk" ? "Қысқаша (RU)" : "Краткое описание (RU)"}
+                  translateLabel="→ KK"
+                  translating={translating.excerpt_ru2kk}
+                  error={translateErr.excerpt_ru2kk}
+                  onTranslate={() => translate("excerpt", "ru2kk")}
+                >
+                  <input
+                    value={form.excerpt_ru}
+                    onChange={(e) => setForm({ ...form, excerpt_ru: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                  />
+                </FieldWithTranslate>
+              </div>
 
-              <Field label={locale === "kk" ? "Мазмұны (KK)" : "Содержание (KK)"}>
+              <FieldWithTranslate
+                label={locale === "kk" ? "Мазмұны (KK)" : "Содержание (KK)"}
+                translateLabel="→ RU"
+                translating={translating.content_kk2ru}
+                error={translateErr.content_kk2ru}
+                onTranslate={() => translate("content", "kk2ru")}
+              >
                 <textarea
                   required
                   rows={8}
@@ -461,8 +590,14 @@ export default function AdminNewsPage() {
                   onChange={(e) => setForm({ ...form, content_kk: e.target.value })}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2"
                 />
-              </Field>
-              <Field label={locale === "kk" ? "Мазмұны (RU)" : "Содержание (RU)"}>
+              </FieldWithTranslate>
+              <FieldWithTranslate
+                label={locale === "kk" ? "Мазмұны (RU)" : "Содержание (RU)"}
+                translateLabel="→ KK"
+                translating={translating.content_ru2kk}
+                error={translateErr.content_ru2kk}
+                onTranslate={() => translate("content", "ru2kk")}
+              >
                 <textarea
                   required
                   rows={8}
@@ -470,7 +605,7 @@ export default function AdminNewsPage() {
                   onChange={(e) => setForm({ ...form, content_ru: e.target.value })}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2"
                 />
-              </Field>
+              </FieldWithTranslate>
 
               <Field label={locale === "kk" ? "Сурет" : "Изображение"}>
                 <div className="space-y-2">
@@ -525,6 +660,26 @@ export default function AdminNewsPage() {
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs"
                   />
                 </div>
+              </Field>
+
+              <Field label={locale === "kk" ? "Бейне сілтемесі (MP4)" : "Ссылка на видео (MP4)"}>
+                <input
+                  type="url"
+                  value={form.video_url}
+                  onChange={(e) => setForm({ ...form, video_url: e.target.value })}
+                  placeholder="https://.../video.mp4"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                />
+              </Field>
+
+              <Field label="HTML embed (YouTube/Vimeo)">
+                <textarea
+                  rows={5}
+                  value={form.embed_code}
+                  onChange={(e) => setForm({ ...form, embed_code: e.target.value })}
+                  placeholder="<iframe ...></iframe>"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs"
+                />
               </Field>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -635,5 +790,39 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="mb-1 block text-sm font-medium text-gray-700">{label}</span>
       {children}
     </label>
+  );
+}
+
+function FieldWithTranslate({
+  label,
+  translateLabel,
+  translating,
+  error,
+  onTranslate,
+  children,
+}: {
+  label: string;
+  translateLabel: string;
+  translating: boolean;
+  error: string;
+  onTranslate: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="block">
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <span className="text-sm font-medium text-gray-700">{label}</span>
+        <button
+          type="button"
+          onClick={onTranslate}
+          disabled={translating}
+          className="inline-flex items-center rounded-md bg-accent px-2 py-0.5 text-xs font-medium text-white hover:opacity-90 disabled:opacity-60"
+        >
+          {translating ? "…" : translateLabel}
+        </button>
+      </div>
+      {children}
+      {error && <div className="mt-1 text-xs text-red-600">{error}</div>}
+    </div>
   );
 }

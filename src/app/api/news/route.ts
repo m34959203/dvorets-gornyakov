@@ -3,6 +3,7 @@ import { query, getMany } from "@/lib/db";
 import { getCurrentUser, requireRole } from "@/lib/auth";
 import { newsSchema, parseBody } from "@/lib/validators";
 import { apiError, apiSuccess, paginate, slugify } from "@/lib/utils";
+import { publishNews } from "@/lib/publish";
 
 export async function GET(request: NextRequest) {
   try {
@@ -49,8 +50,9 @@ export async function POST(request: NextRequest) {
     const slug = slugify(data.title_ru || data.title_kk) + "-" + Date.now().toString(36);
 
     const result = await query(
-      `INSERT INTO news (slug, title_kk, title_ru, content_kk, content_ru, excerpt_kk, excerpt_ru, image_url, category, author_id, status, published_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      `INSERT INTO news (slug, title_kk, title_ru, content_kk, content_ru, excerpt_kk, excerpt_ru,
+                         image_url, video_url, embed_code, category, author_id, status, published_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
        RETURNING *`,
       [
         slug,
@@ -61,6 +63,8 @@ export async function POST(request: NextRequest) {
         data.excerpt_kk || "",
         data.excerpt_ru || "",
         data.image_url || null,
+        data.video_url || null,
+        data.embed_code || "",
         data.category || "general",
         user!.userId,
         data.status || "draft",
@@ -68,7 +72,19 @@ export async function POST(request: NextRequest) {
       ]
     );
 
-    return apiSuccess(result.rows[0], 201);
+    const row = result.rows[0];
+    if (row && row.status === "published") {
+      publishNews({
+        slug: row.slug,
+        title_ru: row.title_ru,
+        title_kk: row.title_kk,
+        excerpt_ru: row.excerpt_ru,
+        excerpt_kk: row.excerpt_kk,
+        image_url: row.image_url,
+      }).catch(console.error);
+    }
+
+    return apiSuccess(row, 201);
   } catch (error) {
     console.error("News POST error:", error);
     return apiError("Internal server error", 500);

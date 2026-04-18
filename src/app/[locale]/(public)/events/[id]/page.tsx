@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { isValidLocale, type Locale, getMessages, getLocalizedField } from "@/lib/i18n";
 import { formatDateTime } from "@/lib/utils";
 import Badge from "@/components/ui/Badge";
-import Button from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import EventSubscribe from "@/components/features/EventSubscribe";
 
 const demoEvent = {
   id: "1",
@@ -33,15 +31,6 @@ export default function EventDetailPage() {
   const event = demoEvent;
   const title = getLocalizedField(event, "title", locale);
   const description = getLocalizedField(event, "description", locale);
-
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // In production, this would call the API
-    setSubscribed(true);
-  };
 
   const typeLabels: Record<string, Record<string, string>> = {
     concert: { kk: "Концерт", ru: "Концерт" },
@@ -69,7 +58,7 @@ export default function EventDetailPage() {
         </div>
 
         <div className="p-6">
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex items-start justify-between mb-4 gap-4">
             <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
             <Badge variant="info">{typeLabels[event.event_type]?.[locale] || event.event_type}</Badge>
           </div>
@@ -89,29 +78,21 @@ export default function EventDetailPage() {
             </div>
           </div>
 
-          <div className="prose max-w-none text-gray-700 mb-8">
-            <p>{description}</p>
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            <EventSubscribe
+              eventId={event.id}
+              locale={locale}
+              labels={{ subscribe: t.subscribe, subscribeSuccess: t.subscribeSuccess }}
+            />
+            <span className="text-sm text-gray-500">
+              {locale === "kk"
+                ? "Іс-шара туралы еске салу алыңыз"
+                : "Получите напоминание о мероприятии"}
+            </span>
           </div>
 
-          {/* Email subscription */}
-          <div className="bg-primary/5 rounded-lg p-6">
-            <h3 className="font-semibold text-gray-900 mb-3">{t.subscribe}</h3>
-            {subscribed ? (
-              <p className="text-green-600 font-medium">{t.subscribeSuccess}</p>
-            ) : (
-              <form onSubmit={handleSubscribe} className="flex gap-2">
-                <Input
-                  id="subscribe_email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="email@example.com"
-                  required
-                  className="flex-1"
-                />
-                <Button type="submit">{t.subscribe}</Button>
-              </form>
-            )}
+          <div className="prose max-w-none text-gray-700 mb-8">
+            <p>{description}</p>
           </div>
         </div>
       </div>

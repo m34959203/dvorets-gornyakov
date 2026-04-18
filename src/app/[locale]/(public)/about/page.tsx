@@ -1,4 +1,50 @@
+import type { Metadata } from "next";
 import { isValidLocale, type Locale, getMessages } from "@/lib/i18n";
+
+const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
+const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
+
+function getBaseUrl(): string {
+  const env = process.env.NEXT_PUBLIC_APP_URL;
+  const fallback = env || "https://dvorets-gornyakov.kz";
+  return fallback.replace(/\/$/, "");
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: lp } = await params;
+  const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const title =
+    locale === "kk"
+      ? `Біз туралы — ${SITE_NAME_KK}`
+      : `О нас — ${SITE_NAME_RU}`;
+  const description =
+    locale === "kk"
+      ? "Ш. Ділдебаев атындағы тау-кенші сарайының тарихы, миссиясы және жетекшілігі — 1960 жылдан бері Жезқазған қаласының мәдени орталығы."
+      : "История, миссия и руководство Дворца горняков им. Ш. Дільдебаева — культурного центра города Жезказган с 1960 года.";
+  const baseUrl = getBaseUrl();
+  const canonical = `${baseUrl}/${locale}/about`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: [],
+    },
+    alternates: {
+      canonical,
+      languages: {
+        kk: `${baseUrl}/kk/about`,
+        ru: `${baseUrl}/ru/about`,
+      },
+    },
+  };
+}
 
 export default async function AboutPage({
   params,

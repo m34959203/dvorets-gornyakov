@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import Button from "@/components/ui/Button";
 import type { Locale } from "@/lib/i18n";
 
@@ -156,6 +157,29 @@ export default function RecommendQuiz({ locale, messages: t }: RecommendQuizProp
         <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap mb-6">
           {result}
         </div>
+
+        <div className="rounded-xl bg-gradient-to-br from-primary/5 to-accent/10 p-5 mb-6">
+          <p className="text-sm text-gray-700 mb-3">
+            {locale === "kk"
+              ? "Ұнаған үйірмеге жазылыңыз:"
+              : "Запишитесь на понравившийся кружок:"}
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={`/${locale}/clubs`}
+              className="bg-accent text-primary-dark hover:bg-accent-light rounded-full px-5 py-2 text-sm font-semibold"
+            >
+              {locale === "kk" ? "Жазылу" : "Записаться"}
+            </Link>
+            <Link
+              href={`/${locale}/clubs`}
+              className="text-sm font-medium text-primary hover:text-primary-dark underline underline-offset-4"
+            >
+              {locale === "kk" ? "Үйірмеге өту" : "Перейти к кружку"}
+            </Link>
+          </div>
+        </div>
+
         <Button onClick={reset} variant="outline">
           {locale === "kk" ? "Қайтадан бастау" : "Начать заново"}
         </Button>

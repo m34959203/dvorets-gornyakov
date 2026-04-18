@@ -1,7 +1,78 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { isValidLocale, type Locale, getMessages, getLocalizedField } from "@/lib/i18n";
+import { getOne } from "@/lib/db";
 import Badge from "@/components/ui/Badge";
 import EnrollmentForm from "@/components/features/EnrollmentForm";
+
+const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
+const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
+
+function getBaseUrl(): string {
+  const env = process.env.NEXT_PUBLIC_APP_URL;
+  const fallback = env || "https://dvorets-gornyakov.kz";
+  return fallback.replace(/\/$/, "");
+}
+
+type ClubMetaRow = {
+  id: string;
+  name_kk: string;
+  name_ru: string;
+  description_kk: string | null;
+  description_ru: string | null;
+  image_url: string | null;
+};
+
+async function loadClubMeta(id: string): Promise<ClubMetaRow | null> {
+  try {
+    return await getOne<ClubMetaRow>(
+      `SELECT id, name_kk, name_ru, description_kk, description_ru, image_url
+         FROM clubs WHERE id = $1 AND is_active = TRUE`,
+      [id]
+    );
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}): Promise<Metadata> {
+  const { locale: lp, id } = await params;
+  const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const row = await loadClubMeta(id);
+
+  const baseUrl = getBaseUrl();
+  const canonical = `${baseUrl}/${locale}/clubs/${id}`;
+  const languages = {
+    kk: `${baseUrl}/kk/clubs/${id}`,
+    ru: `${baseUrl}/ru/clubs/${id}`,
+  };
+
+  if (!row) {
+    return { title: "Not found" };
+  }
+
+  const name = getLocalizedField(row, "name", locale);
+  const description = getLocalizedField(row, "description", locale);
+  const images = row.image_url ? [row.image_url] : [];
+  return {
+    title: `${name} — ${locale === "kk" ? SITE_NAME_KK : SITE_NAME_RU}`,
+    description,
+    openGraph: {
+      title: name,
+      description,
+      type: "article",
+      images,
+    },
+    alternates: {
+      canonical,
+      languages,
+    },
+  };
+}
 
 const demoClubs: Record<string, {
   id: string; name_kk: string; name_ru: string;

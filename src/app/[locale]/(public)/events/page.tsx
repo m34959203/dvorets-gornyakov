@@ -1,5 +1,51 @@
+import type { Metadata } from "next";
 import { isValidLocale, type Locale, getMessages } from "@/lib/i18n";
 import EventCalendar from "@/components/features/EventCalendar";
+
+const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
+const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
+
+function getBaseUrl(): string {
+  const env = process.env.NEXT_PUBLIC_APP_URL;
+  const fallback = env || "https://dvorets-gornyakov.kz";
+  return fallback.replace(/\/$/, "");
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: lp } = await params;
+  const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const title =
+    locale === "kk"
+      ? `Іс-шаралар — ${SITE_NAME_KK}`
+      : `Мероприятия — ${SITE_NAME_RU}`;
+  const description =
+    locale === "kk"
+      ? "Концерттер, көрмелер, шеберханалар мен фестивальдер — Ш. Ділдебаев атындағы тау-кенші сарайындағы жақын арадағы іс-шаралар."
+      : "Концерты, выставки, мастер-классы и фестивали — ближайшие мероприятия Дворца горняков им. Ш. Дільдебаева.";
+  const baseUrl = getBaseUrl();
+  const canonical = `${baseUrl}/${locale}/events`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: [],
+    },
+    alternates: {
+      canonical,
+      languages: {
+        kk: `${baseUrl}/kk/events`,
+        ru: `${baseUrl}/ru/events`,
+      },
+    },
+  };
+}
 
 const demoEvents = [
   { id: "1", title_kk: "Наурыз мерекесіне арналған концерт", title_ru: "Концерт к празднику Наурыз", description_kk: "Наурыз мейрамына арналған мерекелік концерт", description_ru: "Праздничный концерт, посвящённый празднику Наурыз", image_url: null, event_type: "concert" as const, start_date: "2026-03-22T18:00:00Z", location: "Негізгі зал" },

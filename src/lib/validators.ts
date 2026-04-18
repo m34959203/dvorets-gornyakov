@@ -22,8 +22,14 @@ export const newsSchema = z.object({
   excerpt_kk: z.string().max(1000).optional(),
   excerpt_ru: z.string().max(1000).optional(),
   image_url: z.string().url().optional().or(z.literal("")),
+  video_url: z.string().url().optional().or(z.literal("")),
+  embed_code: z.string().max(4000).optional().or(z.literal("")),
   category: z.string().max(100).optional(),
   status: z.enum(["draft", "published", "archived"]).optional(),
+});
+
+export const eventSubscribeSchema = z.object({
+  email: z.string().email(),
 });
 
 export const clubSchema = z.object({

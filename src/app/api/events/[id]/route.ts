@@ -3,6 +3,7 @@ import { query, getOne } from "@/lib/db";
 import { getCurrentUser, requireRole } from "@/lib/auth";
 import { eventSchema, parseBody } from "@/lib/validators";
 import { apiError, apiSuccess } from "@/lib/utils";
+import { publishEvent } from "@/lib/publish";
 import { z } from "zod";
 
 export async function GET(
@@ -33,6 +34,14 @@ export async function PUT(
     if ("error" in parsed) return apiError(parsed.error);
     const d = parsed.data;
 
+    const existing = await getOne<{ status: string; start_date: Date }>(
+      `SELECT status, start_date FROM events WHERE id = $1`,
+      [id]
+    );
+    if (!existing) return apiError("Not found", 404);
+
+    const newStatus = d.status || "upcoming";
+
     const result = await query(
       `UPDATE events SET title_kk=$1, title_ru=$2, description_kk=$3, description_ru=$4,
                           image_url=$5, event_type=$6, start_date=$7, end_date=$8,
@@ -48,12 +57,35 @@ export async function PUT(
         d.start_date,
         d.end_date || null,
         d.location || "",
-        d.status || "upcoming",
+        newStatus,
         id,
       ]
     );
     if (!result.rows[0]) return apiError("Not found", 404);
-    return apiSuccess(result.rows[0]);
+    const row = result.rows[0];
+    const prevStart = existing.start_date
+      ? new Date(existing.start_date).getTime()
+      : NaN;
+    const newStart = new Date(row.start_date).getTime();
+    const statusTransitioned =
+      newStatus === "upcoming" && existing.status !== "upcoming";
+    const dateChangedAndUpcoming =
+      newStatus === "upcoming" &&
+      !isNaN(newStart) &&
+      !isNaN(prevStart) &&
+      newStart !== prevStart &&
+      newStart > Date.now();
+    if (statusTransitioned || dateChangedAndUpcoming) {
+      publishEvent({
+        id: row.id,
+        title_ru: row.title_ru,
+        title_kk: row.title_kk,
+        start_date: row.start_date,
+        location: row.location,
+        event_type: row.event_type,
+      }).catch(console.error);
+    }
+    return apiSuccess(row);
   } catch (e) {
     console.error(e);
     return apiError("Internal server error", 500);
@@ -76,12 +108,29 @@ export async function PATCH(
     const parsed = parseBody(patchSchema, body);
     if ("error" in parsed) return apiError(parsed.error);
 
+    const existing = await getOne<{ status: string }>(
+      `SELECT status FROM events WHERE id = $1`,
+      [id]
+    );
+    if (!existing) return apiError("Not found", 404);
+
     const result = await query(
       `UPDATE events SET status=$1 WHERE id=$2 RETURNING *`,
       [parsed.data.status, id]
     );
     if (!result.rows[0]) return apiError("Not found", 404);
-    return apiSuccess(result.rows[0]);
+    const row = result.rows[0];
+    if (parsed.data.status === "upcoming" && existing.status !== "upcoming") {
+      publishEvent({
+        id: row.id,
+        title_ru: row.title_ru,
+        title_kk: row.title_kk,
+        start_date: row.start_date,
+        location: row.location,
+        event_type: row.event_type,
+      }).catch(console.error);
+    }
+    return apiSuccess(row);
   } catch (e) {
     console.error(e);
     return apiError("Internal server error", 500);

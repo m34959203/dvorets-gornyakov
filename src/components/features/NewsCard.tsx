@@ -15,6 +15,8 @@ interface NewsItem {
   image_url: string | null;
   category: string;
   published_at: string;
+  video_url?: string | null;
+  embed_code?: string;
 }
 
 interface NewsCardProps {
@@ -25,6 +27,7 @@ interface NewsCardProps {
 export default function NewsCard({ news, locale }: NewsCardProps) {
   const title = getLocalizedField(news, "title", locale);
   const excerpt = getLocalizedField(news, "excerpt", locale);
+  const hasVideo = Boolean(news.video_url || (news.embed_code && news.embed_code.trim()));
 
   return (
     <Card hoverable>
@@ -42,6 +45,18 @@ export default function NewsCard({ news, locale }: NewsCardProps) {
           {news.category && (
             <div className="absolute top-2 left-2">
               <Badge variant="primary">{news.category}</Badge>
+            </div>
+          )}
+          {hasVideo && (
+            <div className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-md">
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="h-4 w-4 text-primary ml-0.5"
+                aria-hidden="true"
+              >
+                <path d="M8 5v14l11-7z" />
+              </svg>
             </div>
           )}
         </div>

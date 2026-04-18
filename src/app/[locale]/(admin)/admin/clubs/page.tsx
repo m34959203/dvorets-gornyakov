@@ -99,6 +99,76 @@ export default function AdminClubsPage() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [translating, setTranslating] = useState<
+    null | "name_to_kk" | "name_to_ru" | "desc_to_kk" | "desc_to_ru"
+  >(null);
+  const [translateErr, setTranslateErr] = useState<
+    Partial<Record<"name_to_kk" | "name_to_ru" | "desc_to_kk" | "desc_to_ru", string>>
+  >({});
+
+  const runTranslate = async (
+    key: "name_to_kk" | "name_to_ru" | "desc_to_kk" | "desc_to_ru",
+  ) => {
+    let text = "";
+    let from: "ru" | "kk" = "ru";
+    let to: "ru" | "kk" = "kk";
+    if (key === "name_to_kk") {
+      text = form.name_ru;
+      from = "ru";
+      to = "kk";
+    } else if (key === "name_to_ru") {
+      text = form.name_kk;
+      from = "kk";
+      to = "ru";
+    } else if (key === "desc_to_kk") {
+      text = form.description_ru;
+      from = "ru";
+      to = "kk";
+    } else {
+      text = form.description_kk;
+      from = "kk";
+      to = "ru";
+    }
+    if (!text.trim()) {
+      setTranslateErr((prev) => ({
+        ...prev,
+        [key]: locale === "kk" ? "Мәтін бос" : "Пустой текст",
+      }));
+      return;
+    }
+    setTranslating(key);
+    setTranslateErr((prev) => ({ ...prev, [key]: "" }));
+    try {
+      const r = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, from, to }),
+      });
+      const body = await r.json();
+      if (!r.ok) {
+        setTranslateErr((prev) => ({
+          ...prev,
+          [key]: body.error || (locale === "kk" ? "Қате" : "Ошибка"),
+        }));
+        return;
+      }
+      const translated: string = body.data?.translated ?? "";
+      setForm((f) => {
+        if (key === "name_to_kk") return { ...f, name_kk: translated };
+        if (key === "name_to_ru") return { ...f, name_ru: translated };
+        if (key === "desc_to_kk") return { ...f, description_kk: translated };
+        return { ...f, description_ru: translated };
+      });
+    } catch {
+      setTranslateErr((prev) => ({
+        ...prev,
+        [key]: locale === "kk" ? "Желі қатесі" : "Сетевая ошибка",
+      }));
+    } finally {
+      setTranslating(null);
+    }
+  };
+
   const load = useCallback(async () => {
     setLoading(true);
     setErr("");
@@ -435,35 +505,91 @@ export default function AdminClubsPage() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label={locale === "kk" ? "Атауы (KK)" : "Название (KK)"}>
-                <input
-                  value={form.name_kk}
-                  onChange={(e) => setForm({ ...form, name_kk: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                />
+                <div className="flex items-center gap-2">
+                  <input
+                    value={form.name_kk}
+                    onChange={(e) => setForm({ ...form, name_kk: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => runTranslate("name_to_kk")}
+                    disabled={translating === "name_to_kk"}
+                    title={locale === "kk" ? "RU → KK аудару" : "Перевести RU → KK"}
+                    className="shrink-0 rounded-lg bg-accent/10 px-2 py-2 text-xs font-semibold text-primary-dark hover:bg-accent/20 disabled:opacity-60"
+                  >
+                    {translating === "name_to_kk" ? "…" : "→ KK"}
+                  </button>
+                </div>
+                {translateErr.name_to_kk && (
+                  <div className="mt-1 text-xs text-red-600">{translateErr.name_to_kk}</div>
+                )}
               </Field>
               <Field label={locale === "kk" ? "Атауы (RU)" : "Название (RU)"}>
-                <input
-                  value={form.name_ru}
-                  onChange={(e) => setForm({ ...form, name_ru: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                />
+                <div className="flex items-center gap-2">
+                  <input
+                    value={form.name_ru}
+                    onChange={(e) => setForm({ ...form, name_ru: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => runTranslate("name_to_ru")}
+                    disabled={translating === "name_to_ru"}
+                    title={locale === "kk" ? "KK → RU аудару" : "Перевести KK → RU"}
+                    className="shrink-0 rounded-lg bg-accent/10 px-2 py-2 text-xs font-semibold text-primary-dark hover:bg-accent/20 disabled:opacity-60"
+                  >
+                    {translating === "name_to_ru" ? "…" : "→ RU"}
+                  </button>
+                </div>
+                {translateErr.name_to_ru && (
+                  <div className="mt-1 text-xs text-red-600">{translateErr.name_to_ru}</div>
+                )}
               </Field>
 
               <Field label={locale === "kk" ? "Сипаттама (KK)" : "Описание (KK)"} className="sm:col-span-2">
-                <textarea
-                  rows={3}
-                  value={form.description_kk}
-                  onChange={(e) => setForm({ ...form, description_kk: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                />
+                <div className="flex items-start gap-2">
+                  <textarea
+                    rows={3}
+                    value={form.description_kk}
+                    onChange={(e) => setForm({ ...form, description_kk: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => runTranslate("desc_to_kk")}
+                    disabled={translating === "desc_to_kk"}
+                    title={locale === "kk" ? "RU → KK аудару" : "Перевести RU → KK"}
+                    className="shrink-0 rounded-lg bg-accent/10 px-2 py-2 text-xs font-semibold text-primary-dark hover:bg-accent/20 disabled:opacity-60"
+                  >
+                    {translating === "desc_to_kk" ? "…" : "→ KK"}
+                  </button>
+                </div>
+                {translateErr.desc_to_kk && (
+                  <div className="mt-1 text-xs text-red-600">{translateErr.desc_to_kk}</div>
+                )}
               </Field>
               <Field label={locale === "kk" ? "Сипаттама (RU)" : "Описание (RU)"} className="sm:col-span-2">
-                <textarea
-                  rows={3}
-                  value={form.description_ru}
-                  onChange={(e) => setForm({ ...form, description_ru: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                />
+                <div className="flex items-start gap-2">
+                  <textarea
+                    rows={3}
+                    value={form.description_ru}
+                    onChange={(e) => setForm({ ...form, description_ru: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => runTranslate("desc_to_ru")}
+                    disabled={translating === "desc_to_ru"}
+                    title={locale === "kk" ? "KK → RU аудару" : "Перевести KK → RU"}
+                    className="shrink-0 rounded-lg bg-accent/10 px-2 py-2 text-xs font-semibold text-primary-dark hover:bg-accent/20 disabled:opacity-60"
+                  >
+                    {translating === "desc_to_ru" ? "…" : "→ RU"}
+                  </button>
+                </div>
+                {translateErr.desc_to_ru && (
+                  <div className="mt-1 text-xs text-red-600">{translateErr.desc_to_ru}</div>
+                )}
               </Field>
 
               <Field label={locale === "kk" ? "Сурет" : "Изображение"} className="sm:col-span-2">

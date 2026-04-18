@@ -3,6 +3,7 @@ import { query, getMany } from "@/lib/db";
 import { getCurrentUser, requireRole } from "@/lib/auth";
 import { eventSchema, parseBody } from "@/lib/validators";
 import { apiError, apiSuccess } from "@/lib/utils";
+import { publishEvent } from "@/lib/publish";
 
 export async function GET(request: NextRequest) {
   try {
@@ -65,7 +66,22 @@ export async function POST(request: NextRequest) {
       ]
     );
 
-    return apiSuccess(result.rows[0], 201);
+    const row = result.rows[0];
+    if (row && row.status === "upcoming") {
+      const start = new Date(row.start_date);
+      if (!isNaN(start.getTime()) && start.getTime() > Date.now()) {
+        publishEvent({
+          id: row.id,
+          title_ru: row.title_ru,
+          title_kk: row.title_kk,
+          start_date: row.start_date,
+          location: row.location,
+          event_type: row.event_type,
+        }).catch(console.error);
+      }
+    }
+
+    return apiSuccess(row, 201);
   } catch (error) {
     console.error("Events POST error:", error);
     return apiError("Internal server error", 500);

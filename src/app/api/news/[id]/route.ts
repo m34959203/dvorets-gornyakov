@@ -3,6 +3,7 @@ import { query, getOne } from "@/lib/db";
 import { getCurrentUser, requireRole } from "@/lib/auth";
 import { newsSchema, parseBody } from "@/lib/validators";
 import { apiError, apiSuccess } from "@/lib/utils";
+import { publishNews } from "@/lib/publish";
 import { z } from "zod";
 
 export async function GET(
@@ -50,9 +51,9 @@ export async function PUT(
 
     const result = await query(
       `UPDATE news SET title_kk=$1, title_ru=$2, content_kk=$3, content_ru=$4,
-                       excerpt_kk=$5, excerpt_ru=$6, image_url=$7, category=$8,
-                       status=$9, published_at=$10
-        WHERE id=$11 RETURNING *`,
+                       excerpt_kk=$5, excerpt_ru=$6, image_url=$7, video_url=$8,
+                       embed_code=$9, category=$10, status=$11, published_at=$12
+        WHERE id=$13 RETURNING *`,
       [
         d.title_kk,
         d.title_ru,
@@ -61,13 +62,26 @@ export async function PUT(
         d.excerpt_kk || "",
         d.excerpt_ru || "",
         d.image_url || null,
+        d.video_url || null,
+        d.embed_code || "",
         d.category || "general",
         status,
         publishedAt,
         id,
       ]
     );
-    return apiSuccess(result.rows[0]);
+    const row = result.rows[0];
+    if (row && status === "published" && existing.status !== "published") {
+      publishNews({
+        slug: row.slug,
+        title_ru: row.title_ru,
+        title_kk: row.title_kk,
+        excerpt_ru: row.excerpt_ru,
+        excerpt_kk: row.excerpt_kk,
+        image_url: row.image_url,
+      }).catch(console.error);
+    }
+    return apiSuccess(row);
   } catch (e) {
     console.error(e);
     return apiError("Internal server error", 500);
@@ -90,6 +104,12 @@ export async function PATCH(
     const parsed = parseBody(patchSchema, body);
     if ("error" in parsed) return apiError(parsed.error);
 
+    const existing = await getOne<{ status: string }>(
+      `SELECT status FROM news WHERE id = $1`,
+      [id]
+    );
+    if (!existing) return apiError("Not found", 404);
+
     const result = await query(
       `UPDATE news
           SET status=$1,
@@ -98,7 +118,18 @@ export async function PATCH(
       [parsed.data.status, id]
     );
     if (!result.rows[0]) return apiError("Not found", 404);
-    return apiSuccess(result.rows[0]);
+    const row = result.rows[0];
+    if (parsed.data.status === "published" && existing.status !== "published") {
+      publishNews({
+        slug: row.slug,
+        title_ru: row.title_ru,
+        title_kk: row.title_kk,
+        excerpt_ru: row.excerpt_ru,
+        excerpt_kk: row.excerpt_kk,
+        image_url: row.image_url,
+      }).catch(console.error);
+    }
+    return apiSuccess(row);
   } catch (e) {
     console.error(e);
     return apiError("Internal server error", 500);
