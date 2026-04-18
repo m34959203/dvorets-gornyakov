@@ -32,11 +32,19 @@ interface Club {
   image_url: string | null;
   direction: string;
   age_group: string;
+  instructor_id: string | null;
   instructor_name: string;
   schedule: ScheduleItem[] | string | null;
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
+}
+
+interface InstructorOption {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
 }
 
 interface FormState {
@@ -47,7 +55,7 @@ interface FormState {
   image_url: string;
   direction: Direction;
   age_group: string;
-  instructor_name: string;
+  instructor_id: string;
   scheduleText: string;
   is_active: boolean;
 }
@@ -60,7 +68,7 @@ const EMPTY_FORM: FormState = {
   image_url: "",
   direction: "general",
   age_group: "",
-  instructor_name: "",
+  instructor_id: "",
   scheduleText: "[]",
   is_active: true,
 };
@@ -94,10 +102,14 @@ export default function AdminClubsPage() {
   const [editing, setEditing] = useState<Club | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [scheduleError, setScheduleError] = useState<string>("");
+  const [instructorError, setInstructorError] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [formErr, setFormErr] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [instructors, setInstructors] = useState<InstructorOption[]>([]);
+  const [instructorsLoadError, setInstructorsLoadError] = useState(false);
 
   const [translating, setTranslating] = useState<
     null | "name_to_kk" | "name_to_ru" | "desc_to_kk" | "desc_to_ru"
@@ -199,10 +211,50 @@ export default function AdminClubsPage() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const fetchInstructors = async () => {
+      try {
+        const roles: Array<"admin" | "editor" | "instructor"> = ["admin", "editor", "instructor"];
+        const results = await Promise.all(
+          roles.map((role) =>
+            fetch(`/api/admin/users?role=${role}`).then(async (r) => {
+              if (!r.ok) throw new Error(`status ${r.status}`);
+              const body = await r.json();
+              const items: InstructorOption[] = body?.data?.items ?? [];
+              return items;
+            }),
+          ),
+        );
+        if (cancelled) return;
+        const byId = new Map<string, InstructorOption>();
+        for (const list of results) {
+          for (const u of list) {
+            if (u && u.id && !byId.has(u.id)) byId.set(u.id, u);
+          }
+        }
+        const merged = Array.from(byId.values()).sort((a, b) =>
+          (a.name || "").localeCompare(b.name || ""),
+        );
+        setInstructors(merged);
+        setInstructorsLoadError(false);
+      } catch {
+        if (cancelled) return;
+        setInstructors([]);
+        setInstructorsLoadError(true);
+      }
+    };
+    fetchInstructors();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const openCreate = () => {
     setEditing(null);
     setForm(EMPTY_FORM);
     setScheduleError("");
+    setInstructorError("");
     setFormErr("");
     setDrawerOpen(true);
   };
@@ -218,11 +270,12 @@ export default function AdminClubsPage() {
       image_url: c.image_url ?? "",
       direction: dir,
       age_group: c.age_group ?? "",
-      instructor_name: c.instructor_name ?? "",
+      instructor_id: c.instructor_id ?? "",
       scheduleText: scheduleToText(c.schedule),
       is_active: c.is_active,
     });
     setScheduleError("");
+    setInstructorError("");
     setFormErr("");
     setDrawerOpen(true);
   };
@@ -262,6 +315,16 @@ export default function AdminClubsPage() {
   const onSave = async () => {
     setFormErr("");
     setScheduleError("");
+    setInstructorError("");
+
+    if (!form.instructor_id) {
+      setInstructorError(
+        locale === "kk"
+          ? "Үйірме жетекшісін таңдау қажет"
+          : "Необходимо выбрать руководителя кружка",
+      );
+      return;
+    }
 
     let schedule: ScheduleItem[] = [];
     const trimmed = form.scheduleText.trim();
@@ -289,7 +352,7 @@ export default function AdminClubsPage() {
       image_url: form.image_url || "",
       direction: form.direction,
       age_group: form.age_group,
-      instructor_name: form.instructor_name,
+      instructor_id: form.instructor_id,
       schedule,
       is_active: form.is_active,
     };
@@ -354,6 +417,8 @@ export default function AdminClubsPage() {
     }
   };
 
+  const selectedInstructor = instructors.find((u) => u.id === form.instructor_id) || null;
+
   if (unauthorized) {
     return (
       <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700">
@@ -370,11 +435,20 @@ export default function AdminClubsPage() {
         </h1>
         <button
           onClick={openCreate}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
+          disabled={instructorsLoadError}
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
         >
           {locale === "kk" ? "Жаңа" : "Создать"}
         </button>
       </div>
+
+      {instructorsLoadError && (
+        <div className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800 ring-1 ring-amber-200">
+          {locale === "kk"
+            ? "Нұсқаушылар тізімін жүктеу мүмкін болмады — жасау уақытша қолжетімсіз"
+            : "Не удалось загрузить список инструкторов — создание временно недоступно"}
+        </div>
+      )}
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <button
@@ -656,12 +730,49 @@ export default function AdminClubsPage() {
                 />
               </Field>
 
-              <Field label={locale === "kk" ? "Жетекші" : "Руководитель"} className="sm:col-span-2">
-                <input
-                  value={form.instructor_name}
-                  onChange={(e) => setForm({ ...form, instructor_name: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                />
+              <Field
+                label={locale === "kk" ? "Үйірме жетекшісі *" : "Руководитель кружка *"}
+                className="sm:col-span-2"
+              >
+                <select
+                  required
+                  value={form.instructor_id}
+                  onChange={(e) => {
+                    setForm({ ...form, instructor_id: e.target.value });
+                    if (e.target.value) setInstructorError("");
+                  }}
+                  disabled={instructorsLoadError || instructors.length === 0}
+                  className={
+                    "w-full rounded-lg border px-3 py-2 text-sm " +
+                    (instructorError ? "border-red-500" : "border-gray-300") +
+                    " disabled:bg-gray-50 disabled:text-gray-400"
+                  }
+                >
+                  <option value="" disabled>
+                    {locale === "kk" ? "— таңдаңыз —" : "— выберите —"}
+                  </option>
+                  {instructors.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} ({u.email}, {u.role})
+                    </option>
+                  ))}
+                </select>
+                {selectedInstructor && (
+                  <div className="mt-1 text-xs text-gray-500">
+                    {locale === "kk" ? "Таңдалған: " : "Выбран: "}
+                    <span className="font-medium text-gray-700">{selectedInstructor.name}</span>
+                  </div>
+                )}
+                {instructorError && (
+                  <div className="mt-1 text-xs text-red-600">{instructorError}</div>
+                )}
+                {instructorsLoadError && (
+                  <div className="mt-1 text-xs text-amber-700">
+                    {locale === "kk"
+                      ? "Нұсқаушылар тізімі жүктелмеді"
+                      : "Список инструкторов не загружен"}
+                  </div>
+                )}
               </Field>
 
               <Field label={locale === "kk" ? "Кесте (JSON)" : "Расписание (JSON)"} className="sm:col-span-2">

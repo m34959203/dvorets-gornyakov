@@ -7,20 +7,31 @@ import { parseBody, userCreateSchema } from "@/lib/validators";
 interface UserRow {
   id: string;
   email: string;
-  role: "admin" | "editor";
+  role: "admin" | "editor" | "instructor";
   name: string;
   created_at: string;
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!requireRole(user, ["admin", "editor"])) return apiError("Unauthorized", 401);
 
+    const role = req.nextUrl.searchParams.get("role");
+    const conds: string[] = [];
+    const params: unknown[] = [];
+    if (role && /^(admin|editor|instructor)$/.test(role)) {
+      params.push(role);
+      conds.push(`role = $${params.length}`);
+    }
+    const where = conds.length ? `WHERE ${conds.join(" AND ")}` : "";
+
     const items = await getMany<UserRow>(
       `SELECT id, email, role, name, created_at
          FROM users
-        ORDER BY created_at DESC`
+         ${where}
+        ORDER BY created_at DESC`,
+      params
     );
     return apiSuccess({ items });
   } catch (e) {

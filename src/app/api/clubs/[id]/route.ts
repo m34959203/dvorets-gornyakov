@@ -33,11 +33,20 @@ export async function PUT(
     if ("error" in parsed) return apiError(parsed.error);
     const d = parsed.data;
 
+    const instructor = await getOne<{ id: string; name: string; role: string }>(
+      `SELECT id, name, role FROM users WHERE id = $1`,
+      [d.instructor_id]
+    );
+    if (!instructor) return apiError("Руководитель не найден", 400);
+    if (!["admin", "editor", "instructor"].includes(instructor.role)) {
+      return apiError("Выбранный пользователь не может быть руководителем кружка", 400);
+    }
+
     const result = await query(
       `UPDATE clubs SET name_kk=$1, name_ru=$2, description_kk=$3, description_ru=$4,
-                         image_url=$5, age_group=$6, direction=$7, instructor_name=$8,
-                         schedule=$9::jsonb, is_active=$10
-        WHERE id=$11 RETURNING *`,
+                         image_url=$5, age_group=$6, direction=$7, instructor_id=$8,
+                         instructor_name=$9, schedule=$10::jsonb, is_active=$11
+        WHERE id=$12 RETURNING *`,
       [
         d.name_kk,
         d.name_ru,
@@ -46,7 +55,8 @@ export async function PUT(
         d.image_url || null,
         d.age_group || "all",
         d.direction || "general",
-        d.instructor_name || "",
+        d.instructor_id,
+        d.instructor_name || instructor.name,
         JSON.stringify(d.schedule || []),
         d.is_active ?? true,
         id,

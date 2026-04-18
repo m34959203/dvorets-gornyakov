@@ -40,6 +40,7 @@ export const clubSchema = z.object({
   image_url: z.string().url().optional().or(z.literal("")),
   age_group: z.string().max(50).optional(),
   direction: z.string().max(100).optional(),
+  instructor_id: z.string().uuid("Руководитель кружка обязателен"),
   instructor_name: z.string().max(255).optional(),
   schedule: z.array(z.object({
     day: z.string(),
@@ -135,12 +136,12 @@ export const userCreateSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6).max(200),
   name: z.string().min(2).max(255),
-  role: z.enum(["admin", "editor"]).default("editor"),
+  role: z.enum(["admin", "editor", "instructor"]).default("editor"),
 });
 
 export const userUpdateSchema = z.object({
   name: z.string().min(2).max(255).optional(),
-  role: z.enum(["admin", "editor"]).optional(),
+  role: z.enum(["admin", "editor", "instructor"]).optional(),
   password: z.string().min(6).max(200).optional().or(z.literal("")),
 });
 

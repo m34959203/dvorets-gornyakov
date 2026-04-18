@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 export interface UserPayload extends JWTPayload {
   userId: string;
   email: string;
-  role: "admin" | "editor";
+  role: "admin" | "editor" | "instructor";
   name: string;
 }
 

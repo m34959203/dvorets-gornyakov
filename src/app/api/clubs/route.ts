@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { query, getMany } from "@/lib/db";
+import { query, getMany, getOne } from "@/lib/db";
 import { getCurrentUser, requireRole } from "@/lib/auth";
 import { clubSchema, parseBody } from "@/lib/validators";
 import { apiError, apiSuccess } from "@/lib/utils";
@@ -46,9 +46,18 @@ export async function POST(request: NextRequest) {
 
     const data = parsed.data;
 
+    const instructor = await getOne<{ id: string; name: string; role: string }>(
+      `SELECT id, name, role FROM users WHERE id = $1`,
+      [data.instructor_id]
+    );
+    if (!instructor) return apiError("Руководитель не найден", 400);
+    if (!["admin", "editor", "instructor"].includes(instructor.role)) {
+      return apiError("Выбранный пользователь не может быть руководителем кружка", 400);
+    }
+
     const result = await query(
-      `INSERT INTO clubs (name_kk, name_ru, description_kk, description_ru, image_url, age_group, direction, instructor_name, schedule, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `INSERT INTO clubs (name_kk, name_ru, description_kk, description_ru, image_url, age_group, direction, instructor_id, instructor_name, schedule, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
       [
         data.name_kk,
@@ -58,7 +67,8 @@ export async function POST(request: NextRequest) {
         data.image_url || null,
         data.age_group || "all",
         data.direction || "general",
-        data.instructor_name || "",
+        data.instructor_id,
+        data.instructor_name || instructor.name,
         JSON.stringify(data.schedule || []),
         data.is_active ?? true,
       ]

@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
 
-type Role = "admin" | "editor";
+type Role = "admin" | "editor" | "instructor";
+type RoleFilter = Role | "all";
 
 interface User {
   id: string;
@@ -24,6 +25,13 @@ interface FormState {
 const ROLE_COLORS: Record<Role, string> = {
   admin: "bg-amber-100 text-amber-800",
   editor: "bg-gray-100 text-gray-800",
+  instructor: "bg-emerald-100 text-emerald-800",
+};
+
+const ROLE_LABELS: Record<Role, { ru: string; kk: string }> = {
+  admin: { ru: "Администратор", kk: "Әкімші" },
+  editor: { ru: "Редактор", kk: "Редактор" },
+  instructor: { ru: "Руководитель кружка", kk: "Үйірме жетекшісі" },
 };
 
 export default function AdminUsersPage() {
@@ -34,6 +42,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [unauthorized, setUnauthorized] = useState(false);
   const [listErr, setListErr] = useState<string>("");
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
@@ -45,7 +54,8 @@ export default function AdminUsersPage() {
     setLoading(true);
     setListErr("");
     try {
-      const r = await fetch("/api/admin/users");
+      const url = roleFilter === "all" ? "/api/admin/users" : `/api/admin/users?role=${roleFilter}`;
+      const r = await fetch(url);
       const body = await r.json();
       if (r.status === 401 || r.status === 403) {
         setUnauthorized(true);
@@ -63,7 +73,7 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [roleFilter]);
 
   useEffect(() => {
     load();
@@ -156,6 +166,13 @@ export default function AdminUsersPage() {
 
   const dateLoc = locale === "kk" ? "kk-KZ" : "ru-RU";
 
+  const filterOptions: { value: RoleFilter; label: string }[] = [
+    { value: "all", label: locale === "kk" ? "Барлығы" : "Все" },
+    { value: "admin", label: "Admin" },
+    { value: "editor", label: "Editor" },
+    { value: "instructor", label: "Instructor" },
+  ];
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
@@ -176,6 +193,26 @@ export default function AdminUsersPage() {
       {listErr && (
         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{listErr}</div>
       )}
+
+      <div className="mb-4 flex flex-wrap gap-2">
+        {filterOptions.map((opt) => {
+          const active = roleFilter === opt.value;
+          return (
+            <button
+              key={opt.value}
+              onClick={() => setRoleFilter(opt.value)}
+              className={
+                "rounded-full px-3 py-1.5 text-xs font-medium transition-colors " +
+                (active
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200")
+              }
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
 
       <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
@@ -213,7 +250,7 @@ export default function AdminUsersPage() {
                         ROLE_COLORS[u.role]
                       }
                     >
-                      {u.role}
+                      {ROLE_LABELS[u.role][locale === "kk" ? "kk" : "ru"]}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
@@ -325,8 +362,15 @@ export default function AdminUsersPage() {
                   onChange={(e) => setForm({ ...form, role: e.target.value as Role })}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                 >
-                  <option value="editor">editor</option>
-                  <option value="admin">admin</option>
+                  <option value="editor">
+                    {ROLE_LABELS.editor[locale === "kk" ? "kk" : "ru"]}
+                  </option>
+                  <option value="admin">
+                    {ROLE_LABELS.admin[locale === "kk" ? "kk" : "ru"]}
+                  </option>
+                  <option value="instructor">
+                    {ROLE_LABELS.instructor[locale === "kk" ? "kk" : "ru"]}
+                  </option>
                 </select>
               </div>
             </div>
