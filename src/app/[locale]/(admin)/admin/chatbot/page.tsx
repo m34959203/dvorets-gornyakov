@@ -1,14 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { isValidLocale, type Locale, getMessages } from "@/lib/i18n";
+import { isValidLocale, type Locale } from "@/lib/i18n";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
-import Modal from "@/components/ui/Modal";
+import { truncate } from "@/lib/utils";
 
-interface KnowledgeItem {
+interface KbItem {
   id: string;
+  category: string;
+  question_kk: string;
+  question_ru: string;
+  answer_kk: string;
+  answer_ru: string;
+  created_at: string;
+}
+
+const DEFAULT_CATEGORIES = ["general", "hours", "events", "clubs", "contacts"];
+
+interface FormState {
   category: string;
   question_kk: string;
   question_ru: string;
@@ -16,106 +27,320 @@ interface KnowledgeItem {
   answer_ru: string;
 }
 
-const initialKnowledge: KnowledgeItem[] = [
-  { id: "1", category: "general", question_kk: "Сарай қашан жұмыс істейді?", question_ru: "Когда работает дворец?", answer_kk: "Дс-Жм: 09:00-18:00, Сн-Жс: 10:00-17:00", answer_ru: "Пн-Пт: 09:00-18:00, Сб-Вс: 10:00-17:00" },
-  { id: "2", category: "clubs", question_kk: "Үйірмелерге қалай жазылуға болады?", question_ru: "Как записаться в кружок?", answer_kk: "Сайт арқылы немесе әкімшілікке келіп жазыла аласыз.", answer_ru: "Можно записаться через сайт или обратиться в администрацию." },
-  { id: "3", category: "events", question_kk: "Келесі іс-шара қашан?", question_ru: "Когда следующее мероприятие?", answer_kk: "Іс-шаралар бетін қараңыз.", answer_ru: "Смотрите на странице мероприятий." },
-];
+const EMPTY_FORM: FormState = {
+  category: "general",
+  question_kk: "",
+  question_ru: "",
+  answer_kk: "",
+  answer_ru: "",
+};
 
 export default function AdminChatbotPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
-  const messages = getMessages(locale);
-  const t = messages.admin;
 
-  const [knowledge, setKnowledge] = useState<KnowledgeItem[]>(initialKnowledge);
-  const [showModal, setShowModal] = useState(false);
-  const [editItem, setEditItem] = useState<KnowledgeItem | null>(null);
-  const [form, setForm] = useState({ category: "general", question_kk: "", question_ru: "", answer_kk: "", answer_ru: "" });
+  const [items, setItems] = useState<KbItem[]>([]);
+  const [filter, setFilter] = useState<string>("all");
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
+  const [formErr, setFormErr] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setErr("");
+    try {
+      const url = `/api/admin/chatbot-kb${filter !== "all" ? `?category=${encodeURIComponent(filter)}` : ""}`;
+      const r = await fetch(url);
+      const body = await r.json();
+      if (!r.ok) {
+        setErr(body.error || (locale === "kk" ? "Жүктеу қатесі" : "Ошибка загрузки"));
+        return;
+      }
+      setItems(body.data?.items ?? []);
+    } catch {
+      setErr(locale === "kk" ? "Жүктеу қатесі" : "Ошибка загрузки");
+    } finally {
+      setLoading(false);
+    }
+  }, [filter, locale]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>(DEFAULT_CATEGORIES);
+    for (const it of items) if (it.category) set.add(it.category);
+    return Array.from(set).sort();
+  }, [items]);
 
   const openCreate = () => {
-    setEditItem(null);
-    setForm({ category: "general", question_kk: "", question_ru: "", answer_kk: "", answer_ru: "" });
-    setShowModal(true);
+    setEditId(null);
+    setForm(EMPTY_FORM);
+    setFormErr("");
+    setDrawerOpen(true);
   };
 
-  const openEdit = (item: KnowledgeItem) => {
-    setEditItem(item);
-    setForm({ category: item.category, question_kk: item.question_kk, question_ru: item.question_ru, answer_kk: item.answer_kk, answer_ru: item.answer_ru });
-    setShowModal(true);
+  const openEdit = (item: KbItem) => {
+    setEditId(item.id);
+    setForm({
+      category: item.category,
+      question_kk: item.question_kk,
+      question_ru: item.question_ru,
+      answer_kk: item.answer_kk,
+      answer_ru: item.answer_ru,
+    });
+    setFormErr("");
+    setDrawerOpen(true);
   };
 
-  const handleSave = () => {
-    if (editItem) {
-      setKnowledge(knowledge.map((k) => k.id === editItem.id ? { ...k, ...form } : k));
-    } else {
-      setKnowledge([...knowledge, { id: String(Date.now()), ...form }]);
+  const closeDrawer = () => {
+    setDrawerOpen(false);
+    setEditId(null);
+    setForm(EMPTY_FORM);
+    setFormErr("");
+  };
+
+  const save = async () => {
+    setSaving(true);
+    setFormErr("");
+    try {
+      const url = editId ? `/api/admin/chatbot-kb/${editId}` : "/api/admin/chatbot-kb";
+      const method = editId ? "PUT" : "POST";
+      const r = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const body = await r.json();
+      if (!r.ok) {
+        setFormErr(body.error || (locale === "kk" ? "Сақтау қатесі" : "Ошибка сохранения"));
+        return;
+      }
+      closeDrawer();
+      load();
+    } catch {
+      setFormErr(locale === "kk" ? "Сақтау қатесі" : "Ошибка сохранения");
+    } finally {
+      setSaving(false);
     }
-    setShowModal(false);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm(locale === "kk" ? "Жоюды растайсыз ба?" : "Подтвердите удаление")) {
-      setKnowledge(knowledge.filter((k) => k.id !== id));
+  const remove = async (item: KbItem) => {
+    if (!confirm(locale === "kk" ? "Жоюды растайсыз ба?" : "Подтвердите удаление")) return;
+    try {
+      const r = await fetch(`/api/admin/chatbot-kb/${item.id}`, { method: "DELETE" });
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        setErr(body.error || (locale === "kk" ? "Жою қатесі" : "Ошибка удаления"));
+        return;
+      }
+      load();
+    } catch {
+      setErr(locale === "kk" ? "Жою қатесі" : "Ошибка удаления");
     }
   };
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t.chatbot}</h1>
-        <Button onClick={openCreate}>{messages.common.create}</Button>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">
+          {locale === "kk" ? "Чат-бот білім базасы" : "База знаний чат-бота"}
+        </h1>
+        <Button onClick={openCreate}>
+          {locale === "kk" ? "Жаңа" : "Новый"}
+        </Button>
       </div>
 
-      <p className="text-gray-600 mb-4 text-sm">
+      <p className="mb-4 text-sm text-gray-600">
         {locale === "kk"
           ? "Чат-бот білім базасы. Бұл сұрақ-жауаптар AI жауаптарын жақсартуға көмектеседі."
           : "База знаний чат-бота. Эти вопросы-ответы помогают улучшить ответы AI."}
       </p>
 
-      <div className="space-y-3">
-        {knowledge.map((item) => (
-          <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">{item.category}</span>
-                <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Q (KZ): {item.question_kk}</p>
-                    <p className="text-sm text-gray-600 mt-1">A: {item.answer_kk}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Q (RU): {item.question_ru}</p>
-                    <p className="text-sm text-gray-600 mt-1">A: {item.answer_ru}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-2 ml-4 shrink-0">
-                <button onClick={() => openEdit(item)} className="text-primary hover:text-primary-dark text-sm">{messages.common.edit}</button>
-                <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-800 text-sm">{messages.common.delete}</button>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <label className="text-sm text-gray-600">
+          {locale === "kk" ? "Санат" : "Категория"}:
+        </label>
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          <option value="all">{locale === "kk" ? "Барлығы" : "Все"}</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
       </div>
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editItem ? messages.common.edit : messages.common.create} size="lg">
-        <div className="space-y-4">
-          <Input id="kb_category" label={locale === "kk" ? "Санат" : "Категория"} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
-          <div className="grid grid-cols-2 gap-4">
-            <Textarea id="q_kk" label="Question (KZ)" value={form.question_kk} onChange={(e) => setForm({ ...form, question_kk: e.target.value })} rows={2} />
-            <Textarea id="q_ru" label="Question (RU)" value={form.question_ru} onChange={(e) => setForm({ ...form, question_ru: e.target.value })} rows={2} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Textarea id="a_kk" label="Answer (KZ)" value={form.answer_kk} onChange={(e) => setForm({ ...form, answer_kk: e.target.value })} rows={3} />
-            <Textarea id="a_ru" label="Answer (RU)" value={form.answer_ru} onChange={(e) => setForm({ ...form, answer_ru: e.target.value })} rows={3} />
-          </div>
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="ghost" onClick={() => setShowModal(false)}>{messages.common.cancel}</Button>
-            <Button onClick={handleSave}>{messages.common.save}</Button>
+      {err && <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{err}</div>}
+
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200">
+        <table className="min-w-full divide-y divide-gray-200 text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              <Th>{locale === "kk" ? "Санат" : "Категория"}</Th>
+              <Th>{locale === "kk" ? "Сұрақ (RU)" : "Вопрос (RU)"}</Th>
+              <Th>{locale === "kk" ? "Жауап (RU)" : "Ответ (RU)"}</Th>
+              <Th>{locale === "kk" ? "Әрекеттер" : "Действия"}</Th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {loading ? (
+              <tr><td colSpan={4} className="p-6 text-center text-gray-400">…</td></tr>
+            ) : items.length === 0 ? (
+              <tr><td colSpan={4} className="p-6 text-center text-gray-400">—</td></tr>
+            ) : (
+              items.map((it) => (
+                <tr
+                  key={it.id}
+                  onClick={() => openEdit(it)}
+                  className="cursor-pointer hover:bg-gray-50"
+                >
+                  <td className="px-4 py-3">
+                    <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                      {it.category}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-medium text-gray-900">
+                    {truncate(it.question_ru || "", 60)}
+                  </td>
+                  <td className="px-4 py-3 text-gray-700">
+                    {truncate(it.answer_ru || "", 80)}
+                  </td>
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => openEdit(it)}
+                        className="text-sm text-primary hover:underline"
+                      >
+                        {locale === "kk" ? "Өңдеу" : "Изменить"}
+                      </button>
+                      <button
+                        onClick={() => remove(it)}
+                        className="text-sm text-red-600 hover:underline"
+                      >
+                        {locale === "kk" ? "Жою" : "Удалить"}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {drawerOpen && (
+        <div className="fixed inset-0 z-50 flex" onClick={closeDrawer}>
+          <div className="flex-1 bg-black/40" />
+          <div
+            className="h-full w-full max-w-2xl overflow-y-auto bg-white p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">
+                {editId
+                  ? (locale === "kk" ? "Жазбаны өңдеу" : "Редактировать запись")
+                  : (locale === "kk" ? "Жаңа жазба" : "Новая запись")}
+              </h2>
+              <button onClick={closeDrawer} className="text-gray-400 hover:text-gray-700">✕</button>
+            </div>
+
+            {formErr && (
+              <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{formErr}</div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {locale === "kk" ? "Санат" : "Категория"}
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={DEFAULT_CATEGORIES.includes(form.category) ? form.category : "__custom__"}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "__custom__") setForm({ ...form, category: "" });
+                      else setForm({ ...form, category: v });
+                    }}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    {DEFAULT_CATEGORIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                    <option value="__custom__">{locale === "kk" ? "Өзге…" : "Другое…"}</option>
+                  </select>
+                  {!DEFAULT_CATEGORIES.includes(form.category) && (
+                    <Input
+                      id="kb_cat_custom"
+                      value={form.category}
+                      onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      placeholder={locale === "kk" ? "Санат атауы" : "Название категории"}
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Textarea
+                  id="q_kk"
+                  label="Вопрос (KZ)"
+                  value={form.question_kk}
+                  onChange={(e) => setForm({ ...form, question_kk: e.target.value })}
+                  rows={3}
+                />
+                <Textarea
+                  id="q_ru"
+                  label="Вопрос (RU)"
+                  value={form.question_ru}
+                  onChange={(e) => setForm({ ...form, question_ru: e.target.value })}
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Textarea
+                  id="a_kk"
+                  label="Ответ (KZ)"
+                  value={form.answer_kk}
+                  onChange={(e) => setForm({ ...form, answer_kk: e.target.value })}
+                  rows={5}
+                />
+                <Textarea
+                  id="a_ru"
+                  label="Ответ (RU)"
+                  value={form.answer_ru}
+                  onChange={(e) => setForm({ ...form, answer_ru: e.target.value })}
+                  rows={5}
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <Button variant="ghost" onClick={closeDrawer}>
+                {locale === "kk" ? "Бас тарту" : "Отмена"}
+              </Button>
+              <Button onClick={save} loading={saving}>
+                {locale === "kk" ? "Сақтау" : "Сохранить"}
+              </Button>
+            </div>
           </div>
         </div>
-      </Modal>
+      )}
     </div>
+  );
+}
+
+function Th({ children }: { children: React.ReactNode }) {
+  return (
+    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
+      {children}
+    </th>
   );
 }

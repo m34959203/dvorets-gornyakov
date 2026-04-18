@@ -125,6 +125,34 @@ export const bannerSchema = z.object({
   sort_order: z.number().int().optional(),
 });
 
+export const userCreateSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6).max(200),
+  name: z.string().min(2).max(255),
+  role: z.enum(["admin", "editor"]).default("editor"),
+});
+
+export const userUpdateSchema = z.object({
+  name: z.string().min(2).max(255).optional(),
+  role: z.enum(["admin", "editor"]).optional(),
+  password: z.string().min(6).max(200).optional().or(z.literal("")),
+});
+
+export const settingsBulkSchema = z.object({
+  items: z.array(z.object({
+    key: z.string().min(1).max(100),
+    value: z.string().max(4000),
+  })).min(1).max(100),
+});
+
+export const chatbotKbSchema = z.object({
+  category: z.string().min(1).max(100).default("general"),
+  question_kk: z.string().max(2000).default(""),
+  question_ru: z.string().max(2000).default(""),
+  answer_kk: z.string().max(4000).default(""),
+  answer_ru: z.string().max(4000).default(""),
+});
+
 export function parseBody<T>(schema: z.ZodSchema<T>, data: unknown): { data: T } | { error: string } {
   const result = schema.safeParse(data);
   if (!result.success) {
