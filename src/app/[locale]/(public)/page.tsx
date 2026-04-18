@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { getMessages, isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
-import BannerSlider from "@/components/features/BannerSlider";
+import { getMessages, isValidLocale, type Locale } from "@/lib/i18n";
+import HomeHero from "@/components/features/HomeHero";
+import RentalChecklist from "@/components/features/RentalChecklist";
 import NewsCard from "@/components/features/NewsCard";
 import ClubCard from "@/components/features/ClubCard";
 import EventCard from "@/components/features/EventCard";
@@ -141,17 +142,23 @@ export default async function HomePage({
 
   const demo = getDemoData(locale);
 
+  const rental = messages.rental as unknown as Parameters<typeof RentalChecklist>[0]["messages"];
+
   return (
     <div>
-      {/* Hero Banner */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <BannerSlider
-          banners={[]}
-          locale={locale}
-          heroTitle={t.heroTitle}
-          heroSubtitle={t.heroSubtitle}
-        />
-      </section>
+      {/* Hero */}
+      <HomeHero
+        locale={locale}
+        title={t.heroTitle}
+        headline={t.heroHeadline}
+        lead={t.heroLead}
+        badge={t.heroBadge}
+        ctaSchedule={t.heroCtaSchedule}
+        ctaRent={t.heroCtaRent}
+      />
+
+      {/* Rental checklist */}
+      <RentalChecklist locale={locale} messages={rental} />
 
       {/* Upcoming Events */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
