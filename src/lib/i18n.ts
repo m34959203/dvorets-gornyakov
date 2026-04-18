@@ -6,8 +6,8 @@ export type Locale = (typeof locales)[number];
 export const defaultLocale: Locale = "kk";
 
 const messages: Record<Locale, Record<string, Record<string, string>>> = {
-  kk: kkMessages as Record<string, Record<string, string>>,
-  ru: ruMessages as Record<string, Record<string, string>>,
+  kk: kkMessages as unknown as Record<string, Record<string, string>>,
+  ru: ruMessages as unknown as Record<string, Record<string, string>>,
 };
 
 export function getMessages(locale: Locale): Record<string, Record<string, string>> {

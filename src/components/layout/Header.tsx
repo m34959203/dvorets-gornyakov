@@ -21,6 +21,7 @@ export default function Header({ locale, messages }: HeaderProps) {
     { href: `/${locale}/news`, label: t.news },
     { href: `/${locale}/clubs`, label: t.clubs },
     { href: `/${locale}/events`, label: t.events },
+    { href: `/${locale}/rent`, label: locale === "kk" ? "Залдарды жалдау" : "Аренда залов" },
     { href: `/${locale}/about`, label: t.about },
     { href: `/${locale}/contacts`, label: t.contacts },
   ];

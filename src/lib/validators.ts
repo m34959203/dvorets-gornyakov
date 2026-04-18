@@ -71,6 +71,51 @@ export const contactSchema = z.object({
   message: z.string().min(10).max(2000),
 });
 
+export const rentalRequestSchema = z.object({
+  hall_id: z.string().uuid("Invalid hall ID"),
+  name: z.string().min(2).max(255),
+  phone: z.string().regex(/^\+?[0-9\s\-()]{10,20}$/, "Phone format: +7 7XX XXX XX XX"),
+  email: z.string().email(),
+  event_type: z.enum(["concert", "conference", "corporate", "school", "other"]),
+  event_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date format: YYYY-MM-DD"),
+  time_from: z.string().regex(/^\d{2}:\d{2}$/, "Time format: HH:MM"),
+  time_to: z.string().regex(/^\d{2}:\d{2}$/, "Time format: HH:MM"),
+  guests: z.number().int().min(1).max(2000),
+  equipment: z.array(z.enum(["mic", "projector", "lights", "streaming", "catering"])).default([]),
+  message: z.string().max(2000).optional().default(""),
+  website: z.string().max(0).optional(), // honeypot
+});
+
+export const rentalRequestStatusSchema = z.object({
+  status: z.enum(["new", "contacted", "confirmed", "rejected", "completed"]),
+  admin_note: z.string().max(4000).optional(),
+});
+
+export const hallSchema = z.object({
+  slug: z.string().regex(/^[a-z0-9-]+$/).min(2).max(100),
+  name_kk: z.string().min(1).max(255),
+  name_ru: z.string().min(1).max(255),
+  description_kk: z.string().default(""),
+  description_ru: z.string().default(""),
+  capacity: z.number().int().min(0).max(10000),
+  equipment_kk: z.array(z.string()).default([]),
+  equipment_ru: z.array(z.string()).default([]),
+  hourly_price: z.number().int().min(0),
+  event_price_from: z.number().int().min(0),
+  photos: z
+    .array(
+      z.object({
+        url: z.string(),
+        alt_kk: z.string().optional().default(""),
+        alt_ru: z.string().optional().default(""),
+      })
+    )
+    .default([]),
+  layout_url: z.string().optional().nullable(),
+  is_active: z.boolean().optional(),
+  sort_order: z.number().int().optional(),
+});
+
 export const bannerSchema = z.object({
   title: z.string().min(1).max(255),
   image_url: z.string().url(),
