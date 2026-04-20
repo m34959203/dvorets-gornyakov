@@ -152,6 +152,25 @@ export const settingsBulkSchema = z.object({
   })).min(1).max(100),
 });
 
+export const navItemSchema = z.object({
+  slug: z
+    .string()
+    .min(1)
+    .max(100)
+    .regex(/^[a-z0-9][a-z0-9-_]*$/i, "Slug: a-z, 0-9, -, _"),
+  title_kk: z.string().min(1).max(200),
+  title_ru: z.string().min(1).max(200),
+  url: z.string().min(1).max(500),
+  parent_id: z.string().uuid().nullable().optional(),
+  target: z.enum(["_self", "_blank"]).default("_self"),
+  sort_order: z.number().int().min(0).max(100000).optional(),
+  is_active: z.boolean().optional(),
+});
+
+export const navItemReorderSchema = z.object({
+  direction: z.enum(["up", "down"]),
+});
+
 export const chatbotKbSchema = z.object({
   category: z.string().min(1).max(100).default("general"),
   question_kk: z.string().max(2000).default(""),

@@ -19,14 +19,14 @@ export default function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
   };
 
   return (
-    <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
+    <div className="flex items-center bg-[color:var(--cream-2)] rounded-full p-[3px]">
       <Link
         href={switchLocale("kk")}
         className={cn(
-          "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+          "px-3 py-1.5 text-[13px] font-semibold rounded-full transition-colors",
           locale === "kk"
-            ? "bg-white text-primary shadow-sm"
-            : "text-gray-500 hover:text-gray-700"
+            ? "bg-[color:var(--navy)] text-white"
+            : "text-[color:var(--muted)] hover:text-[color:var(--navy)]"
         )}
       >
         KZ
@@ -34,10 +34,10 @@ export default function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
       <Link
         href={switchLocale("ru")}
         className={cn(
-          "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+          "px-3 py-1.5 text-[13px] font-semibold rounded-full transition-colors",
           locale === "ru"
-            ? "bg-white text-primary shadow-sm"
-            : "text-gray-500 hover:text-gray-700"
+            ? "bg-[color:var(--navy)] text-white"
+            : "text-[color:var(--muted)] hover:text-[color:var(--navy)]"
         )}
       >
         RU

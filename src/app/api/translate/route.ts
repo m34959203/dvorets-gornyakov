@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       return apiError("Invalid language. Supported: kk, ru");
     }
 
-    const translated = await translateText(text, from, to);
+    const translated = await translateText(text, from, to, { userId: user?.userId });
     return apiSuccess({ translated });
   } catch (error) {
     console.error("Translate error:", error);

@@ -37,7 +37,7 @@ Rules:
 
     messages.push({ role: "user", parts: [{ text: message }] });
 
-    const reply = await chatWithGemini(messages, knowledgeContext);
+    const reply = await chatWithGemini(messages, knowledgeContext, { purpose: "chatbot" });
 
     return apiSuccess({ reply });
   } catch (error) {

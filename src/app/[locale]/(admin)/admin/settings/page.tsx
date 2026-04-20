@@ -24,6 +24,10 @@ const GROUPS: { title: { kk: string; ru: string }; keys: string[] }[] = [
     title: { kk: "Әлеуметтік желілер", ru: "Соцсети" },
     keys: ["telegram_channel", "instagram_handle"],
   },
+  {
+    title: { kk: "Аналитика", ru: "Аналитика" },
+    keys: ["ga4_measurement_id", "yandex_metrika_id"],
+  },
 ];
 
 const KNOWN_KEYS = GROUPS.flatMap((g) => g.keys);
@@ -39,6 +43,8 @@ function labelFor(key: string): string {
     address_ru: "Адрес (RU)",
     telegram_channel: "Telegram",
     instagram_handle: "Instagram",
+    ga4_measurement_id: "Google Analytics ID (G-XXXXXXX)",
+    yandex_metrika_id: "Яндекс.Метрика ID",
   };
   return map[key] || key;
 }

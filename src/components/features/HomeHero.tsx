@@ -1,6 +1,16 @@
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 
+interface HeroEvent {
+  id: string;
+  title: string;
+  day: string;
+  month: string;
+  time: string;
+  hall: string;
+  price: string;
+}
+
 interface HomeHeroProps {
   locale: Locale;
   title: string;
@@ -9,7 +19,20 @@ interface HomeHeroProps {
   badge: string;
   ctaSchedule: string;
   ctaRent: string;
+  upcoming?: HeroEvent[];
 }
+
+const DEFAULT_UPCOMING_RU: HeroEvent[] = [
+  { id: "1", title: "Симфонический концерт к Наурызу", day: "22", month: "МАР", time: "18:00", hall: "Главный зал", price: "от 2 500 ₸" },
+  { id: "2", title: "Вечер казахской поэзии", day: "05", month: "АПР", time: "19:00", hall: "Камерный зал", price: "Вход свободный" },
+  { id: "3", title: "Танцевальный мастер-класс", day: "15", month: "АПР", time: "14:00", hall: "Репетиционный", price: "от 1 000 ₸" },
+];
+
+const DEFAULT_UPCOMING_KK: HeroEvent[] = [
+  { id: "1", title: "Наурызға арналған симфониялық концерт", day: "22", month: "НАУ", time: "18:00", hall: "Негізгі зал", price: "2 500 ₸-ден" },
+  { id: "2", title: "Қазақ поэзиясы кеші", day: "05", month: "СӘУ", time: "19:00", hall: "Камералық зал", price: "Тегін" },
+  { id: "3", title: "Би шеберханасы", day: "15", month: "СӘУ", time: "14:00", hall: "Репетиция залы", price: "1 000 ₸-ден" },
+];
 
 export default function HomeHero({
   locale,
@@ -19,69 +42,117 @@ export default function HomeHero({
   badge,
   ctaSchedule,
   ctaRent,
+  upcoming,
 }: HomeHeroProps) {
+  const items = upcoming ?? (locale === "kk" ? DEFAULT_UPCOMING_KK : DEFAULT_UPCOMING_RU);
+
   return (
-    <section
-      className="relative isolate overflow-hidden bg-primary-dark text-white"
-      aria-label={title}
-    >
-      <div
-        className="absolute inset-0 -z-20 bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "linear-gradient(135deg, rgba(9,84,86,0.92) 0%, rgba(13,115,119,0.75) 50%, rgba(26,26,46,0.9) 100%), url(/hero/hero.jpg)",
-        }}
-      />
-      <div className="absolute inset-0 -z-10 opacity-20 mix-blend-overlay">
-        <svg className="h-full w-full" viewBox="0 0 200 200" preserveAspectRatio="none" aria-hidden="true">
-          <pattern id="hero-ornament" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
-            <path d="M24 0L48 24L24 48L0 24Z" fill="white" />
-            <circle cx="24" cy="24" r="6" fill="none" stroke="white" strokeWidth="1.2" />
-          </pattern>
-          <rect width="100%" height="100%" fill="url(#hero-ornament)" />
-        </svg>
+    <section className="hero-wrap" aria-label={title}>
+      <div className="hero-media">
+        {/* Unsplash fallback — заменится пользовательским /hero/hero.jpg если лежит в public */}
+        <picture>
+          <source srcSet="/hero/hero.jpg" />
+          <img
+            src="https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=1600&q=80"
+            alt=""
+          />
+        </picture>
+        <div className="hero-overlay" />
       </div>
 
-      <div className="relative mx-auto flex min-h-[78vh] max-w-7xl flex-col items-center justify-center px-4 py-24 text-center sm:px-6 lg:min-h-[86vh] lg:px-8">
-        <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.22em] text-white/90 backdrop-blur">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-          {badge}
-        </span>
+      <div className="max-w-[1240px] mx-auto px-7 w-full">
+        <div className="hero-grid">
+          <div className="fade-up">
+            <div className="hero-eyebrow">
+              <span className="dot" />
+              {badge}
+            </div>
 
-        <h1 className="max-w-4xl text-balance text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
-          {headline}
-        </h1>
+            <h1 className="hero-title">
+              {headline.split("|").map((part, i, arr) => (
+                <span key={i}>
+                  {i === arr.length - 1 ? <span className="accent">{part}</span> : part}
+                  {i < arr.length - 1 && <br />}
+                </span>
+              ))}
+            </h1>
 
-        <p className="mt-6 max-w-2xl text-lg text-white/85 sm:text-xl">
-          {lead}
-        </p>
+            <p className="hero-lead">{lead}</p>
 
-        <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
-          <Link
-            href={`/${locale}/events`}
-            className="inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-base font-semibold text-primary-dark shadow-lg shadow-accent/20 transition hover:bg-accent-light"
-          >
-            {ctaSchedule}
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </Link>
-          <Link
-            href={`/${locale}/rent`}
-            className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-7 py-3.5 text-base font-semibold text-white backdrop-blur transition hover:bg-white/20"
-          >
-            {ctaRent}
-          </Link>
-        </div>
+            <div className="hero-actions">
+              <Link href={`/${locale}/events`} className="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 9a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v2a2 2 0 0 0 0 4v2a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-2a2 2 0 0 0 0-4Z" />
+                  <path d="M13 5v14" />
+                </svg>
+                {ctaSchedule}
+              </Link>
+              <Link href={`/${locale}/rent`} className="btn btn-outline">
+                {ctaRent}
+              </Link>
+            </div>
 
-        <div className="pointer-events-none absolute bottom-8 left-1/2 hidden -translate-x-1/2 animate-bounce text-white/60 sm:block">
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
+            <div className="hero-stats">
+              <div>
+                <div className="hero-stat-n">
+                  60<span>+</span>
+                </div>
+                <div className="hero-stat-l">
+                  {locale === "kk" ? "жыл тарих" : "лет истории"}
+                </div>
+              </div>
+              <div>
+                <div className="hero-stat-n">
+                  20<span>+</span>
+                </div>
+                <div className="hero-stat-l">
+                  {locale === "kk" ? "үйірмелер" : "творческих кружков"}
+                </div>
+              </div>
+              <div>
+                <div className="hero-stat-n">
+                  500<span>+</span>
+                </div>
+                <div className="hero-stat-l">
+                  {locale === "kk" ? "тәрбиеленуші" : "воспитанников"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Widget: upcoming events */}
+          <aside className="hero-widget fade-up">
+            <div className="hw-head">
+              <div className="eyebrow">
+                {locale === "kk" ? "Жақын іс-шаралар" : "Ближайшие события"}
+              </div>
+              <Link href={`/${locale}/events`} className="hw-all">
+                {locale === "kk" ? "Бүкіл афиша →" : "Вся афиша →"}
+              </Link>
+            </div>
+            <div className="hw-list">
+              {items.map((ev) => (
+                <Link key={ev.id} href={`/${locale}/events`} className="hw-item">
+                  <div className="hw-date">
+                    <div className="d">{ev.day}</div>
+                    <div className="m">{ev.month}</div>
+                  </div>
+                  <div>
+                    <div className="hw-title">{ev.title}</div>
+                    <div className="hw-meta">
+                      {ev.time} · {ev.hall}
+                    </div>
+                    <div className="hw-price">{ev.price}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </aside>
         </div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-[color:var(--background)]" />
+      {/* Ornament line at the bottom */}
+      <div className="ornament on-dark absolute bottom-0 left-0 right-0 z-[2] opacity-[0.35]" />
     </section>
   );
 }

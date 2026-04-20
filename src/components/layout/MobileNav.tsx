@@ -4,11 +4,12 @@ import { useEffect } from "react";
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import LanguageSwitcher from "@/components/features/LanguageSwitcher";
+import type { ClientNavItem } from "./HeaderClient";
 
 interface MobileNavProps {
   isOpen: boolean;
   onClose: () => void;
-  navItems: { href: string; label: string }[];
+  navItems: ClientNavItem[];
   locale: Locale;
 }
 
@@ -30,7 +31,7 @@ export default function MobileNav({ isOpen, onClose, navItems, locale }: MobileN
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Panel */}
-      <div className="absolute right-0 top-0 bottom-0 w-72 bg-white shadow-xl">
+      <div className="absolute right-0 top-0 bottom-0 w-72 bg-white shadow-xl overflow-y-auto">
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
           <span className="font-semibold text-gray-900">
             {locale === "kk" ? "Мәзір" : "Меню"}
@@ -44,14 +45,33 @@ export default function MobileNav({ isOpen, onClose, navItems, locale }: MobileN
 
         <nav className="p-4 space-y-1">
           {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              className="block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg font-medium transition-colors"
-            >
-              {item.label}
-            </Link>
+            <div key={item.id}>
+              <Link
+                href={item.href}
+                target={item.target}
+                rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
+                onClick={onClose}
+                className="block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg font-medium transition-colors"
+              >
+                {item.label}
+              </Link>
+              {item.children && item.children.length > 0 && (
+                <div className="ml-4 mt-1 space-y-1 border-l border-gray-100 pl-2">
+                  {item.children.map((c) => (
+                    <Link
+                      key={c.id}
+                      href={c.href}
+                      target={c.target}
+                      rel={c.target === "_blank" ? "noopener noreferrer" : undefined}
+                      onClick={onClose}
+                      className="block px-4 py-2 text-sm text-gray-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                    >
+                      {c.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </nav>
 

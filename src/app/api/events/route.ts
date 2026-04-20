@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
           start_date: row.start_date,
           location: row.location,
           event_type: row.event_type,
+          image_url: row.image_url,
         }).catch(console.error);
       }
     }

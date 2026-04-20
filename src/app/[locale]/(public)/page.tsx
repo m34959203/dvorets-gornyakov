@@ -1,133 +1,49 @@
 import Link from "next/link";
 import { getMessages, isValidLocale, type Locale } from "@/lib/i18n";
 import HomeHero from "@/components/features/HomeHero";
-import RentalChecklist from "@/components/features/RentalChecklist";
 import NewsCard from "@/components/features/NewsCard";
 import ClubCard from "@/components/features/ClubCard";
 import EventCard from "@/components/features/EventCard";
+import HallCard from "@/components/features/HallCard";
 
-// Demo data used when database is not available
 function getDemoData(locale: Locale) {
   const events = [
-    {
-      id: "1",
-      title_kk: "Наурыз мерекесіне арналған концерт",
-      title_ru: "Концерт к празднику Наурыз",
-      description_kk: "Наурыз мейрамына арналған мерекелік концерт",
-      description_ru: "Праздничный концерт, посвящённый празднику Наурыз",
-      image_url: null,
-      event_type: "concert",
-      start_date: "2026-03-22T18:00:00Z",
-      location: "Негізгі зал",
-    },
-    {
-      id: "2",
-      title_kk: "Балаларға арналған би шеберханасы",
-      title_ru: "Танцевальный мастер-класс для детей",
-      description_kk: "Балаларға арналған тегін би шеберханасы",
-      description_ru: "Бесплатный танцевальный мастер-класс для детей",
-      image_url: null,
-      event_type: "workshop",
-      start_date: "2026-04-15T14:00:00Z",
-      location: "Хореография залы",
-    },
-    {
-      id: "3",
-      title_kk: "Жас суретшілер көрмесі",
-      title_ru: "Выставка юных художников",
-      description_kk: "Жас суретшілердің шығармашылық көрмесі",
-      description_ru: "Творческая выставка юных художников",
-      image_url: null,
-      event_type: "exhibition",
-      start_date: "2026-05-01T10:00:00Z",
-      location: "Галерея",
-    },
+    { id: "1", title_kk: "Наурыз мерекесіне арналған концерт", title_ru: "Симфонический концерт к Наурызу", description_kk: "", description_ru: "", image_url: null, event_type: "concert", start_date: "2026-03-22T18:00:00Z", location: locale === "kk" ? "Негізгі зал" : "Главный зал", price: "от 2 500 ₸" },
+    { id: "2", title_kk: "Қазақ поэзиясы кеші", title_ru: "Вечер казахской поэзии", description_kk: "", description_ru: "", image_url: null, event_type: "other", start_date: "2026-04-05T19:00:00Z", location: locale === "kk" ? "Камералық зал" : "Камерный зал", price: "0" },
+    { id: "3", title_kk: "Балалар би шеберханасы", title_ru: "Танцевальный мастер-класс для детей", description_kk: "", description_ru: "", image_url: null, event_type: "workshop", start_date: "2026-04-15T14:00:00Z", location: locale === "kk" ? "Репетиция залы" : "Репетиционный", price: "от 1 000 ₸" },
+    { id: "4", title_kk: "Жас суретшілер көрмесі", title_ru: "Выставка юных художников", description_kk: "", description_ru: "", image_url: null, event_type: "exhibition", start_date: "2026-05-01T10:00:00Z", location: locale === "kk" ? "Галерея" : "Галерея", price: "0" },
+    { id: "5", title_kk: "Халық билерінің фестивалі", title_ru: "Фестиваль народных танцев", description_kk: "", description_ru: "", image_url: null, event_type: "festival", start_date: "2026-05-10T17:00:00Z", location: locale === "kk" ? "Негізгі зал" : "Главный зал", price: "от 1 500 ₸" },
+    { id: "6", title_kk: "Театр қойылымы «Абай жолы»", title_ru: "Спектакль «Путь Абая»", description_kk: "", description_ru: "", image_url: null, event_type: "other", start_date: "2026-05-18T19:00:00Z", location: locale === "kk" ? "Негізгі зал" : "Главный зал", price: "от 3 000 ₸" },
+    { id: "7", title_kk: "Фортепиано байқауы", title_ru: "Конкурс юных пианистов", description_kk: "", description_ru: "", image_url: null, event_type: "competition", start_date: "2026-05-25T14:00:00Z", location: locale === "kk" ? "Камералық зал" : "Камерный зал", price: "0" },
+    { id: "8", title_kk: "Жазғы балалар мерекесі", title_ru: "Детский летний праздник", description_kk: "", description_ru: "", image_url: null, event_type: "festival", start_date: "2026-06-01T11:00:00Z", location: locale === "kk" ? "Алаң" : "Площадь", price: "0" },
   ];
 
   const clubs = [
-    {
-      id: "1",
-      name_kk: "Вокал студиясы",
-      name_ru: "Вокальная студия",
-      description_kk: "Кәсіби вокал сабақтары балалар мен ересектерге",
-      description_ru: "Профессиональные занятия вокалом для детей и взрослых",
-      image_url: null,
-      age_group: "7-18",
-      direction: "vocal",
-      instructor_name: "Айгуль Сериковна",
-    },
-    {
-      id: "2",
-      name_kk: "Халық билері",
-      name_ru: "Народные танцы",
-      description_kk: "Қазақтың ұлттық билерін үйрену",
-      description_ru: "Изучение казахских национальных танцев",
-      image_url: null,
-      age_group: "5-16",
-      direction: "dance",
-      instructor_name: "Динара Маратовна",
-    },
-    {
-      id: "3",
-      name_kk: "Бейнелеу өнері студиясы",
-      name_ru: "Студия изобразительного искусства",
-      description_kk: "Сурет салу, кескіндеме, графика",
-      description_ru: "Рисунок, живопись, графика",
-      image_url: null,
-      age_group: "6-99",
-      direction: "art",
-      instructor_name: "Бауыржан Нурланович",
-    },
-    {
-      id: "4",
-      name_kk: "Театр студиясы",
-      name_ru: "Театральная студия",
-      description_kk: "Актёрлік шеберлік, сценалық сөйлеу",
-      description_ru: "Актёрское мастерство, сценическая речь",
-      image_url: null,
-      age_group: "8-18",
-      direction: "theater",
-      instructor_name: "Сауле Бекеновна",
-    },
+    { id: "1", name_kk: "Вокал студиясы", name_ru: "Вокальная студия", description_kk: "Кәсіби вокал сабақтары", description_ru: "Академический и эстрадный вокал — сольное пение и ансамбль.", image_url: null, age_group: "7-18", direction: "vocal", instructor_name: "Айгүл Серікқызы" },
+    { id: "2", name_kk: "Халық билері", name_ru: "Народные танцы", description_kk: "Қазақ ұлттық билері", description_ru: "Казахские национальные танцы и постановки для фестивалей.", image_url: null, age_group: "5-16", direction: "dance", instructor_name: "Динара Маратқызы" },
+    { id: "3", name_kk: "Бейнелеу өнері", name_ru: "Изобразительное искусство", description_kk: "Сурет, кескіндеме, графика", description_ru: "Рисунок, живопись, графика и основы композиции.", image_url: null, age_group: "6-17", direction: "art", instructor_name: "Бауыржан Нұрланұлы" },
+    { id: "4", name_kk: "Театр студиясы", name_ru: "Театральная студия", description_kk: "Актёрлік шеберлік", description_ru: "Актёрское мастерство, сценическая речь, сценодвижение.", image_url: null, age_group: "8-18", direction: "theater", instructor_name: "Сәуле Бекенқызы" },
   ];
 
   const news = [
-    {
-      id: "1",
-      slug: "nauryz-2026",
-      title_kk: "Наурыз мерекесіне шақырамыз!",
-      title_ru: "Приглашаем на праздник Наурыз!",
-      excerpt_kk: "Сарайда Наурыз мерекесіне арналған мерекелік іс-шаралар өтеді",
-      excerpt_ru: "Во дворце пройдут праздничные мероприятия, посвящённые Наурызу",
-      image_url: null,
-      category: "events",
-      published_at: "2026-03-15T10:00:00Z",
-    },
-    {
-      id: "2",
-      slug: "new-clubs-2026",
-      title_kk: "Жаңа оқу жылына үйірмелерге жазылу",
-      title_ru: "Запись в кружки на новый учебный год",
-      excerpt_kk: "2026-2027 оқу жылына үйірмелерге жазылу басталды",
-      excerpt_ru: "Открыта запись в кружки на 2026-2027 учебный год",
-      image_url: null,
-      category: "announcement",
-      published_at: "2026-03-10T10:00:00Z",
-    },
-    {
-      id: "3",
-      slug: "competition-results",
-      title_kk: "Байқау нәтижелері",
-      title_ru: "Результаты конкурса",
-      excerpt_kk: "Облыстық шығармашылық байқауының нәтижелері жарияланды",
-      excerpt_ru: "Опубликованы результаты областного творческого конкурса",
-      image_url: null,
-      category: "news",
-      published_at: "2026-03-05T10:00:00Z",
-    },
+    { id: "1", slug: "nauryz-2026", title_kk: "Наурыз мерекесіне шақырамыз!", title_ru: "Приглашаем на праздник Наурыз!", excerpt_kk: "Мерекелік іс-шаралар", excerpt_ru: "Во дворце пройдут праздничные мероприятия, посвящённые Наурызу.", image_url: null, category: locale === "kk" ? "Жаңалықтар" : "Новости", published_at: "2026-03-15T10:00:00Z" },
+    { id: "2", slug: "new-clubs-2026", title_kk: "Жаңа оқу жылына жазылу", title_ru: "Запись в кружки на новый сезон", excerpt_kk: "2026-2027 оқу жылы", excerpt_ru: "Открыта запись в 20+ творческих студий на 2026–2027 учебный год.", image_url: null, category: locale === "kk" ? "Үйірмелер" : "Студии", published_at: "2026-03-10T10:00:00Z" },
+    { id: "3", slug: "competition-results", title_kk: "Байқау нәтижелері", title_ru: "Итоги областного конкурса", excerpt_kk: "Облыстық шығармашылық байқау", excerpt_ru: "Опубликованы результаты областного творческого конкурса среди школьников.", image_url: null, category: locale === "kk" ? "Байқау" : "Конкурсы", published_at: "2026-03-05T10:00:00Z" },
   ];
 
-  return { events, clubs, news };
+  const halls = locale === "kk"
+    ? [
+        { id: "grand", slug: "grand", name: "Негізгі концерттік зал", seats: 650, description: "Оркестрге, әшекейлі қойылымдарға және ірі мерекелік концерттерге арналған классикалық зал.", features: ["Кәсіби дыбыс пен жарық", "Сахна 12×8 м", "Екі ярус балкон", "Киім ілгіш 400 орынға"], price: "250 000 ₸-ден / күн", image: "https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=1400&q=80" },
+        { id: "chamber", slug: "chamber", name: "Камералық зал", seats: 120, description: "Камералық концерттерге, поэзия кештеріне және дөңгелек үстелдерге арналған.", features: ["Акустикалық құрылым", "Stage monitoring", "Конференц-режим", "Киім ілгіш 80 орынға"], price: "80 000 ₸-ден / күн", image: "https://images.unsplash.com/photo-1519683109079-d5f539e1542f?w=1400&q=80" },
+        { id: "rehearsal", slug: "rehearsal", name: "Репетиция залы", seats: 40, description: "Репетицияларға, мастер-кластарға және жас ұжымдардың жұмысына арналған.", features: ["Кәсіби айналар", "Балет станоктары", "Линолеум жабын", "Киім ауыстыру бөлмесі"], price: "15 000 ₸-ден / күн", image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1400&q=80" },
+      ]
+    : [
+        { id: "grand", slug: "grand", name: "Главный концертный зал", seats: 650, description: "Классический зал для симфонических концертов, балета и масштабных торжественных событий.", features: ["Профессиональный звук и свет", "Сцена 12×8 м", "Два яруса балконов", "Гардероб на 400 мест"], price: "от 250 000 ₸ / день", image: "https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=1400&q=80" },
+        { id: "chamber", slug: "chamber", name: "Камерный зал", seats: 120, description: "Камерные концерты, поэтические вечера, круглые столы и мастер-классы.", features: ["Акустическая отделка", "Stage monitoring", "Режим конференции", "Гардероб на 80 мест"], price: "от 80 000 ₸ / день", image: "https://images.unsplash.com/photo-1519683109079-d5f539e1542f?w=1400&q=80" },
+        { id: "rehearsal", slug: "rehearsal", name: "Репетиционный зал", seats: 40, description: "Репетиции, мастер-классы и занятия молодых коллективов.", features: ["Профессиональные зеркала", "Балетные станки", "Специальный линолеум", "Гримёрная"], price: "от 15 000 ₸ / день", image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1400&q=80" },
+      ];
+
+  return { events, clubs, news, halls };
 }
 
 export default async function HomePage({
@@ -142,55 +58,109 @@ export default async function HomePage({
 
   const demo = getDemoData(locale);
 
-  const rental = messages.rental as unknown as Parameters<typeof RentalChecklist>[0]["messages"];
+  const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
   return (
     <div>
-      {/* Hero */}
+      {/* Hero with upcoming events widget */}
       <HomeHero
         locale={locale}
         title={t.heroTitle}
-        headline={t.heroHeadline}
-        lead={t.heroLead}
-        badge={t.heroBadge}
-        ctaSchedule={t.heroCtaSchedule}
-        ctaRent={t.heroCtaRent}
+        headline={locale === "kk" ? "Өнер оянады|Жезқазғанның жүрегінде" : "Искусство оживает|в сердце Жезказгана"}
+        lead={t.heroLead || T(
+          "Ш. Ділдебаев атындағы сарай — қаланың басты сахнасы. Классика, қазақ дәстүрі мен жаңа есімдер осы жерде кездеседі.",
+          "Дворец культуры горняков им. Ш. Дильдебаева — главная сцена города. Здесь встречаются симфоническая классика, казахская традиция и новые имена."
+        )}
+        badge={T("1965 жылдан бері · 60 жыл өнерде", "С 1965 года · 60 лет искусству")}
+        ctaSchedule={T("Афишаны қарау", "Смотреть афишу")}
+        ctaRent={T("Зал жалдау", "Арендовать зал")}
       />
 
-      {/* Rental checklist */}
-      <RentalChecklist locale={locale} messages={rental} />
-
-      {/* Upcoming Events */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">{t.upcomingEvents}</h2>
-          <Link
-            href={`/${locale}/events`}
-            className="text-primary hover:text-primary-dark font-medium text-sm"
-          >
-            {t.viewAll} &rarr;
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {demo.events.map((event) => (
-            <EventCard key={event.id} event={event} locale={locale} />
-          ))}
+      {/* Events grid */}
+      <section className="py-20 bg-[color:var(--cream)]">
+        <div className="max-w-[1240px] mx-auto px-7">
+          <div className="flex items-end justify-between gap-10 mb-11">
+            <div>
+              <div className="eyebrow">{T("Афиша", "Афиша")}</div>
+              <h2 className="text-[44px] font-semibold leading-[1.1] mt-2" style={{ fontFamily: "var(--font-head)", color: "var(--navy)" }}>
+                {T("Жақын іс-шаралар", "Ближайшие события")}
+              </h2>
+              <p className="text-[color:var(--ink-2)] max-w-[640px] mt-2.5 text-[16px]">
+                {T(
+                  "Концерттер, қойылымдар, фестивальдер мен шеберханалар — таңдаңыз да онлайн орындықтарды броньдаңыз.",
+                  "Концерты, спектакли, фестивали и мастер-классы — выбирайте и бронируйте места онлайн."
+                )}
+              </p>
+            </div>
+            <Link
+              href={`/${locale}/events`}
+              className="hidden sm:inline-flex items-center gap-2 font-semibold text-[14px] text-[color:var(--navy)] pb-0.5 border-b-[1.5px] border-[color:var(--ochre)] hover:text-[color:var(--coral-600)] hover:border-[color:var(--coral-600)]"
+            >
+              {T("Барлық іс-шаралар", "Все события")} →
+            </Link>
+          </div>
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {demo.events.map((ev) => (
+              <EventCard key={ev.id} event={ev} locale={locale} />
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Popular Clubs */}
-      <section className="bg-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">{t.popularClubs}</h2>
+      {/* Stats banner */}
+      <section className="stats-banner">
+        <div className="max-w-[1240px] mx-auto px-7">
+          <div className="ornament on-dark mb-8" />
+          <div className="stats-row">
+            <div>
+              <div className="stat-n">1965</div>
+              <div className="stat-l">{T("негіз қаланған жыл", "год основания")}</div>
+            </div>
+            <div>
+              <div className="stat-n">
+                120<span>+</span>
+              </div>
+              <div className="stat-l">{T("жылына іс-шара", "событий в год")}</div>
+            </div>
+            <div>
+              <div className="stat-n">
+                500<span>+</span>
+              </div>
+              <div className="stat-l">{T("тәрбиеленуші", "воспитанников")}</div>
+            </div>
+            <div>
+              <div className="stat-n">3</div>
+              <div className="stat-l">{T("концерт залы", "концертных зала")}</div>
+            </div>
+          </div>
+          <div className="ornament on-dark mt-8" />
+        </div>
+      </section>
+
+      {/* Popular clubs */}
+      <section className="py-20">
+        <div className="max-w-[1240px] mx-auto px-7">
+          <div className="flex items-end justify-between gap-10 mb-11">
+            <div>
+              <div className="eyebrow">{T("Шығармашылық студиялар", "Творческие студии")}</div>
+              <h2 className="text-[44px] font-semibold leading-[1.1] mt-2" style={{ fontFamily: "var(--font-head)", color: "var(--navy)" }}>
+                {T("Танымал үйірмелер", "Популярные кружки")}
+              </h2>
+              <p className="text-[color:var(--ink-2)] max-w-[640px] mt-2.5 text-[16px]">
+                {T(
+                  "Балалар мен ересектерге арналған 20+ бағыт — академиялық вокалдан робототехникаға дейін.",
+                  "20+ направлений для детей и взрослых — от академического вокала до робототехники."
+                )}
+              </p>
+            </div>
             <Link
               href={`/${locale}/clubs`}
-              className="text-primary hover:text-primary-dark font-medium text-sm"
+              className="hidden sm:inline-flex items-center gap-2 font-semibold text-[14px] text-[color:var(--navy)] pb-0.5 border-b-[1.5px] border-[color:var(--ochre)] hover:text-[color:var(--coral-600)] hover:border-[color:var(--coral-600)]"
             >
-              {t.viewAll} &rarr;
+              {T("Барлық үйірмелер", "Все кружки")} →
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {demo.clubs.map((club) => (
               <ClubCard key={club.id} club={club} locale={locale} />
             ))}
@@ -198,45 +168,89 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* Latest News */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">{t.latestNews}</h2>
-          <Link
-            href={`/${locale}/news`}
-            className="text-primary hover:text-primary-dark font-medium text-sm"
-          >
-            {t.viewAll} &rarr;
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {demo.news.map((item) => (
-            <NewsCard key={item.id} news={item} locale={locale} />
-          ))}
+      {/* Halls */}
+      <section className="py-20 bg-white">
+        <div className="max-w-[1240px] mx-auto px-7">
+          <div className="flex items-end justify-between gap-10 mb-11">
+            <div>
+              <div className="eyebrow">{T("Жалдау", "Аренда")}</div>
+              <h2 className="text-[44px] font-semibold leading-[1.1] mt-2" style={{ fontFamily: "var(--font-head)", color: "var(--navy)" }}>
+                {T("Кез келген іс-шараға үш зал", "Три зала для любых событий")}
+              </h2>
+              <p className="text-[color:var(--ink-2)] max-w-[640px] mt-2.5 text-[16px]">
+                {T(
+                  "Симфониялық концерттен камералық кешке дейін — міндетіңізге сай алаңды таңдаймыз.",
+                  "От симфонического концерта до камерного вечера — мы подберём площадку под вашу задачу."
+                )}
+              </p>
+            </div>
+            <Link
+              href={`/${locale}/rent`}
+              className="hidden sm:inline-flex items-center gap-2 font-semibold text-[14px] text-[color:var(--navy)] pb-0.5 border-b-[1.5px] border-[color:var(--ochre)] hover:text-[color:var(--coral-600)] hover:border-[color:var(--coral-600)]"
+            >
+              {T("Зал жалдау", "Арендовать зал")} →
+            </Link>
+          </div>
+          <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
+            {demo.halls.map((h) => (
+              <HallCard key={h.id} hall={h} locale={locale} />
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Quick Info Section */}
-      <section className="bg-primary text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+      {/* Latest news */}
+      <section className="py-20">
+        <div className="max-w-[1240px] mx-auto px-7">
+          <div className="flex items-end justify-between gap-10 mb-11">
             <div>
-              <div className="text-4xl font-bold text-accent mb-2">20+</div>
-              <div className="text-white/80">
-                {locale === "kk" ? "Үйірмелер мен студиялар" : "Кружков и студий"}
-              </div>
+              <div className="eyebrow">{T("Жаңалықтар", "Новости")}</div>
+              <h2 className="text-[44px] font-semibold leading-[1.1] mt-2" style={{ fontFamily: "var(--font-head)", color: "var(--navy)" }}>
+                {T("Соңғы жаңалықтар", "Последние новости")}
+              </h2>
             </div>
-            <div>
-              <div className="text-4xl font-bold text-accent mb-2">500+</div>
-              <div className="text-white/80">
-                {locale === "kk" ? "Тәрбиеленушілер" : "Воспитанников"}
+            <Link
+              href={`/${locale}/news`}
+              className="hidden sm:inline-flex items-center gap-2 font-semibold text-[14px] text-[color:var(--navy)] pb-0.5 border-b-[1.5px] border-[color:var(--ochre)] hover:text-[color:var(--coral-600)] hover:border-[color:var(--coral-600)]"
+            >
+              {T("Барлық жаңалықтар", "Все новости")} →
+            </Link>
+          </div>
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+            {demo.news.map((n) => (
+              <NewsCard key={n.id} news={n} locale={locale} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="pb-20">
+        <div className="max-w-[1240px] mx-auto px-7">
+          <div className="cta-block">
+            <div className="relative">
+              <div className="eyebrow" style={{ color: "var(--ochre-soft)" }}>
+                {T("Біз ынтымақтастыққа ашықпыз", "Мы открыты к сотрудничеству")}
               </div>
+              <h2>
+                {T("Жезқазғанның жүрегінде", "Готовы провести событие")}
+                <br />
+                {T("іс-шара өткізуге дайынсыз ба?", "в сердце Жезказгана?")}
+              </h2>
+              <p>
+                {T(
+                  "Концерттер, конференциялар, той-мерекелер, бітіру кештері, корпоратив іс-шаралары — өтінімнен сахнаға дейін әр қадамда көмектесеміз.",
+                  "Концерты, конференции, торжества, выпускные, корпоративные мероприятия — помогаем на каждом шаге от заявки до сцены."
+                )}
+              </p>
             </div>
-            <div>
-              <div className="text-4xl font-bold text-accent mb-2">60+</div>
-              <div className="text-white/80">
-                {locale === "kk" ? "Жылдық тәжірибе" : "Лет опыта"}
-              </div>
+            <div className="cta-actions">
+              <Link href={`/${locale}/rent`} className="btn btn-primary">
+                {T("Өтінім қалдыру", "Оставить заявку")} →
+              </Link>
+              <Link href={`/${locale}/contacts`} className="btn btn-outline">
+                {T("Бізбен байланыс", "Связаться с нами")}
+              </Link>
             </div>
           </div>
         </div>

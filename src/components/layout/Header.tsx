@@ -1,96 +1,116 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import type { Locale } from "@/lib/i18n";
 import LanguageSwitcher from "@/components/features/LanguageSwitcher";
-import MobileNav from "./MobileNav";
+import HeaderClient from "./HeaderClient";
+import { getNavTree, localizeHref, type NavItem } from "@/lib/nav";
 
 interface HeaderProps {
   locale: Locale;
   messages: Record<string, Record<string, string>>;
 }
 
-export default function Header({ locale, messages }: HeaderProps) {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const t = messages.common;
+export default async function Header({ locale }: HeaderProps) {
+  let navTree: NavItem[] = [];
+  try {
+    navTree = await getNavTree(locale);
+  } catch (e) {
+    console.error("Header getNavTree error:", e);
+    navTree = [];
+  }
 
-  const navItems = [
-    { href: `/${locale}`, label: t.home },
-    { href: `/${locale}/news`, label: t.news },
-    { href: `/${locale}/clubs`, label: t.clubs },
-    { href: `/${locale}/events`, label: t.events },
-    { href: `/${locale}/rent`, label: locale === "kk" ? "Залдарды жалдау" : "Аренда залов" },
-    { href: `/${locale}/about`, label: t.about },
-    { href: `/${locale}/contacts`, label: t.contacts },
-  ];
+  const navItems = navTree.map((n) => ({
+    id: n.id,
+    href: localizeHref(n.url, locale),
+    label: n.title,
+    target: n.target,
+    children: n.children.map((c) => ({
+      id: c.id,
+      href: localizeHref(c.url, locale),
+      label: c.title,
+      target: c.target,
+    })),
+  }));
 
   return (
     <>
-      <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-40">
-        {/* Top bar with ornament */}
-        <div className="h-1 bg-gradient-to-r from-primary via-accent to-primary" />
+      {/* Top bar */}
+      <div className="bg-[color:var(--navy-900)] text-white/80 text-[13px]">
+        <div className="max-w-[1240px] mx-auto px-7 flex items-center justify-between h-10">
+          <div className="hidden md:flex items-center gap-5">
+            <Link href={`/${locale}/about`} className="hover:text-[color:var(--ochre-soft)]">
+              {locale === "kk" ? "Сарай туралы" : "О дворце"}
+            </Link>
+            <Link href={`/${locale}/news`} className="hover:text-[color:var(--ochre-soft)]">
+              {locale === "kk" ? "Жаңалықтар" : "Новости"}
+            </Link>
+            <a href="#" className="hover:text-[color:var(--ochre-soft)]">
+              {locale === "kk" ? "Бос жұмыс орны" : "Вакансии"}
+            </a>
+            <a href="#" className="hover:text-[color:var(--ochre-soft)]">
+              {locale === "kk" ? "Мем. сатып алу" : "Госзакупки"}
+            </a>
+          </div>
+          <div className="flex items-center gap-4 ml-auto">
+            <span className="hidden sm:inline">
+              {locale === "kk" ? "Касса: күн сайын 10:00–19:00" : "Касса: ежедневно 10:00–19:00"}
+            </span>
+            <span className="hidden sm:inline w-px h-3.5 bg-white/20" />
+            <a
+              href="tel:+77102720000"
+              className="inline-flex items-center gap-1.5 hover:text-[color:var(--ochre-soft)]"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.31 1.85.53 2.81.66A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              +7 (7102) 72-00-00
+            </a>
+          </div>
+        </div>
+      </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
-            {/* Logo */}
-            <Link href={`/${locale}`} className="flex items-center gap-3 shrink-0">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 lg:w-7 lg:h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
+      {/* Main header */}
+      <header className="bg-white border-b border-[color:var(--line)] sticky top-0 z-40">
+        <div className="max-w-[1240px] mx-auto px-7">
+          <div className="flex items-center gap-7 py-4">
+            {/* Brand */}
+            <Link href={`/${locale}`} className="flex items-center gap-3.5 shrink-0">
+              <div
+                className="w-[52px] h-[52px] rounded-full flex items-center justify-center shrink-0"
+                style={{
+                  background: "var(--navy)",
+                  color: "var(--ochre)",
+                  border: "2px solid var(--ochre)",
+                  boxShadow: "inset 0 0 0 3px var(--navy), inset 0 0 0 4px var(--ochre-soft)",
+                  fontFamily: "var(--font-head)",
+                  fontSize: 26,
+                  fontWeight: 700,
+                }}
+              >
+                Д
               </div>
-              <div className="hidden sm:block">
-                <div className="text-sm lg:text-base font-bold text-gray-900 leading-tight">
-                  {t.siteNameShort}
+              <div className="leading-tight hidden sm:block">
+                <div className="font-serif font-semibold text-[17px] text-[color:var(--navy)]" style={{ fontFamily: "var(--font-head)" }}>
+                  {locale === "kk" ? "Тау-кенші сарайы" : "Дворец горняков"}
                 </div>
-                <div className="text-xs text-gray-500">
-                  {locale === "kk" ? "Жезқазған қ." : "г. Жезказган"}
+                <div className="text-[12px] text-[color:var(--muted)] uppercase tracking-[0.06em]">
+                  {locale === "kk" ? "Ш. Ділдебаев · Жезқазған" : "им. Ш. Дильдебаева · Жезказган"}
                 </div>
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "px-3 py-2 text-sm font-medium rounded-lg transition-colors",
-                    "text-gray-700 hover:text-primary hover:bg-primary/5"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-
-            {/* Right section */}
-            <div className="flex items-center gap-2">
+            {/* Desktop nav + mobile toggle */}
+            <HeaderClient locale={locale} navItems={navItems}>
               <LanguageSwitcher locale={locale} />
-              {/* Mobile menu button */}
-              <button
-                onClick={() => setMobileOpen(true)}
-                className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
-                aria-label="Open menu"
+              <Link
+                href={`/${locale}/rent`}
+                className="btn btn-navy btn-sm hidden md:inline-flex"
               >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
+                {locale === "kk" ? "Брондау" : "Забронировать"}
+              </Link>
+            </HeaderClient>
           </div>
         </div>
       </header>
-
-      <MobileNav
-        isOpen={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        navItems={navItems}
-        locale={locale}
-      />
     </>
   );
 }

@@ -77,10 +77,17 @@ const questions: Question[] = [
   },
 ];
 
+interface Match {
+  id: string;
+  name_kk: string;
+  name_ru: string;
+}
+
 export default function RecommendQuiz({ locale, messages: t }: RecommendQuizProps) {
   const [step, setStep] = useState(-1); // -1 = not started
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [result, setResult] = useState<string | null>(null);
+  const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(false);
 
   const currentQuestion = step >= 0 ? questions[step] : null;
@@ -107,6 +114,7 @@ export default function RecommendQuiz({ locale, messages: t }: RecommendQuizProp
       });
       const data = await response.json();
       setResult(data.data?.recommendation || data.error || "Error");
+      setMatches(Array.isArray(data.data?.matches) ? data.data.matches : []);
     } catch {
       setResult(locale === "kk" ? "Қате орын алды" : "Произошла ошибка");
     } finally {
@@ -118,6 +126,7 @@ export default function RecommendQuiz({ locale, messages: t }: RecommendQuizProp
     setStep(-1);
     setAnswers({});
     setResult(null);
+    setMatches([]);
   };
 
   // Not started
@@ -164,20 +173,35 @@ export default function RecommendQuiz({ locale, messages: t }: RecommendQuizProp
               ? "Ұнаған үйірмеге жазылыңыз:"
               : "Запишитесь на понравившийся кружок:"}
           </p>
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href={`/${locale}/clubs`}
-              className="bg-accent text-primary-dark hover:bg-accent-light rounded-full px-5 py-2 text-sm font-semibold"
-            >
-              {locale === "kk" ? "Жазылу" : "Записаться"}
-            </Link>
-            <Link
-              href={`/${locale}/clubs`}
-              className="text-sm font-medium text-primary hover:text-primary-dark underline underline-offset-4"
-            >
-              {locale === "kk" ? "Үйірмеге өту" : "Перейти к кружку"}
-            </Link>
-          </div>
+          {matches.length > 0 ? (
+            <div className="space-y-2">
+              {matches.map((m) => (
+                <div
+                  key={m.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white/80 px-3 py-2"
+                >
+                  <span className="text-sm font-semibold text-gray-900">
+                    {locale === "kk" ? m.name_kk : m.name_ru}
+                  </span>
+                  <Link
+                    href={`/${locale}/clubs/${m.id}`}
+                    className="bg-accent text-primary-dark hover:bg-accent-light rounded-full px-4 py-1.5 text-xs font-semibold"
+                  >
+                    {locale === "kk" ? "Жазылу" : "Записаться"}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href={`/${locale}/clubs`}
+                className="bg-accent text-primary-dark hover:bg-accent-light rounded-full px-5 py-2 text-sm font-semibold"
+              >
+                {locale === "kk" ? "Үйірмелерді көру" : "Смотреть кружки"}
+              </Link>
+            </div>
+          )}
         </div>
 
         <Button onClick={reset} variant="outline">

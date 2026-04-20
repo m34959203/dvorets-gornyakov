@@ -1,6 +1,4 @@
 import Link from "next/link";
-import Card from "@/components/ui/Card";
-import Badge from "@/components/ui/Badge";
 import type { Locale } from "@/lib/i18n";
 import { getLocalizedField } from "@/lib/i18n";
 import { formatDate, truncate } from "@/lib/utils";
@@ -24,52 +22,41 @@ interface NewsCardProps {
   locale: Locale;
 }
 
+const FALLBACK_IMG = "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1200&q=80";
+
 export default function NewsCard({ news, locale }: NewsCardProps) {
   const title = getLocalizedField(news, "title", locale);
   const excerpt = getLocalizedField(news, "excerpt", locale);
   const hasVideo = Boolean(news.video_url || (news.embed_code && news.embed_code.trim()));
+  const img = news.image_url || FALLBACK_IMG;
 
   return (
-    <Card hoverable>
-      <Link href={`/${locale}/news/${news.slug}`}>
-        <div className="aspect-video bg-gray-200 relative overflow-hidden">
-          {news.image_url ? (
-            <img src={news.image_url} alt={title} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
-              <svg className="w-12 h-12 text-primary/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-              </svg>
-            </div>
-          )}
-          {news.category && (
-            <div className="absolute top-2 left-2">
-              <Badge variant="primary">{news.category}</Badge>
-            </div>
-          )}
-          {hasVideo && (
-            <div className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-md">
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="h-4 w-4 text-primary ml-0.5"
-                aria-hidden="true"
-              >
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </div>
-          )}
-        </div>
-        <div className="p-4">
-          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{title}</h3>
-          <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-            {truncate(excerpt, 150)}
-          </p>
-          <div className="text-xs text-gray-400">
-            {news.published_at && formatDate(news.published_at, locale)}
+    <Link href={`/${locale}/news/${news.slug}`} className="news-card no-underline">
+      <div className="news-media relative">
+        <img src={img} alt={title} loading="lazy" />
+        {hasVideo && (
+          <div className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-md">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 ml-0.5" style={{ color: "var(--navy)" }}>
+              <path d="M8 5v14l11-7z" />
+            </svg>
           </div>
+        )}
+      </div>
+      <div className="news-body">
+        <div className="news-meta">
+          {news.category && <span className="badge-soft">{news.category}</span>}
+          {news.published_at && <span className="news-date">{formatDate(news.published_at, locale)}</span>}
         </div>
-      </Link>
-    </Card>
+        <h3 className="news-title line-clamp-2">{title}</h3>
+        <p className="news-desc line-clamp-3">{truncate(excerpt, 160)}</p>
+        <div className="news-more">
+          {locale === "kk" ? "Оқу" : "Читать"}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+    </Link>
   );
 }
