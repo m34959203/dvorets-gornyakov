@@ -4,6 +4,7 @@ import HomeHero from "@/components/features/HomeHero";
 import NewsCard from "@/components/features/NewsCard";
 import ClubCard from "@/components/features/ClubCard";
 import HallCard from "@/components/features/HallCard";
+import CalendarStrip from "@/components/features/CalendarStrip";
 
 function getDemoData(locale: Locale) {
   const events = [
@@ -119,6 +120,9 @@ export default async function HomePage({
           </a>
         </div>
       </section>
+
+      {/* Calendar strip */}
+      <CalendarStrip locale={locale} />
 
       {/* Stats banner */}
       <section className="stats-banner">
