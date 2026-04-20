@@ -4,6 +4,7 @@ import HomeHero from "@/components/features/HomeHero";
 import NewsCard from "@/components/features/NewsCard";
 import ClubCard from "@/components/features/ClubCard";
 import HallCard from "@/components/features/HallCard";
+import EventCard from "@/components/features/EventCard";
 import CalendarStrip from "@/components/features/CalendarStrip";
 
 function getDemoData(locale: Locale) {
@@ -78,6 +79,37 @@ export default async function HomePage({
 
       {/* Calendar strip */}
       <CalendarStrip locale={locale} />
+
+      {/* Events grid */}
+      <section className="py-20 bg-[color:var(--cream)]">
+        <div className="max-w-[1240px] mx-auto px-7">
+          <div className="flex items-end justify-between gap-10 mb-11">
+            <div>
+              <div className="eyebrow">{T("Афиша", "Афиша")}</div>
+              <h2 className="text-[44px] font-semibold leading-[1.1] mt-2" style={{ fontFamily: "var(--font-head)", color: "var(--navy)" }}>
+                {T("Жақын іс-шаралар", "Ближайшие события")}
+              </h2>
+              <p className="text-[color:var(--ink-2)] max-w-[640px] mt-2.5 text-[16px]">
+                {T(
+                  "Концерттер, қойылымдар, фестивальдер мен шеберханалар — таңдаңыз да онлайн орындықтарды броньдаңыз.",
+                  "Концерты, спектакли, фестивали и мастер-классы — выбирайте и бронируйте места онлайн."
+                )}
+              </p>
+            </div>
+            <Link
+              href={`/${locale}/events`}
+              className="hidden sm:inline-flex items-center gap-2 font-semibold text-[14px] text-[color:var(--navy)] pb-0.5 border-b-[1.5px] border-[color:var(--ochre)] hover:text-[color:var(--coral-600)] hover:border-[color:var(--coral-600)]"
+            >
+              {T("Барлық іс-шаралар", "Все события")} →
+            </Link>
+          </div>
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {demo.events.map((ev) => (
+              <EventCard key={ev.id} event={ev} locale={locale} />
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Popular clubs */}
       <section className="py-20">

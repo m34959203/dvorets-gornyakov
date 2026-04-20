@@ -1,16 +1,6 @@
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 
-interface HeroEvent {
-  id: string;
-  title: string;
-  day: string;
-  month: string;
-  time: string;
-  hall: string;
-  price: string;
-}
-
 interface HomeHeroProps {
   locale: Locale;
   title: string;
@@ -19,20 +9,7 @@ interface HomeHeroProps {
   badge: string;
   ctaSchedule: string;
   ctaRent: string;
-  upcoming?: HeroEvent[];
 }
-
-const DEFAULT_UPCOMING_RU: HeroEvent[] = [
-  { id: "1", title: "Симфонический концерт к Наурызу", day: "22", month: "МАР", time: "18:00", hall: "Главный зал", price: "от 2 500 ₸" },
-  { id: "2", title: "Вечер казахской поэзии", day: "05", month: "АПР", time: "19:00", hall: "Камерный зал", price: "Вход свободный" },
-  { id: "3", title: "Танцевальный мастер-класс", day: "15", month: "АПР", time: "14:00", hall: "Репетиционный", price: "от 1 000 ₸" },
-];
-
-const DEFAULT_UPCOMING_KK: HeroEvent[] = [
-  { id: "1", title: "Наурызға арналған симфониялық концерт", day: "22", month: "НАУ", time: "18:00", hall: "Негізгі зал", price: "2 500 ₸-ден" },
-  { id: "2", title: "Қазақ поэзиясы кеші", day: "05", month: "СӘУ", time: "19:00", hall: "Камералық зал", price: "Тегін" },
-  { id: "3", title: "Би шеберханасы", day: "15", month: "СӘУ", time: "14:00", hall: "Репетиция залы", price: "1 000 ₸-ден" },
-];
 
 export default function HomeHero({
   locale,
@@ -42,10 +19,7 @@ export default function HomeHero({
   badge,
   ctaSchedule,
   ctaRent,
-  upcoming,
 }: HomeHeroProps) {
-  const items = upcoming ?? (locale === "kk" ? DEFAULT_UPCOMING_KK : DEFAULT_UPCOMING_RU);
-
   return (
     <section className="hero-wrap" aria-label={title}>
       <div className="hero-media">
@@ -120,34 +94,6 @@ export default function HomeHero({
             </div>
           </div>
 
-          {/* Widget: upcoming events */}
-          <aside className="hero-widget fade-up">
-            <div className="hw-head">
-              <div className="eyebrow">
-                {locale === "kk" ? "Жақын іс-шаралар" : "Ближайшие события"}
-              </div>
-              <Link href={`/${locale}/events`} className="hw-all">
-                {locale === "kk" ? "Бүкіл афиша →" : "Вся афиша →"}
-              </Link>
-            </div>
-            <div className="hw-list">
-              {items.map((ev) => (
-                <Link key={ev.id} href={`/${locale}/events`} className="hw-item">
-                  <div className="hw-date">
-                    <div className="d">{ev.day}</div>
-                    <div className="m">{ev.month}</div>
-                  </div>
-                  <div>
-                    <div className="hw-title">{ev.title}</div>
-                    <div className="hw-meta">
-                      {ev.time} · {ev.hall}
-                    </div>
-                    <div className="hw-price">{ev.price}</div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </aside>
         </div>
       </div>
 
