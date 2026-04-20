@@ -76,6 +76,51 @@ export default async function HomePage({
         ctaRent={T("Зал жалдау", "Арендовать зал")}
       />
 
+      {/* Gemini presentation link */}
+      <section className="bg-[color:var(--navy-900)] text-white">
+        <div className="max-w-[1240px] mx-auto px-7 py-5">
+          <a
+            href="https://gemini.google.com/share/a9882ca2ba44"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6"
+          >
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#8e75f5] via-[#61a6ff] to-[#8fd8ff] flex items-center justify-center shadow-lg">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              </div>
+              <div className="text-[11px] uppercase tracking-[0.22em] text-[color:var(--ochre-soft)]">
+                {T("Презентация", "Презентация")}
+              </div>
+            </div>
+            <div className="flex-1">
+              <div className="font-semibold text-[16px] leading-snug">
+                {T(
+                  "Жоба презентациясы — Google Gemini",
+                  "Презентация проекта — Google Gemini"
+                )}
+              </div>
+              <div className="text-[13px] text-white/70 mt-0.5">
+                {T(
+                  "Жаңа қойындыда ашылады · gemini.google.com",
+                  "Открывается в новой вкладке · gemini.google.com"
+                )}
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-2 text-[14px] font-semibold text-[color:var(--ochre)] group-hover:text-[color:var(--ochre-soft)] shrink-0">
+              {T("Ашу", "Открыть")}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </span>
+          </a>
+        </div>
+      </section>
+
       {/* Events grid */}
       <section className="py-20 bg-[color:var(--cream)]">
         <div className="max-w-[1240px] mx-auto px-7">
