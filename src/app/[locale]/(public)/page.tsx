@@ -79,36 +79,6 @@ export default async function HomePage({
       {/* Calendar strip */}
       <CalendarStrip locale={locale} />
 
-      {/* Stats banner */}
-      <section className="stats-banner">
-        <div className="max-w-[1240px] mx-auto px-7">
-          <div className="ornament on-dark mb-8" />
-          <div className="stats-row">
-            <div>
-              <div className="stat-n">1965</div>
-              <div className="stat-l">{T("негіз қаланған жыл", "год основания")}</div>
-            </div>
-            <div>
-              <div className="stat-n">
-                120<span>+</span>
-              </div>
-              <div className="stat-l">{T("жылына іс-шара", "событий в год")}</div>
-            </div>
-            <div>
-              <div className="stat-n">
-                500<span>+</span>
-              </div>
-              <div className="stat-l">{T("тәрбиеленуші", "воспитанников")}</div>
-            </div>
-            <div>
-              <div className="stat-n">3</div>
-              <div className="stat-l">{T("концерт залы", "концертных зала")}</div>
-            </div>
-          </div>
-          <div className="ornament on-dark mt-8" />
-        </div>
-      </section>
-
       {/* Popular clubs */}
       <section className="py-20">
         <div className="max-w-[1240px] mx-auto px-7">
