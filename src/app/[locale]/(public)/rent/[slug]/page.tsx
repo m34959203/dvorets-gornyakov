@@ -9,25 +9,91 @@ import RentalRequestForm from "@/components/rent/RentalRequestForm";
 
 export const dynamic = "force-dynamic";
 
+const DEMO_HALLS: Record<string, Hall> = {
+  grand: {
+    id: "demo-grand",
+    slug: "grand",
+    name_kk: "Үлкен концерт залы",
+    name_ru: "Большой концертный зал",
+    description_kk:
+      "Сарайдың басты залы — кең сахна, кәсіби дыбыс және жарық жүйелері, балкон. Концерт, фестиваль және үлкен іс-шараларға ыңғайлы.",
+    description_ru:
+      "Главный зал дворца — просторная сцена, профессиональный звук и свет, балкон. Подходит для концертов, фестивалей и крупных мероприятий.",
+    capacity: 650,
+    equipment_kk: ["Кәсіби дыбыс жүйесі", "Сахналық жарық", "LED-экран", "3 гримёрка", "Wi-Fi", "Кондиционер"],
+    equipment_ru: ["Профессиональный звук", "Сценический свет", "LED-экран", "3 гримёрки", "Wi-Fi", "Кондиционер"],
+    hourly_price: 80000,
+    event_price_from: 350000,
+    photos: [{ url: "https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=1600&q=80", alt_ru: "Большой зал", alt_kk: "Үлкен зал" }],
+    layout_url: null,
+    is_active: true,
+    sort_order: 10,
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
+  },
+  chamber: {
+    id: "demo-chamber",
+    slug: "chamber",
+    name_kk: "Камералық зал",
+    name_ru: "Камерный зал",
+    description_kk:
+      "Акустикалық ортасы жақсы шағын зал. Камералық концерт, презентация, лекция, қонақ жиналыстарына ыңғайлы.",
+    description_ru:
+      "Небольшой зал с хорошей акустикой. Подходит для камерных концертов, презентаций, лекций и встреч.",
+    capacity: 120,
+    equipment_kk: ["Акустикалық жүйе", "Проектор", "Экран", "Wi-Fi", "Сахна"],
+    equipment_ru: ["Акустическая система", "Проектор", "Экран", "Wi-Fi", "Сцена"],
+    hourly_price: 35000,
+    event_price_from: 150000,
+    photos: [{ url: "https://images.unsplash.com/photo-1519683109079-d5f539e1542f?w=1600&q=80", alt_ru: "Камерный зал", alt_kk: "Камералық зал" }],
+    layout_url: null,
+    is_active: true,
+    sort_order: 20,
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
+  },
+  rehearsal: {
+    id: "demo-rehearsal",
+    slug: "rehearsal",
+    name_kk: "Жаттығу залы",
+    name_ru: "Репетиционный зал",
+    description_kk:
+      "Айна қабырғалы, таза еденді жаттығу залы. Би, вокал және театр ұжымдарына арналған.",
+    description_ru:
+      "Зал с зеркальной стеной и ровным полом. Для танцевальных, вокальных и театральных репетиций.",
+    capacity: 40,
+    equipment_kk: ["Айналар", "Станок", "Пианино", "Дыбыс жүйесі", "Киім ауыстыру бөлмесі"],
+    equipment_ru: ["Зеркала", "Станок", "Пианино", "Аудио-система", "Раздевалка"],
+    hourly_price: 8000,
+    event_price_from: 40000,
+    photos: [{ url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1600&q=80", alt_ru: "Репетиционный зал", alt_kk: "Жаттығу залы" }],
+    layout_url: null,
+    is_active: true,
+    sort_order: 30,
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
+  },
+};
+
 async function loadHall(slug: string): Promise<Hall | null> {
   try {
-    return await getOne<Hall>(
+    const row = await getOne<Hall>(
       `SELECT * FROM halls WHERE slug = $1 AND is_active = TRUE`,
       [slug]
     );
-  } catch {
-    return null;
-  }
+    if (row) return row;
+  } catch {}
+  return DEMO_HALLS[slug] ?? null;
 }
 
 async function loadAllHalls(): Promise<Hall[]> {
   try {
-    return await getMany<Hall>(
+    const rows = await getMany<Hall>(
       `SELECT * FROM halls WHERE is_active = TRUE ORDER BY sort_order ASC`
     );
-  } catch {
-    return [];
-  }
+    if (rows.length) return rows;
+  } catch {}
+  return Object.values(DEMO_HALLS);
 }
 
 export async function generateMetadata({
