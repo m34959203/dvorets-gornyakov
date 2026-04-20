@@ -91,7 +91,7 @@ export function formatNewsForInstagram(
     "",
     `Читать: ${url}`,
     "",
-    "#ДворецГорняков #Жезказган #Культура",
+    "#ДворецГорняков #Сатпаев #Культура",
   ].filter((p) => p !== undefined);
   return parts.join("\n").slice(0, 2200);
 }
@@ -112,7 +112,7 @@ export function formatEventForInstagram(
     "",
     `Подробнее: ${url}`,
     "",
-    "#ДворецГорняков #Жезказган #Мероприятие",
+    "#ДворецГорняков #Сатпаев #Мероприятие",
   ]
     .filter((p) => p !== undefined && p !== "")
     .concat([""]);

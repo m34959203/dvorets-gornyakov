@@ -71,8 +71,8 @@ export default function Footer({ locale }: FooterProps) {
             </div>
             <p className="mt-5 text-[14px] leading-[1.7] max-w-[320px]">
               {locale === "kk"
-                ? "1965 жылдан бері Жезқазғанның мәдени орталығы. 60 жылдан астам уақыт бойы біз өнер, салт-дәстүр және адамдарды бір шаңырақ астына жинаймыз."
-                : "Культурный центр Жезказгана с 1965 года. Более 60 лет мы собираем искусство, традиции и людей под одной крышей."}
+                ? "2000 жылдан бері тау-кенші сарайы. 1974 жылдан бері (бұрынғы «Байқоңыр» к/т) біз өнер, салт-дәстүр және адамдарды бір шаңырақ астына жинаймыз."
+                : "Дворец горняков с 2000 года (здание 1974, к-р «Байконур»). "}
             </p>
             <div className="flex gap-2.5 mt-6">
               {(["ig", "fb", "yt", "tg"] as const).map((k) => (
@@ -138,15 +138,15 @@ export default function Footer({ locale }: FooterProps) {
               {locale === "kk" ? "Байланыс" : "Контакты"}
             </h4>
             <FooterLink href={`/${locale}/contacts`}>
-              {locale === "kk" ? "100600, Жезқазған қ." : "100600, г. Жезказган"}
+              {locale === "kk" ? "101300, Сәтбаев қ." : "101300, г. Сатпаев"}
               <br />
               {locale === "kk" ? "Бұқар жырау д-лы, 27" : "пр. Бухар жырау, 27"}
             </FooterLink>
-            <FooterLink href="tel:+77102720000">
-              +7 (7102) 72-00-00 — {locale === "kk" ? "қабылдау" : "приёмная"}
+            <FooterLink href="tel:+77106362330">
+              +7 (71063) 6-23-30 — {locale === "kk" ? "қабылдау" : "приёмная"}
             </FooterLink>
-            <FooterLink href="tel:+77102720101">
-              +7 (7102) 72-01-01 — {locale === "kk" ? "касса" : "касса"}
+            <FooterLink href="tel:+77106362440">
+              +7 (71063) 6-24-40 — {locale === "kk" ? "касса" : "касса"}
             </FooterLink>
             <FooterLink href="mailto:info@dvorets-gornyakov.kz">
               info@dvorets-gornyakov.kz

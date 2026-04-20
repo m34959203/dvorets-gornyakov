@@ -52,7 +52,7 @@ const TG_FALLBACK_NEWS =
 const TG_FALLBACK_EVENT =
   '🎭 <b>{{title_ru}}</b>\n🇰🇿 <b>{{title_kk}}</b>\n\n📅 {{date_ru}}\n📍 {{location}}\n\n<a href="{{url}}">Подробнее / Толығырақ</a>';
 const IG_FALLBACK_NEWS =
-  "📰 {{title_ru}}\n🇰🇿 {{title_kk}}\n\n{{excerpt_ru}}\n\nЧитать: {{url}}\n\n#ДворецГорняков #Жезказган";
+  "📰 {{title_ru}}\n🇰🇿 {{title_kk}}\n\n{{excerpt_ru}}\n\nЧитать: {{url}}\n\n#ДворецГорняков #Сатпаев";
 const IG_FALLBACK_EVENT =
   "🎭 {{title_ru}}\n🇰🇿 {{title_kk}}\n\n📅 {{date_ru}}\n📍 {{location}}\n\nПодробнее: {{url}}\n\n#ДворецГорняков";
 

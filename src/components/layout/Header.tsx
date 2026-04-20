@@ -56,13 +56,13 @@ export default async function Header({ locale }: HeaderProps) {
             </span>
             <span className="hidden sm:inline w-px h-3.5 bg-white/20" />
             <a
-              href="tel:+77102720000"
+              href="tel:+77106362330"
               className="inline-flex items-center gap-1.5 hover:text-[color:var(--ochre-soft)]"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.31 1.85.53 2.81.66A2 2 0 0 1 22 16.92z"/>
               </svg>
-              +7 (7102) 72-00-00
+              +7 (71063) 6-23-30
             </a>
           </div>
         </div>
@@ -93,7 +93,7 @@ export default async function Header({ locale }: HeaderProps) {
                   {locale === "kk" ? "Тау-кенші сарайы" : "Дворец горняков"}
                 </div>
                 <div className="text-[12px] text-[color:var(--muted)] uppercase tracking-[0.06em]">
-                  {locale === "kk" ? "Ш. Ділдебаев · Жезқазған" : "им. Ш. Дильдебаева · Жезказган"}
+                  {locale === "kk" ? "Ш. Ділдебаев · Сәтбаев" : "им. Ш. Дильдебаева · Сатпаев"}
                 </div>
               </div>
             </Link>

@@ -70,8 +70,8 @@ export default async function HallPage({
     maximumAttendeeCapacity: hall.capacity,
     address: {
       "@type": "PostalAddress",
-      streetAddress: locale === "kk" ? "Абай д-лы, 10" : "пр. Абая, 10",
-      addressLocality: "Жезказган",
+      streetAddress: locale === "kk" ? "Абай д-лы, 10" : "пр. К.И. Сатпаева, 106",
+      addressLocality: "Сатпаев",
       addressCountry: "KZ",
     },
   };

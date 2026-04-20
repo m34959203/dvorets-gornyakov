@@ -30,11 +30,11 @@ INSERT INTO social_templates (platform, kind, name, body_ru, body_kk, is_default
    '🎭 <b>{{title_kk}}</b>' || E'\n\n' || '📅 {{date_kk}}' || E'\n' || '📍 {{location}}' || E'\n\n' || '<a href="{{url}}">Толығырақ</a>',
    TRUE),
   ('instagram', 'news', 'Default news',
-   '📰 {{title_ru}}' || E'\n' || '🇰🇿 {{title_kk}}' || E'\n\n' || '{{excerpt_ru}}' || E'\n\n' || 'Читать: {{url}}' || E'\n\n' || '#ДворецГорняков #Жезказган #Культура',
-   '📰 {{title_kk}}' || E'\n\n' || '{{excerpt_kk}}' || E'\n\n' || 'Оқу: {{url}}' || E'\n\n' || '#ДворецГорняков #Жезқазған #Мәдениет',
+   '📰 {{title_ru}}' || E'\n' || '🇰🇿 {{title_kk}}' || E'\n\n' || '{{excerpt_ru}}' || E'\n\n' || 'Читать: {{url}}' || E'\n\n' || '#ДворецГорняков #Сатпаев #Культура',
+   '📰 {{title_kk}}' || E'\n\n' || '{{excerpt_kk}}' || E'\n\n' || 'Оқу: {{url}}' || E'\n\n' || '#ДворецГорняков #Сәтбаев #Мәдениет',
    TRUE),
   ('instagram', 'event', 'Default event',
-   '🎭 {{title_ru}}' || E'\n' || '🇰🇿 {{title_kk}}' || E'\n\n' || '📅 {{date_ru}}' || E'\n' || '📍 {{location}}' || E'\n\n' || 'Подробнее: {{url}}' || E'\n\n' || '#ДворецГорняков #Жезказган #Мероприятие',
-   '🎭 {{title_kk}}' || E'\n\n' || '📅 {{date_kk}}' || E'\n' || '📍 {{location}}' || E'\n\n' || 'Толығырақ: {{url}}' || E'\n\n' || '#ДворецГорняков #Жезқазған',
+   '🎭 {{title_ru}}' || E'\n' || '🇰🇿 {{title_kk}}' || E'\n\n' || '📅 {{date_ru}}' || E'\n' || '📍 {{location}}' || E'\n\n' || 'Подробнее: {{url}}' || E'\n\n' || '#ДворецГорняков #Сатпаев #Мероприятие',
+   '🎭 {{title_kk}}' || E'\n\n' || '📅 {{date_kk}}' || E'\n' || '📍 {{location}}' || E'\n\n' || 'Толығырақ: {{url}}' || E'\n\n' || '#ДворецГорняков #Сәтбаев',
    TRUE)
 ON CONFLICT DO NOTHING;

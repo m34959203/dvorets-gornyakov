@@ -86,7 +86,14 @@ export default async function ContactsPage({
                 </svg>
                 <div>
                   <div className="text-sm text-gray-500">{c.phone}</div>
-                  <div className="font-medium text-gray-900">+7 (7102) 77-77-77</div>
+                  <div className="font-medium text-gray-900">
+                    <a href="tel:+77106362330" className="hover:text-primary">+7 (71063) 6-23-30</a>
+                    <span className="text-xs text-gray-400 ml-2">— {locale === "kk" ? "қабылдау" : "приёмная"}</span>
+                  </div>
+                  <div className="font-medium text-gray-900 mt-1">
+                    <a href="tel:+77106362440" className="hover:text-primary">+7 (71063) 6-24-40</a>
+                    <span className="text-xs text-gray-400 ml-2">— {locale === "kk" ? "касса" : "касса"}</span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -95,7 +102,9 @@ export default async function ContactsPage({
                 </svg>
                 <div>
                   <div className="text-sm text-gray-500">{c.email}</div>
-                  <div className="font-medium text-gray-900">info@dvorets-gornyakov.kz</div>
+                  <div className="font-medium text-gray-900">
+                    <a href="mailto:info@dvorets-satpayev.kz" className="hover:text-primary">info@dvorets-satpayev.kz</a>
+                  </div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -120,9 +129,17 @@ export default async function ContactsPage({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
                 <p className="text-sm">
-                  {locale === "kk" ? "Жезқазған қ., Абай д-лы, 10" : "г. Жезказган, пр. Абая, 10"}
+                  {locale === "kk" ? "101300, Сәтбаев қ., Қ.И. Сәтбаев д-лы, 106" : "101300, г. Сатпаев, пр. К.И. Сатпаева, 106"}
                 </p>
-                <p className="text-xs mt-1 text-gray-400">47.7833, 67.7131</p>
+                <p className="text-xs mt-1 text-gray-400">47.8889, 67.5429</p>
+                <a
+                  href="https://2gis.kz/satpaev"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline mt-2 inline-block"
+                >
+                  {locale === "kk" ? "2GIS-те ашу →" : "Открыть в 2GIS →"}
+                </a>
               </div>
             </div>
           </div>
