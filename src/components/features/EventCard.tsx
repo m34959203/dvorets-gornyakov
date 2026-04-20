@@ -12,7 +12,7 @@ interface Event {
   event_type: string;
   start_date: string;
   location: string;
-  price?: string | null;
+  is_partner?: boolean;
 }
 
 interface EventCardProps {
@@ -53,12 +53,9 @@ export default function EventCard({ event, locale }: EventCardProps) {
     minute: "2-digit",
   });
   const img = event.image_url || FALLBACK_IMG[event.event_type] || FALLBACK_IMG.other;
-  const isFree = event.price === "0" || event.price === "free" || event.price === null || event.price === undefined;
-  const priceLabel = isFree
-    ? locale === "kk"
-      ? "Тегін"
-      : "Бесплатно"
-    : event.price || (locale === "kk" ? "Билет бар" : "Купить");
+  const entryLabel = event.is_partner
+    ? locale === "kk" ? "Серіктестік" : "Партнёрское"
+    : locale === "kk" ? "Тегін" : "Бесплатно";
   const categoryLabel = TYPE_LABELS[event.event_type]?.[locale] || event.event_type;
 
   return (
@@ -92,9 +89,9 @@ export default function EventCard({ event, locale }: EventCardProps) {
           )}
         </div>
         <div className="event-foot">
-          <span className={`event-price ${isFree ? "free" : ""}`}>{priceLabel}</span>
+          <span className={`event-price ${event.is_partner ? "" : "free"}`}>{entryLabel}</span>
           <span className="event-link">
-            {locale === "kk" ? "Билет алу" : "Купить билет"}
+            {locale === "kk" ? "Толығырақ" : "Подробнее"}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14" />
               <path d="m12 5 7 7-7 7" />
