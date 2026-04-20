@@ -112,8 +112,8 @@ export async function PATCH(
 
     const result = await query(
       `UPDATE news
-          SET status=$1,
-              published_at = CASE WHEN $1 = 'published' AND published_at IS NULL THEN NOW() ELSE published_at END
+          SET status=$1::text,
+              published_at = CASE WHEN $1::text = 'published' AND published_at IS NULL THEN NOW() ELSE published_at END
         WHERE id=$2 RETURNING *`,
       [parsed.data.status, id]
     );

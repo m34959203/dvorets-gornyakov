@@ -270,9 +270,28 @@ CRON_SECRET=...
 - Next 16 просит переименовать `src/middleware.ts` → `src/proxy.ts` (deprecation warning).
 - `serverActions` помечен экспериментальным в `next.config.ts` — при переходе на stable API убрать флаг.
 - Cross-origin warning в dev при обращении с `192.168.50.13` — можно добавить `allowedDevOrigins` в next.config.
-- `sitemap.ts` / `robots.ts` — не сгенерированы.
 - OpenGraph-image для hero — через `next/og` когда будут фото из PSD.
 - Тестов нет (unit/e2e). Для v2 — Vitest + pg test-db, E2E формы `/rent/request`.
+
+---
+
+## Deploy-чеклист (prod)
+
+1. **Применить ВСЕ миграции по порядку** — иначе `/api/rent/*` падает в 500:
+   ```bash
+   for f in sql/001_init.sql sql/002_rent.sql sql/003_news_video.sql \
+            sql/004_auto_publish_settings.sql sql/005_club_instructors.sql \
+            sql/006_scheduled_jobs.sql sql/007_social_templates.sql \
+            sql/008_media_extra.sql sql/009_analytics.sql \
+            sql/010_ai_usage.sql sql/011_nav_items.sql sql/012_real_org_data.sql; do
+     docker exec -i dvorets-gornyakov-postgres-1 psql -U dvorets -d dvorets_db < "$f"
+   done
+   ```
+2. Создать админа: `npx tsx scripts/create-admin.ts <email> <password> "<name>"`
+3. Выставить `.env.local`: `JWT_SECRET`, `GEMINI_API_KEY`, `TELEGRAM_BOT_TOKEN/CHANNEL_ID`, `INSTAGRAM_ACCESS_TOKEN/ACCOUNT_ID`, `NEXT_PUBLIC_APP_URL=https://dvorets-gornyakov.kz`.
+4. В `/admin/settings` → «Аналитика» внести GA4 и Я.Метрика ID (иначе Script-теги не инжектятся).
+5. Проверить `/sitemap.xml` и `/robots.txt` — они генерируются автоматически из БД (news/events/clubs/halls).
+6. Cron-тикер стартует автоматически через `instrumentation.ts`. Отключить в demo: `DISABLE_CRON=1`.
 
 ---
 
