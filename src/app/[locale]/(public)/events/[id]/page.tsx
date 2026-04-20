@@ -107,6 +107,15 @@ const DEMO_EVENTS: Record<string, EventRow> = {
   },
 };
 
+const FALLBACK_IMG: Record<string, string> = {
+  concert: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=1600&q=80",
+  exhibition: "https://images.unsplash.com/photo-1577720580479-7d839d829c73?w=1600&q=80",
+  workshop: "https://images.unsplash.com/photo-1472162314594-eca3be56d8f4?w=1600&q=80",
+  festival: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=1600&q=80",
+  competition: "https://images.unsplash.com/photo-1503095396549-807759245b35?w=1600&q=80",
+  other: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=1600&q=80",
+};
+
 const TYPE_LABELS: Record<string, Record<Locale, string>> = {
   concert: { kk: "Концерт", ru: "Концерт" },
   exhibition: { kk: "Көрме", ru: "Выставка" },
@@ -173,30 +182,12 @@ export default async function EventDetailPage({
       </Link>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {event.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={event.image_url}
-            alt={title}
-            className="w-full aspect-video object-cover"
-          />
-        ) : (
-          <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-            <svg
-              className="w-20 h-20 text-primary/30"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-          </div>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={event.image_url || FALLBACK_IMG[event.event_type] || FALLBACK_IMG.other}
+          alt={title}
+          className="w-full aspect-video object-cover"
+        />
 
         <div className="p-6">
           <div className="flex items-start justify-between mb-4 gap-4">
