@@ -20,7 +20,11 @@ type EventRow = {
   image_url: string | null;
 };
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 async function loadEventMeta(id: string): Promise<EventRow | null> {
+  if (!UUID_RE.test(id)) return null;
   try {
     return await getOne<EventRow>(
       `SELECT id, title_kk, title_ru, description_kk, description_ru, image_url
@@ -49,7 +53,10 @@ export async function generateMetadata({
   };
 
   if (!row) {
-    return { title: "Not found" };
+    return {
+      title: `${locale === "kk" ? "Іс-шара" : "Событие"} — ${locale === "kk" ? SITE_NAME_KK : SITE_NAME_RU}`,
+      alternates: { canonical, languages },
+    };
   }
 
   const title = getLocalizedField(row, "title", locale);

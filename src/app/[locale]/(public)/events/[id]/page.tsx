@@ -30,6 +30,7 @@ type EventRow = {
 };
 
 async function loadEvent(id: string): Promise<EventRow | null> {
+  if (!UUID_RE.test(id)) return null;
   try {
     return await getOne<EventRow>(
       `SELECT id, title_kk, title_ru, description_kk, description_ru,
@@ -42,6 +43,69 @@ async function loadEvent(id: string): Promise<EventRow | null> {
     return null;
   }
 }
+
+const DEMO_EVENTS: Record<string, EventRow> = {
+  "1": {
+    id: "1",
+    title_kk: "Наурыз мерекесіне арналған концерт",
+    title_ru: "Симфонический концерт к Наурызу",
+    description_kk:
+      "Көктем мерекесіне арналған мерекелік концерт. Өнер бағытындағы ансамбльдер мен жас солистер қатысады.",
+    description_ru:
+      "Праздничный концерт, посвящённый Наурызу. Выступления творческих коллективов дворца, ансамбля «Арман» и юных солистов.",
+    image_url: null,
+    event_type: "concert",
+    start_date: "2026-04-22T18:00:00+06:00",
+    end_date: null,
+    location: "Главный зал",
+    status: "upcoming",
+  },
+  "2": {
+    id: "2",
+    title_kk: "Қазақ поэзиясы кеші",
+    title_ru: "Вечер казахской поэзии",
+    description_kk:
+      "Шынболат Ділдебаев мұрасына арналған поэзия кеші. Ақындар мен термешілер сөз сөйлейді.",
+    description_ru:
+      "Поэтический вечер, посвящённый наследию Шынболата Дильдебаева. Выступления местных акынов и термеши.",
+    image_url: null,
+    event_type: "other",
+    start_date: "2026-05-05T19:00:00+06:00",
+    end_date: null,
+    location: "Камерный зал",
+    status: "upcoming",
+  },
+  "3": {
+    id: "3",
+    title_kk: "Балалар би шеберханасы",
+    title_ru: "Танцевальный мастер-класс для детей",
+    description_kk:
+      "5–12 жас аралығындағы балаларға арналған тегін би шеберханасы. Заманауи және халық билері.",
+    description_ru:
+      "Бесплатный мастер-класс для детей 5–12 лет. Современные и народные танцы, руководитель — Динара Маратқызы.",
+    image_url: null,
+    event_type: "workshop",
+    start_date: "2026-05-15T14:00:00+06:00",
+    end_date: null,
+    location: "Репетиционный зал",
+    status: "upcoming",
+  },
+  "4": {
+    id: "4",
+    title_kk: "Жас суретшілер көрмесі",
+    title_ru: "Выставка юных художников",
+    description_kk:
+      "Сәтбаев қаласының оқушыларының шығармашылық жұмыстары — сурет, графика, керамика.",
+    description_ru:
+      "Итоговая выставка работ воспитанников изостудии — рисунок, графика, керамика.",
+    image_url: null,
+    event_type: "exhibition",
+    start_date: "2026-06-01T10:00:00+06:00",
+    end_date: "2026-06-14T18:00:00+06:00",
+    location: "Галерея",
+    status: "upcoming",
+  },
+};
 
 const TYPE_LABELS: Record<string, Record<Locale, string>> = {
   concert: { kk: "Концерт", ru: "Концерт" },
@@ -73,11 +137,7 @@ export default async function EventDetailPage({
   const messages = getMessages(locale);
   const t = messages.events;
 
-  if (!UUID_RE.test(id)) {
-    notFound();
-  }
-
-  const event = await loadEvent(id);
+  const event = (await loadEvent(id)) ?? DEMO_EVENTS[id];
   if (!event) {
     notFound();
   }
