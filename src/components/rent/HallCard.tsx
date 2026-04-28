@@ -52,7 +52,7 @@ export default function HallCard({ hall, locale, labels }: Props) {
           <div>
             <div className="text-xs uppercase tracking-wide text-gray-500">{labels.from}</div>
             <div className="text-lg font-bold text-primary">
-              {hall.event_price_from.toLocaleString("ru-RU")} {labels.currency}
+              {locale === "kk" ? "Тегін" : "Бесплатно"}
             </div>
           </div>
           <Link

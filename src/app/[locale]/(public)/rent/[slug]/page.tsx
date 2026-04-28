@@ -22,8 +22,8 @@ const DEMO_HALLS: Record<string, Hall> = {
     capacity: 650,
     equipment_kk: ["Кәсіби дыбыс жүйесі", "Сахналық жарық", "LED-экран", "3 гримёрка", "Wi-Fi", "Кондиционер"],
     equipment_ru: ["Профессиональный звук", "Сценический свет", "LED-экран", "3 гримёрки", "Wi-Fi", "Кондиционер"],
-    hourly_price: 80000,
-    event_price_from: 350000,
+    hourly_price: 0,
+    event_price_from: 0,
     photos: [{ url: "https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=1600&q=80", alt_ru: "Большой зал", alt_kk: "Үлкен зал" }],
     layout_url: null,
     is_active: true,
@@ -43,8 +43,8 @@ const DEMO_HALLS: Record<string, Hall> = {
     capacity: 120,
     equipment_kk: ["Акустикалық жүйе", "Проектор", "Экран", "Wi-Fi", "Сахна"],
     equipment_ru: ["Акустическая система", "Проектор", "Экран", "Wi-Fi", "Сцена"],
-    hourly_price: 35000,
-    event_price_from: 150000,
+    hourly_price: 0,
+    event_price_from: 0,
     photos: [{ url: "https://images.unsplash.com/photo-1519683109079-d5f539e1542f?w=1600&q=80", alt_ru: "Камерный зал", alt_kk: "Камералық зал" }],
     layout_url: null,
     is_active: true,
@@ -64,8 +64,8 @@ const DEMO_HALLS: Record<string, Hall> = {
     capacity: 40,
     equipment_kk: ["Айналар", "Станок", "Пианино", "Дыбыс жүйесі", "Киім ауыстыру бөлмесі"],
     equipment_ru: ["Зеркала", "Станок", "Пианино", "Аудио-система", "Раздевалка"],
-    hourly_price: 8000,
-    event_price_from: 40000,
+    hourly_price: 0,
+    event_price_from: 0,
     photos: [{ url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1600&q=80", alt_ru: "Репетиционный зал", alt_kk: "Жаттығу залы" }],
     layout_url: null,
     is_active: true,
@@ -168,16 +168,9 @@ export default async function HallPage({
             <span className="rounded-full bg-white/15 px-3 py-1">
               {String(t.detailCapacity)}: {hall.capacity}
             </span>
-            {hall.hourly_price > 0 && (
-              <span className="rounded-full bg-white/15 px-3 py-1">
-                {String(t.detailHourly)}: {hall.hourly_price.toLocaleString("ru-RU")} ₸
-              </span>
-            )}
-            {hall.event_price_from > 0 && (
-              <span className="rounded-full bg-accent/90 px-3 py-1 font-semibold text-primary-dark">
-                {String(t.detailEvent)}: {String(t.hallFrom)} {hall.event_price_from.toLocaleString("ru-RU")} ₸
-              </span>
-            )}
+            <span className="rounded-full bg-accent/90 px-3 py-1 font-semibold text-primary-dark">
+              {locale === "kk" ? "Тегін" : "Бесплатно"}
+            </span>
           </div>
         </div>
       </section>
@@ -226,7 +219,7 @@ export default async function HallPage({
                 {String(t.detailEvent)}
               </div>
               <div className="mt-1 text-3xl font-bold">
-                {String(t.hallFrom)} {hall.event_price_from.toLocaleString("ru-RU")} ₸
+                {locale === "kk" ? "Тегін" : "Бесплатно"}
               </div>
               <a href="#book"
                  className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-primary-dark transition hover:bg-accent-light">

@@ -109,9 +109,7 @@ async function load(locale: Locale) {
 
 function mapHallForCard(h: HallRow, locale: Locale) {
   const features = locale === "kk" ? h.equipment_kk || [] : h.equipment_ru || [];
-  const price = h.event_price_from
-    ? `${locale === "kk" ? "бастап" : "от"} ${h.event_price_from.toLocaleString("ru-RU")} ₸`
-    : "";
+  const price = locale === "kk" ? "Тегін" : "Бесплатно";
   return {
     id: h.id,
     slug: h.slug,
@@ -151,16 +149,17 @@ function getDemoNews(locale: Locale): NewsRow[] {
 }
 
 function getDemoHalls(locale: Locale) {
+  const free = locale === "kk" ? "Тегін" : "Бесплатно";
   return locale === "kk"
     ? [
-        { id: "grand", slug: "grand", name: "Негізгі концерттік зал", seats: 650, description: "Оркестрге, әшекейлі қойылымдарға және ірі мерекелік концерттерге арналған классикалық зал.", features: ["Кәсіби дыбыс пен жарық", "Сахна 12×8 м", "Екі ярус балкон", "Киім ілгіш 400 орынға"], price: "250 000 ₸-ден / күн", image: "https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=1400&q=80" },
-        { id: "chamber", slug: "chamber", name: "Камералық зал", seats: 120, description: "Камералық концерттерге, поэзия кештеріне және дөңгелек үстелдерге арналған.", features: ["Акустикалық құрылым", "Stage monitoring", "Конференц-режим", "Киім ілгіш 80 орынға"], price: "80 000 ₸-ден / күн", image: "https://images.unsplash.com/photo-1519683109079-d5f539e1542f?w=1400&q=80" },
-        { id: "rehearsal", slug: "rehearsal", name: "Репетиция залы", seats: 40, description: "Репетицияларға, мастер-кластарға және жас ұжымдардың жұмысына арналған.", features: ["Кәсіби айналар", "Балет станоктары", "Линолеум жабын", "Киім ауыстыру бөлмесі"], price: "15 000 ₸-ден / күн", image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1400&q=80" },
+        { id: "grand", slug: "grand", name: "Негізгі концерттік зал", seats: 650, description: "Оркестрге, әшекейлі қойылымдарға және ірі мерекелік концерттерге арналған классикалық зал.", features: ["Кәсіби дыбыс пен жарық", "Сахна 12×8 м", "Екі ярус балкон", "Киім ілгіш 400 орынға"], price: free, image: "https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=1400&q=80" },
+        { id: "chamber", slug: "chamber", name: "Камералық зал", seats: 120, description: "Камералық концерттерге, поэзия кештеріне және дөңгелек үстелдерге арналған.", features: ["Акустикалық құрылым", "Stage monitoring", "Конференц-режим", "Киім ілгіш 80 орынға"], price: free, image: "https://images.unsplash.com/photo-1519683109079-d5f539e1542f?w=1400&q=80" },
+        { id: "rehearsal", slug: "rehearsal", name: "Репетиция залы", seats: 40, description: "Репетицияларға, мастер-кластарға және жас ұжымдардың жұмысына арналған.", features: ["Кәсіби айналар", "Балет станоктары", "Линолеум жабын", "Киім ауыстыру бөлмесі"], price: free, image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1400&q=80" },
       ]
     : [
-        { id: "grand", slug: "grand", name: "Главный концертный зал", seats: 650, description: "Классический зал для симфонических концертов, балета и масштабных торжественных событий.", features: ["Профессиональный звук и свет", "Сцена 12×8 м", "Два яруса балконов", "Гардероб на 400 мест"], price: "от 250 000 ₸ / день", image: "https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=1400&q=80" },
-        { id: "chamber", slug: "chamber", name: "Камерный зал", seats: 120, description: "Камерные концерты, поэтические вечера, круглые столы и мастер-классы.", features: ["Акустическая отделка", "Stage monitoring", "Режим конференции", "Гардероб на 80 мест"], price: "от 80 000 ₸ / день", image: "https://images.unsplash.com/photo-1519683109079-d5f539e1542f?w=1400&q=80" },
-        { id: "rehearsal", slug: "rehearsal", name: "Репетиционный зал", seats: 40, description: "Репетиции, мастер-классы и занятия молодых коллективов.", features: ["Профессиональные зеркала", "Балетные станки", "Специальный линолеум", "Гримёрная"], price: "от 15 000 ₸ / день", image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1400&q=80" },
+        { id: "grand", slug: "grand", name: "Главный концертный зал", seats: 650, description: "Классический зал для симфонических концертов, балета и масштабных торжественных событий.", features: ["Профессиональный звук и свет", "Сцена 12×8 м", "Два яруса балконов", "Гардероб на 400 мест"], price: free, image: "https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=1400&q=80" },
+        { id: "chamber", slug: "chamber", name: "Камерный зал", seats: 120, description: "Камерные концерты, поэтические вечера, круглые столы и мастер-классы.", features: ["Акустическая отделка", "Stage monitoring", "Режим конференции", "Гардероб на 80 мест"], price: free, image: "https://images.unsplash.com/photo-1519683109079-d5f539e1542f?w=1400&q=80" },
+        { id: "rehearsal", slug: "rehearsal", name: "Репетиционный зал", seats: 40, description: "Репетиции, мастер-классы и занятия молодых коллективов.", features: ["Профессиональные зеркала", "Балетные станки", "Специальный линолеум", "Гримёрная"], price: free, image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1400&q=80" },
       ];
 }
 
