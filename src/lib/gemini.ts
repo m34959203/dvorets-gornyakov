@@ -43,6 +43,20 @@ export async function chatWithGemini(
   const purpose = options.purpose ?? "other";
   const userId = options.userId ?? null;
 
+  // Kill-switch — env-флаг для мгновенного отключения AI без передеплоя.
+  // Включается при подозрении на T1 (утечка ключа) или для экономии trial credit.
+  if (process.env.AI_DISABLED === "1") {
+    await logGeneration({
+      model: GEMINI_MODEL,
+      purpose,
+      userId,
+      durationMs: 0,
+      success: false,
+      error: "ai_disabled",
+    });
+    return UNAVAILABLE_REPLY;
+  }
+
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     // No key at all — log as failure, do not hit network
