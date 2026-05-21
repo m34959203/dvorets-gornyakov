@@ -103,7 +103,7 @@ export default async function ContactsPage({
                 <div>
                   <div className="text-sm text-gray-500">{c.email}</div>
                   <div className="font-medium text-gray-900">
-                    <a href="mailto:info@dvorets-satpayev.kz" className="hover:text-primary">info@dvorets-satpayev.kz</a>
+                    <a href="mailto:info@dvorets-gornyakov.kz" className="hover:text-primary">info@dvorets-gornyakov.kz</a>
                   </div>
                 </div>
               </div>
@@ -129,7 +129,7 @@ export default async function ContactsPage({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
                 <p className="text-sm">
-                  {locale === "kk" ? "101300, Сәтбаев қ., Қ.И. Сәтбаев д-лы, 106" : "101300, г. Сатпаев, пр. К.И. Сатпаева, 106"}
+                  {locale === "kk" ? "101300, Ұлытау обл., Сәтбаев қ., Қ.И. Сәтбаев д-лы, 106" : "101300, область Ұлытау, г. Сатпаев, пр. К.И. Сатпаева, 106"}
                 </p>
                 <p className="text-xs mt-1 text-gray-400">47.8889, 67.5429</p>
                 <a

@@ -34,23 +34,34 @@ const MONTH_ABBR: Record<Locale, string[]> = {
   ru: ["ЯНВ", "ФЕВ", "МАР", "АПР", "МАЙ", "ИЮН", "ИЮЛ", "АВГ", "СЕН", "ОКТ", "НОЯ", "ДЕК"],
 };
 
+// Реальные фото Дворца (источник: КГКП «Центр культуры и творчества им. Ш. Дильдебаева»).
 const FALLBACK_IMG: Record<string, string> = {
-  concert: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=1200&q=80",
-  exhibition: "https://images.unsplash.com/photo-1577720580479-7d839d829c73?w=1200&q=80",
-  workshop: "https://images.unsplash.com/photo-1472162314594-eca3be56d8f4?w=1200&q=80",
-  festival: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=1200&q=80",
-  competition: "https://images.unsplash.com/photo-1503095396549-807759245b35?w=1200&q=80",
-  other: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=1200&q=80",
+  concert: "/photos/dvorets-07.webp",
+  exhibition: "/photos/dvorets-06.webp",
+  workshop: "/photos/dvorets-11.webp",
+  festival: "/photos/dvorets-03.webp",
+  competition: "/photos/dvorets-04.webp",
+  other: "/photos/dvorets-09-1.webp",
 };
 
 export default function EventCard({ event, locale }: EventCardProps) {
   const title = getLocalizedField(event, "title", locale);
   const d = new Date(event.start_date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = MONTH_ABBR[locale][d.getMonth()] || "";
+  // Все даты/время приводим к Asia/Almaty: в UTC-контейнере badge и время
+  // съезжают (вечерние события показывают чужой день и час «04:00»).
+  const dateParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Almaty",
+    day: "2-digit",
+    month: "numeric",
+  }).formatToParts(d);
+  const day = dateParts.find((p) => p.type === "day")?.value ?? "";
+  const monthIdx =
+    Number(dateParts.find((p) => p.type === "month")?.value ?? "1") - 1;
+  const month = MONTH_ABBR[locale][monthIdx] || "";
   const time = d.toLocaleTimeString(locale === "kk" ? "kk-KZ" : "ru-RU", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Asia/Almaty",
   });
   const img = event.image_url || FALLBACK_IMG[event.event_type] || FALLBACK_IMG.other;
   const entryLabel = event.is_partner
