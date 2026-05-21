@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import { getLocalizedField } from "@/lib/i18n";
 import { formatDate, truncate } from "@/lib/utils";
+import { localizeNewsCategory } from "@/lib/news-category";
 
 interface NewsItem {
   id: string;
@@ -22,7 +23,8 @@ interface NewsCardProps {
   locale: Locale;
 }
 
-const FALLBACK_IMG = "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1200&q=80";
+// Реальное фото Дворца (источник: КГКП «Центр культуры и творчества им. Ш. Дильдебаева»).
+const FALLBACK_IMG = "/photos/dvorets-12.webp";
 
 export default function NewsCard({ news, locale }: NewsCardProps) {
   const title = getLocalizedField(news, "title", locale);
@@ -44,7 +46,7 @@ export default function NewsCard({ news, locale }: NewsCardProps) {
       </div>
       <div className="news-body">
         <div className="news-meta">
-          {news.category && <span className="badge-soft">{news.category}</span>}
+          {news.category && <span className="badge-soft">{localizeNewsCategory(news.category, locale)}</span>}
           {news.published_at && <span className="news-date">{formatDate(news.published_at, locale)}</span>}
         </div>
         <h3 className="news-title line-clamp-2">{title}</h3>

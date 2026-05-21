@@ -17,17 +17,24 @@ export interface ClientNavItem {
 interface HeaderClientProps {
   locale: Locale;
   navItems: ClientNavItem[];
-  children?: ReactNode; // language switcher slot
+  children?: ReactNode;
+  overlay?: boolean;
 }
 
-export default function HeaderClient({ locale, navItems, children }: HeaderClientProps) {
+export default function HeaderClient({ locale, navItems, children, overlay = false }: HeaderClientProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
+  const linkColor = overlay ? "rgba(247,241,230,0.92)" : "var(--text)";
+  const linkHover = overlay ? "var(--ochre)" : "var(--emerald)";
+
   return (
     <>
-      {/* Desktop Navigation */}
-      <nav className="hidden lg:flex items-center gap-1 ml-auto">
+      {/* Desktop Navigation — centered */}
+      <nav
+        className="hidden lg:flex items-center"
+        style={{ gap: 28, margin: "0 auto" }}
+      >
         {navItems.map((item) => {
           const hasChildren = item.children && item.children.length > 0;
           return (
@@ -36,33 +43,52 @@ export default function HeaderClient({ locale, navItems, children }: HeaderClien
               className="relative"
               onMouseEnter={() => hasChildren && setOpenDropdown(item.id)}
               onMouseLeave={() => hasChildren && setOpenDropdown((v) => (v === item.id ? null : v))}
+              style={{ position: "relative" }}
             >
               <Link
                 href={item.href}
                 target={item.target}
                 rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
                 className={cn(
-                  "px-3.5 py-2.5 text-[14.5px] font-medium rounded-[10px] transition-colors inline-flex items-center gap-1",
-                  "text-[color:var(--ink-2)] hover:bg-[color:var(--cream-2)] hover:text-[color:var(--navy)]"
+                  "etno-nav-link",
+                  "inline-flex items-center gap-1 font-medium"
                 )}
+                style={{
+                  color: linkColor,
+                  fontSize: 13.5,
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  padding: "6px 0",
+                  transition: "color .15s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = linkHover)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = linkColor)}
               >
                 {item.label}
                 {hasChildren && (
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.4" />
                   </svg>
                 )}
               </Link>
               {hasChildren && openDropdown === item.id && (
-                <div className="absolute left-0 top-full pt-2 z-50">
-                  <div className="min-w-[200px] rounded-lg bg-white shadow-lg ring-1 ring-[color:var(--line)] py-1">
+                <div className="absolute left-0 top-full pt-3 z-50">
+                  <div
+                    className="min-w-[220px] rounded-lg py-2"
+                    style={{
+                      background: "#fff",
+                      border: "1px solid var(--line)",
+                      boxShadow: "var(--shadow-md)",
+                    }}
+                  >
                     {item.children!.map((c) => (
                       <Link
                         key={c.id}
                         href={c.href}
                         target={c.target}
                         rel={c.target === "_blank" ? "noopener noreferrer" : undefined}
-                        className="block px-4 py-2 text-sm text-[color:var(--ink-2)] hover:bg-[color:var(--cream-2)] hover:text-[color:var(--navy)]"
+                        className="block px-4 py-2.5 text-sm"
+                        style={{ color: "var(--text)" }}
                       >
                         {c.label}
                       </Link>
@@ -76,17 +102,36 @@ export default function HeaderClient({ locale, navItems, children }: HeaderClien
       </nav>
 
       {/* Right section */}
-      <div className="flex items-center gap-3 ml-auto lg:ml-0">
+      <div className="flex items-center gap-3" style={{ marginLeft: "auto" }}>
         {children}
         {/* Mobile menu button */}
         <button
           onClick={() => setMobileOpen(true)}
-          className="lg:hidden p-2 rounded-lg text-[color:var(--ink-2)] hover:bg-[color:var(--cream-2)]"
+          className="lg:hidden"
           aria-label="Open menu"
+          style={{
+            width: 36,
+            height: 36,
+            border: `1px solid ${overlay ? "rgba(247,241,230,0.4)" : "var(--line)"}`,
+            borderRadius: 10,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 4,
+            background: "transparent",
+          }}
         >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              style={{
+                width: 16,
+                height: 1.5,
+                background: overlay ? "var(--text-light)" : "var(--text)",
+              }}
+            />
+          ))}
         </button>
       </div>
 

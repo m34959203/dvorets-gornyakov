@@ -1,5 +1,45 @@
 import { type Locale } from "./i18n";
 
+/** Часовой пояс учреждения. Контейнер живёт в UTC, поэтому все «гражданские»
+ *  компоненты дат событий нужно извлекать в этом поясе, иначе вечерние события
+ *  показывают чужой день и время «04:00». */
+export const TIMEZONE = "Asia/Almaty";
+
+const WEEKDAY_MON0: Record<string, number> = {
+  Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6,
+};
+
+/** Компоненты даты в Asia/Almaty: day, month (0-indexed), year, weekday (0=Пн), hour, minute. */
+export function almatyParts(date: string | Date): {
+  day: number;
+  month: number;
+  year: number;
+  weekday: number;
+  hour: number;
+  minute: number;
+} {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: TIMEZONE,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    weekday: "short",
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return {
+    day: Number(get("day")),
+    month: Number(get("month")) - 1,
+    year: Number(get("year")),
+    weekday: WEEKDAY_MON0[get("weekday")] ?? 0,
+    hour: Number(get("hour")),
+    minute: Number(get("minute")),
+  };
+}
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()

@@ -1,13 +1,56 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { isValidLocale, type Locale, getMessages } from "@/lib/i18n";
+import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
-import EventCalendar from "@/components/features/EventCalendar";
+import EtnoHeroStrip from "@/components/features/EtnoHeroStrip";
+import EventsCatalog, { type CatalogItem } from "@/components/features/EventsCatalog";
 
 export const dynamic = "force-dynamic";
 
 const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
 const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
+
+const MONTHS_KK = ["қаң.", "ақп.", "наурыз", "сәуір", "мамыр", "маусым", "шілде", "тамыз", "қыр.", "қаз.", "қар.", "жел."];
+const MONTHS_RU = ["янв.", "фев.", "марта", "апр.", "мая", "июн.", "июл.", "авг.", "сен.", "окт.", "ноя.", "дек."];
+const MONTHS_KK_FULL = ["қаңтар", "ақпан", "наурыз", "сәуір", "мамыр", "маусым", "шілде", "тамыз", "қыркүйек", "қазан", "қараша", "желтоқсан"];
+const MONTHS_RU_FULL = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
+
+function buildKicker(events: { start_date: string }[], locale: Locale): string {
+  if (!events.length) {
+    const now = new Date();
+    const monthsFull = locale === "kk" ? MONTHS_KK_FULL : MONTHS_RU_FULL;
+    return `${(locale === "kk" ? "Афиша · " : "Афиша · ")}${capitalize(monthsFull[now.getMonth()])} ${now.getFullYear()}`;
+  }
+  const dates = events.map((e) => new Date(e.start_date));
+  const min = dates.reduce((a, b) => (a < b ? a : b));
+  const max = dates.reduce((a, b) => (a > b ? a : b));
+  const monthsFull = locale === "kk" ? MONTHS_KK_FULL : MONTHS_RU_FULL;
+  const minM = capitalize(monthsFull[min.getMonth()]);
+  const maxM = capitalize(monthsFull[max.getMonth()]);
+  const year = max.getFullYear();
+  const range = min.getMonth() === max.getMonth() ? minM : `${minM} — ${maxM}`;
+  return `${locale === "kk" ? "Афиша · " : "Афиша · "}${range} ${year}`;
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+const TYPE_TO_CAT_KK: Record<string, string> = {
+  concert: "Концерт",
+  theater: "Театр",
+  workshop: "Шеберлік",
+  exhibition: "Көрме",
+  festival: "Фестиваль",
+  other: "Басқа",
+};
+const TYPE_TO_CAT_RU: Record<string, string> = {
+  concert: "Концерт",
+  theater: "Театр",
+  workshop: "Мастер-класс",
+  exhibition: "Выставка",
+  festival: "Фестиваль",
+  other: "Прочее",
+};
 
 function getBaseUrl(): string {
   const env = process.env.NEXT_PUBLIC_APP_URL;
@@ -25,22 +68,17 @@ export async function generateMetadata({
   const title =
     locale === "kk"
       ? `Іс-шаралар — ${SITE_NAME_KK}`
-      : `Мероприятия — ${SITE_NAME_RU}`;
+      : `Афиша — ${SITE_NAME_RU}`;
   const description =
     locale === "kk"
-      ? "Концерттер, көрмелер, шеберханалар мен фестивальдер — Ш. Ділдебаев атындағы тау-кенші сарайындағы жақын арадағы іс-шаралар."
-      : "Концерты, выставки, мастер-классы и фестивали — ближайшие мероприятия Дворца горняков им. Ш. Дільдебаева.";
+      ? "Концерттер, спектакльдер, шеберханалар мен фестивальдер афишасы — Сатпаев қаласы."
+      : "Афиша концертов, спектаклей, мастер-классов и фестивалей — г. Сатпаев.";
   const baseUrl = getBaseUrl();
   const canonical = `${baseUrl}/${locale}/events`;
   return {
     title,
     description,
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      images: [],
-    },
+    openGraph: { title, description, type: "website", images: [] },
     alternates: {
       canonical,
       languages: {
@@ -51,7 +89,7 @@ export async function generateMetadata({
   };
 }
 
-type EventRow = {
+interface EventRow {
   id: string;
   title_kk: string;
   title_ru: string;
@@ -61,53 +99,21 @@ type EventRow = {
   event_type: string;
   start_date: string;
   location: string;
-};
+}
 
 const demoEvents: EventRow[] = [
-  {
-    id: "11111111-1111-1111-1111-111111111111",
-    title_kk: "Наурыз мерекесіне арналған концерт",
-    title_ru: "Концерт к празднику Наурыз",
-    description_kk: "Наурыз мейрамына арналған мерекелік концерт",
-    description_ru: "Праздничный концерт, посвящённый празднику Наурыз",
-    image_url: null,
-    event_type: "concert",
-    start_date: "2026-03-22T18:00:00Z",
-    location: "Негізгі зал",
-  },
-  {
-    id: "22222222-2222-2222-2222-222222222222",
-    title_kk: "Балаларға арналған би шеберханасы",
-    title_ru: "Танцевальный мастер-класс для детей",
-    description_kk: "Балаларға арналған тегін би шеберханасы",
-    description_ru: "Бесплатный танцевальный мастер-класс для детей",
-    image_url: null,
-    event_type: "workshop",
-    start_date: "2026-04-15T14:00:00Z",
-    location: "Хореография залы",
-  },
-  {
-    id: "33333333-3333-3333-3333-333333333333",
-    title_kk: "Жас суретшілер көрмесі",
-    title_ru: "Выставка юных художников",
-    description_kk: "Жас суретшілердің шығармашылық көрмесі",
-    description_ru: "Творческая выставка юных художников",
-    image_url: null,
-    event_type: "exhibition",
-    start_date: "2026-05-01T10:00:00Z",
-    location: "Галерея",
-  },
-  {
-    id: "44444444-4444-4444-4444-444444444444",
-    title_kk: "Жас орындаушылар фестивалі",
-    title_ru: "Фестиваль юных исполнителей",
-    description_kk: "Жас орындаушылардың шығармашылық фестивалі",
-    description_ru: "Творческий фестиваль юных исполнителей",
-    image_url: null,
-    event_type: "festival",
-    start_date: "2026-06-01T11:00:00Z",
-    location: "Концерт залы",
-  },
+  { id: "e1", title_kk: "Концерт «Көктем әуені»", title_ru: "Концерт «Мелодии весны»", description_kk: "", description_ru: "", image_url: null, event_type: "concert", start_date: "2026-03-12T19:00:00Z", location: "Үлкен зал" },
+  { id: "e2", title_kk: "«Тұмар» хореографиялық қойылым", title_ru: "Хореографическая постановка «Тумар»", description_kk: "", description_ru: "", image_url: null, event_type: "concert", start_date: "2026-03-15T18:00:00Z", location: "Үлкен зал" },
+  { id: "e3", title_kk: "«Абай жолы» спектаклі", title_ru: "Спектакль «Путь Абая»", description_kk: "", description_ru: "", image_url: null, event_type: "theater", start_date: "2026-03-16T18:00:00Z", location: "Үлкен зал" },
+  { id: "e4", title_kk: "Қыш илеу шеберлік сабағы", title_ru: "Мастер-класс по гончарному делу", description_kk: "", description_ru: "", image_url: null, event_type: "workshop", start_date: "2026-03-17T11:00:00Z", location: "Студия №3" },
+  { id: "e5", title_kk: "Айтыс — Арқа айтысы", title_ru: "Айтыс — состязание акынов", description_kk: "", description_ru: "", image_url: null, event_type: "concert", start_date: "2026-03-19T18:30:00Z", location: "Үлкен зал" },
+  { id: "e6", title_kk: "«Менің Сатпаев» сурет көрмесі", title_ru: "Выставка «Мой Сатпаев»", description_kk: "", description_ru: "", image_url: null, event_type: "exhibition", start_date: "2026-03-20T14:00:00Z", location: "Фойе" },
+  { id: "e7", title_kk: "«Наурыз думан» — қала концерті", title_ru: "Городской концерт «Наурыз»", description_kk: "", description_ru: "", image_url: null, event_type: "concert", start_date: "2026-03-22T18:00:00Z", location: "Үлкен зал" },
+  { id: "e8", title_kk: "Балалар театры «Қарлығаш»", title_ru: "Детский театр «Карлыгаш»", description_kk: "", description_ru: "", image_url: null, event_type: "theater", start_date: "2026-03-24T12:00:00Z", location: "Камералық" },
+  { id: "e9", title_kk: "Ою-өрнек шеберлік сабағы", title_ru: "Мастер-класс по орнаменту", description_kk: "", description_ru: "", image_url: null, event_type: "workshop", start_date: "2026-03-25T15:00:00Z", location: "Студия №2" },
+  { id: "e10", title_kk: "«Қара жорға» этно-кеш", title_ru: "Этно-вечер «Қара жорға»", description_kk: "", description_ru: "", image_url: null, event_type: "concert", start_date: "2026-03-28T19:00:00Z", location: "Үлкен зал" },
+  { id: "e11", title_kk: "Жас суретшілер фестивалі", title_ru: "Фестиваль юных художников", description_kk: "", description_ru: "", image_url: null, event_type: "exhibition", start_date: "2026-03-30T11:00:00Z", location: "Фойе" },
+  { id: "e12", title_kk: "Көктем фестивалі — гала", title_ru: "Гала-концерт фестиваля «Весна»", description_kk: "", description_ru: "", image_url: null, event_type: "festival", start_date: "2026-04-05T19:00:00Z", location: "Үлкен зал" },
 ];
 
 async function loadEvents(): Promise<EventRow[]> {
@@ -123,96 +129,74 @@ async function loadEvents(): Promise<EventRow[]> {
         ORDER BY start_date ASC
         LIMIT 60`
     );
-    if (!rows.length) {
-      return demoEvents;
-    }
-    return rows;
+    return rows.length ? rows : demoEvents;
   } catch {
     return demoEvents;
   }
 }
 
-const DATE_PARAM_RE = /^\d{4}-\d{2}-\d{2}$/;
-
-function toAlmatyDateString(iso: string): string {
-  // Convert an ISO timestamp to its YYYY-MM-DD in Asia/Almaty
-  const d = new Date(iso);
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Almaty",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(d);
-  const y = parts.find((p) => p.type === "year")?.value ?? "1970";
-  const m = parts.find((p) => p.type === "month")?.value ?? "01";
-  const day = parts.find((p) => p.type === "day")?.value ?? "01";
-  return `${y}-${m}-${day}`;
-}
-
 export default async function EventsPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale: localeParam } = await params;
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
-  const messages = getMessages(locale);
+  const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
-  const sp = await searchParams;
-  const dateRaw = sp?.date;
-  const dateStr =
-    typeof dateRaw === "string" && DATE_PARAM_RE.test(dateRaw) ? dateRaw : null;
+  const events = await loadEvents();
+  const months = locale === "kk" ? MONTHS_KK : MONTHS_RU;
+  const typeMap = locale === "kk" ? TYPE_TO_CAT_KK : TYPE_TO_CAT_RU;
 
-  const allEvents = await loadEvents();
+  const items: CatalogItem[] = events.map((e) => {
+    const d = new Date(e.start_date);
+    // Asia/Almaty, иначе в UTC-контейнере дата и время съезжают (час «04:00»).
+    const dp = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Almaty",
+      day: "numeric",
+      month: "numeric",
+    }).formatToParts(d);
+    const dayNum = dp.find((p) => p.type === "day")?.value ?? "";
+    const monthIdx = Number(dp.find((p) => p.type === "month")?.value ?? "1") - 1;
+    return {
+      title: getLocalizedField(e as unknown as Record<string, unknown>, "title", locale),
+      date: `${dayNum} ${months[monthIdx]}`,
+      time: d.toLocaleTimeString(locale === "kk" ? "kk-KZ" : "ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Asia/Almaty",
+      }),
+      hall: e.location,
+      price: T("Тегін", "Бесплатно"),
+      free: true,
+      cat: typeMap[e.event_type] ?? typeMap.other,
+      href: `/${locale}/events/${e.id}`,
+    };
+  });
 
-  const events = dateStr
-    ? allEvents.filter((e) => toAlmatyDateString(e.start_date) === dateStr)
-    : allEvents;
-
-  const dateLabel = dateStr
-    ? new Date(dateStr + "T00:00:00").toLocaleDateString(
-        locale === "kk" ? "kk-KZ" : "ru-RU",
-        { day: "numeric", month: "long", year: "numeric" }
-      )
-    : null;
-
-  const filterLabel = locale === "kk" ? "Күні бойынша сүзгі" : "Фильтр по дате";
-  const resetLabel = locale === "kk" ? "Сүзгіні тазарту" : "Сбросить фильтр";
+  // Фильтр-категории — только те, что реально присутствуют в данных
+  const presentCats = Array.from(new Set(items.map((i) => i.cat)));
+  const orderedCats = [
+    T("Барлығы", "Все"),
+    ...["Концерт", "Театр", T("Шеберлік", "Мастер-класс"), T("Көрме", "Выставка"), "Фестиваль", T("Басқа", "Прочее")].filter(
+      (c) => presentCats.includes(c)
+    ),
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">{messages.events.title}</h1>
-
-      {dateStr && (
-        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
-          <span className="text-sm text-gray-700">
-            <span className="font-medium">{filterLabel}:</span> {dateLabel}
-          </span>
-          <Link
-            href={`/${locale}/events`}
-            className="ml-auto inline-flex items-center gap-1 text-sm text-primary hover:text-primary-dark"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-            {resetLabel}
-          </Link>
-        </div>
-      )}
-
-      <EventCalendar locale={locale} initialEvents={events} />
-    </div>
+    <>
+      <EtnoHeroStrip
+        kicker={buildKicker(events, locale)}
+        title={
+          <>
+            {T("Барлық ", "Все ")}
+            <span style={{ color: "var(--emerald)" }}>
+              {T("іс-шаралар", "события")}
+            </span>
+          </>
+        }
+      />
+      <EventsCatalog locale={locale} items={items} cats={orderedCats} perPage={12} />
+    </>
   );
 }

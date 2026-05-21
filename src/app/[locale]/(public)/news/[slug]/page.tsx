@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isValidLocale, type Locale, getMessages, getLocalizedField } from "@/lib/i18n";
 import { getOne } from "@/lib/db";
+import { localizeNewsCategory } from "@/lib/news-category";
 
 export const dynamic = "force-dynamic";
 
@@ -211,7 +212,7 @@ export default async function NewsArticlePage({
             <time>{dateLabel}</time>
             {category && (
               <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs">
-                {category}
+                {localizeNewsCategory(category, locale)}
               </span>
             )}
           </div>

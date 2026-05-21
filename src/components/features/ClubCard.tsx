@@ -30,15 +30,16 @@ const DIRECTION_LABELS: Record<string, Record<Locale, string>> = {
   general: { kk: "Жалпы", ru: "Общее" },
 };
 
+// Реальные фото Дворца (источник: КГКП «Центр культуры и творчества им. Ш. Дильдебаева»).
 const FALLBACK_IMG: Record<string, string> = {
-  vocal: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80",
-  dance: "https://images.unsplash.com/photo-1535525153412-5a42439a210d?w=1200&q=80",
-  art: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1200&q=80",
-  theater: "https://images.unsplash.com/photo-1503095396549-807759245b35?w=1200&q=80",
-  music: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=1200&q=80",
-  craft: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=1200&q=80",
-  sport: "https://images.unsplash.com/photo-1574267432553-4b4628081c31?w=1200&q=80",
-  general: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200&q=80",
+  vocal: "/photos/dvorets-05.webp",
+  dance: "/photos/dvorets-11.webp",
+  art: "/photos/dvorets-13.webp",
+  theater: "/photos/dvorets-09-1.webp",
+  music: "/photos/dvorets-04.webp",
+  craft: "/photos/dvorets-08.webp",
+  sport: "/photos/dvorets-10.webp",
+  general: "/photos/dvorets-01.webp",
 };
 
 export default function ClubCard({ club, locale }: ClubCardProps) {

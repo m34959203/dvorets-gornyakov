@@ -305,6 +305,98 @@ CRON_SECRET=...
 | `568be05` | feat(admin): полноценная админ-панель |
 | `b9732ec` | docs: аудит ТЗ 88% |
 | (uncommitted 2026-04-19) | 6 новых модулей из technokod: media/analytics/ai-usage/scheduler/social-templates/navigation |
+| (uncommitted 2026-05-05) | Этно-модерн редизайн (Claude Design): палитра/шрифты + новая главная + каталог афиш |
+
+---
+
+## 2026-05-05 — Этно-модерн редизайн (Claude Design)
+
+Получен handoff bundle от Claude Design (`Дворец горняков Сатпаев — этно-модерн.html`, 6 экранов на 1440 + 375). Имплементировано:
+
+### Палитра + шрифты (`src/app/globals.css`, `src/lib/fonts.ts`)
+- **Новые токены**: `--bg-cream` `#f7f1e6`, `--emerald` `#0d7377`, `--emerald-dark` `#095456`, `--emerald-deep` `#074143`, `--ochre` `#d4a843`, `--text` `#1c1c1c`.
+- **Старые токены ремаплены**: `--navy` → `--emerald`, `--coral` → `--ochre`, `--cream` → `--bg-cream`. Так весь существующий код (login, ChatBot, CalendarStrip, NewsCard) автоматически подхватил новую палитру без правок.
+- **Шрифты**: Manrope (заголовки) + Inter (текст). `lib/fonts.ts` сохраняет имена `playfair`/`manrope` из совместимости — `playfair` теперь возвращает Manrope, `manrope` → Inter.
+
+### Орнаменты (CSS-классы в `globals.css`)
+- `.ornament-band` — горизонтальный ромбовый бордюр для футера.
+- `.vert-ornament` — вертикальный орнамент (бараньи рога + ромб) на тёмном изумруде, слева у hero внутренних страниц.
+- `.diamond-divider`, `.section-kicker`, `.img-ph` (постер-плейсхолдер с орнамент-overlay), `.poster-card`.
+
+### Header / Footer (`src/components/layout/`)
+- `Header.tsx` — переписан: монограмма (изумруд-круг с орнаментом охрой) + двухстрочный лого `DVORETS GORNYAKOV / Сатпаев · Дворец горняков`, центральное меню из БД (`getNavTree`), `KZ/RU` пилы, мобильный burger. Опциональный prop `overlay` (полупрозрачный над hero) — сейчас не используется в layout, на главной Header sticky-белый.
+- `Monogram.tsx` — новый компонент.
+- `Footer.tsx` — 4 колонки на `--emerald-dark` с орнамент-бордюром сверху. Брендовый блок (монограмма + соцсети) / Меню / Контакты / Соцсети.
+- `LanguageSwitcher.tsx` — capslock-пилы `KZ/RU` с опцией overlay.
+
+### Главная (`src/app/[locale]/(public)/page.tsx`)
+Полностью переписана под новую архитектуру — 7 блоков:
+1. `EtnoHero` (`features/EtnoHero.tsx`) — full-bleed 700px, тёмный изумруд + охра радиал, силуэт зрительного зала (SVG ряды кресел), орнамент-overlay, центральный слоган `Үлытау өңірінің мәдени сарайы`, скролл-индикатор.
+2. `EtnoSchedule` (`features/EtnoSchedule.tsx`) — на изумруд-тёмном. Слева 4 карточки-даты (первая — охра-залитая), справа календарь 7×6 с маркерами событий. Динамически считает starting weekday и количество дней месяца.
+3. Афиши «Арман» — белый фон, 8 концертов через `<PosterCard>` (4×2).
+4. Афиши «Үлкен зал» — кремовый фон, ещё 8 событий.
+5. О дворце — двухколоночный блок на `--bg-cream-2` с орнамент-фоном: фасад-плейсхолдер + история + 4 статистики (22 ұжым / 758 қатысушы / 60+ жыл / 3 зала) + CTA «Подробнее».
+6. Новости — 4 карточки с emerald/ochre/cream чередованием плейсхолдеров.
+7. CTA-пара — изумрудная `Үйірмеге жазылу` + охровая `Зал жалдау` с орнамент-узором в углу.
+
+`PosterCard.tsx` — общий компонент для главной и каталога.
+
+### События — каталог-афиша (`(public)/events/page.tsx`)
+Заменён `EventCalendar` на:
+- `EtnoHeroStrip` (вертикальный орнамент + kicker + h1).
+- `EventsCatalog` (`features/EventsCatalog.tsx`, client) — фильтр-пилсы (Все / Концерт / Театр / Мастер-класс / Выставка / Фестиваль), сетка PosterCard 4×3, пагинация 12 на страницу, счётчик `N СОБЫТИЕ`.
+
+### Деплой
+- `docker compose build app` (image: `dvorets-gornyakov-app:latest`).
+- Создан `docker-compose.override.yml` с `ports: !override [- "3007:3000"]` — потому что 3000 занят open-webui. Файл в `.gitignore`.
+- Контейнер на 3007. Live: https://tracy-wal-sep-uses.trycloudflare.com.
+- Билд зелёный, все публичные страницы (rent/clubs/news/about/contacts/events/home) → 200.
+
+### Что осталось / TODO
+- Header overlay-режим (полупрозрачный поверх hero) на главной не активен — нужен route group или conditional render через `headers()`. Сейчас sticky-белый, hero начинается под ним. Не критично визуально.
+- Rent / Clubs / News / About / Contacts — структура старая, но цвета новые (через ремап). По дизайну для них предусмотрены: вертикальный орнамент слева hero, section-kicker с охровой полосой, форма-заявки на изумруде (rent), age-slider (clubs), таймлайн+биография Дильдебаева (about). По заказу — переверстать аналогично главной.
+
+---
+
+## 2026-05-05 (далее) — фиксы по аудиту /tracy-wal-sep-uses
+
+### Critical / High (закрыто)
+- **#1 Deep-link «Подробнее»** в `PosterCard` теперь ведёт на `/${locale}/events/${id}` (правка в `(public)/page.tsx` toPoster и `events/page.tsx` mapping).
+- **#2/#3 Sitemap/robots с localhost** — `site_settings.site_base_url` обновлён на текущий trycloudflare URL (раньше был `https://dvorets-gornyakov.kz`). `sitemap.ts` уже умел читать оттуда; в `robots.ts` добавлено чтение из БД с фолбэком на env. Оба роута теперь `export const dynamic = "force-dynamic"; export const revalidate = 0;` — иначе Next 16 пытался prerender'ить их на этапе build (когда БД недоступна и `NEXT_PUBLIC_APP_URL=http://localhost:3013` из .env.local). Если URL trycloudflare сменится после рестарта tunnel — обновить через `UPDATE site_settings SET value=... WHERE key='site_base_url'`, билд не нужен.
+- **#4 Карта сайта/Политика 404** — заменено в футере на ссылку `/rules` (правила посещения). Сами страницы /privacy /sitemap не создавал.
+- **#5 «ФИО уточняется — обновляется через /admin/settings»** — карточка-заглушка директора удалена из `(public)/about/page.tsx` (обе локали). Покажется только Дильдебаев. Когда заказчик пришлёт ФИО — добавить обратно с реальными данными.
+- **#6/#7/#8 Контакты+адрес единый источник**: Footer — Ұлытау обл., часы Пн-Пт 09:00–18:00 / Сб-Вс 10:00–17:00 (выровнено с /contacts). Email единый `info@dvorets-gornyakov.kz` (раньше /contacts отдавал `dvorets-satpayev.kz`). Заглушка `+7 (7102) 00-00-00` в `messages/{ru,kk}.json` → `+7 (71063) 6-23-30`. Адрес на /contacts добавлено `Ұлытау обл.`
+- **#13 HTML title** в `src/app/layout.tsx` — `Дворец горняков им. Ш. Дильдебаева — Сатпаев` (правильная "и", не "ї") + template `%s · Дворец горняков · Сатпаев`. Старая description тоже обновлена (Ұлытау, не Карагандинская).
+- **#14 Соцсети `href="#"`** — `Footer.tsx` теперь читает из `site_settings` (`social_instagram`, `social_facebook`, `social_youtube`, `social_telegram`, `social_tiktok`, плюс fallback на `instagram_handle`/`telegram_channel`). Если URL пуст — кнопка не отрисовывается. Колонка «Соцсети» при пустых ссылках показывает «Скоро появятся».
+
+### Medium (закрыто)
+- **#9 Логика «Арман» / «Большой зал»** — раньше split по `event_type === 'concert'`. Теперь по `location` (regex `/үлкен|большой|grand/i`). Секция скрывается полностью если событий 0.
+- **#10 Английские категории `events`/`announcement`** — новый helper `src/lib/news-category.ts` (slug → локализованное название). Применён в `NewsCard.tsx` и в `news/[slug]/page.tsx`.
+- **#11 «3 СОБЫТИЕ»** — новый helper `src/lib/plural.ts` (`pluralByLocale`, `pluralRu`). Применён в `EventsCatalog`. KK не имеет ru-style плюрализации — единственная форма `ИС-ШАРА`.
+- **#12 Хардкод «Март — апрель 2026»** в hero событий → `buildKicker()` в `events/page.tsx` берёт `min/max` start_date из выборки.
+- **#15 404 страница** — новая `src/app/not-found.tsx` в этно-модерн стиле: тёмный изумруд + охра градиент, орнамент-overlay, монограмма, цифра 404 охрой, кнопки «На главную» / «Афиша», копирайт. Двуязычный текст.
+- **#18 Слоган hero сливается** — добавлен `radial-gradient` тёмная подложка (rgba 0.65 → 0.35 → 0) под слоганом + `text-shadow` на h1. Читаемость восстановлена.
+- **#22 Таймзона событий («04:00 · Галерея»)** — list-вью и главная брали `getDate()/getMonth()/toLocaleTimeString()` без TZ → в UTC-контейнере и время, и день badge съезжали (деталка уже была верной с `Asia/Almaty`). Добавлен helper `almatyParts()` в `src/lib/utils.ts` (+ `TIMEZONE`); применён в `EventCard.tsx`, `events/page.tsx`, главной `page.tsx` (чип, дни календаря, month/year label). `tsc` чист, новых lint-ошибок нет.
+
+- **#23 Реальные фото вместо Unsplash-стока** — 14 фото Дворца (источник: КГКП ОНМЦД, страница Центра им. Ш. Дильдебаева) лежат в `dvorets-photos/` (raw PNG, манифест с alt-текстом в `dvorets-photos/README.md`). Пережаты в WebP (q82, 15–45 КБ) → `public/photos/dvorets-*.webp` + `og-cover.jpg` (1200×630, cover из dvorets-01). Заменены все стоковые fallback-картинки: `EventCard`, `events/[id]`, `ClubCard`, `NewsCard`. Добавлен `openGraph`/`twitter` + `metadataBase` в `layout.tsx` (og:image = og-cover.jpg, разворачивается через `NEXT_PUBLIC_APP_URL`); заполнен пустой `images:[]` в `about`. `tsc` + `npm run build` чисто. **Закрывает audit P0 #2 (нет фото) и #5 (нет og:image); частично #20.**
+  - Мэппинг event_type: concert→07, exhibition→06, workshop→11, festival→03, competition→04, other→09-1. Клубы: vocal→05, dance→11, art→13, theater→09-1, music→04, craft→08, sport→10, general→01.
+  - **Юр. примечание (из манифеста):** для прода — письмо-согласие от Центра ИЛИ своя фотосессия; рекомендуется атрибуция в подвале «Фото: КГКП Центр культуры и творчества им. Ш. Дильдебаева». Footer не трогал (свежий рерайт) — добавить строку атрибуции отдельно.
+
+### Не закрыто (нужен контент / большая работа)
+- **#16 Чат-бот не назвал «бесплатно»** — наполнить KB через `/admin/chatbot` (FAQ про цены аренды).
+- **#17 Нет фото на детальной кружка** — в `clubs/[id]/page.tsx` не подтягивается `image_url` (карточки `ClubCard` теперь с реальным fallback, но деталка — нет). Не правил.
+- **#19 Скудные seed-данные** — наполнять через админку (`/admin/news`, `/admin/events`).
+- **#20 Стоковые фото новостей** — fallback `NewsCard` теперь реальный (dvorets-12); конкретные новости всё равно лучше заливать через `/admin/media` + `/admin/news`.
+- **#21 Карта 2GIS на /contacts** — заменить заглушку на реальный iframe.
+- **Hero на главной** — `EtnoHero` остаётся CSS-артом: исходники фото max 613×409, для фуллскрин-hero слишком мелкие (мыло при апскейле). Нужна высокая res — фотосессия фасада ИЛИ оригиналы у пресс-службы Центра.
+- **Демо-залы аренды** (`rent/[slug]` DEMO_HALLS) — ещё на Unsplash; в наборе нет интерьеров залов, нужны реальные снимки залов.
+
+### Если URL trycloudflare сменится
+```bash
+docker exec dvorets-gornyakov-postgres-1 psql -U dvorets -d dvorets_db \
+  -c "UPDATE site_settings SET value='https://новый.trycloudflare.com' WHERE key='site_base_url';"
+```
+Билд не нужен — sitemap/robots dynamic.
 
 ---
 

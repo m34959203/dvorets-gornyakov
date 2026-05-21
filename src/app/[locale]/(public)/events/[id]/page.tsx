@@ -107,13 +107,14 @@ const DEMO_EVENTS: Record<string, EventRow> = {
   },
 };
 
+// Реальные фото Дворца (источник: КГКП «Центр культуры и творчества им. Ш. Дильдебаева»).
 const FALLBACK_IMG: Record<string, string> = {
-  concert: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=1600&q=80",
-  exhibition: "https://images.unsplash.com/photo-1577720580479-7d839d829c73?w=1600&q=80",
-  workshop: "https://images.unsplash.com/photo-1472162314594-eca3be56d8f4?w=1600&q=80",
-  festival: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=1600&q=80",
-  competition: "https://images.unsplash.com/photo-1503095396549-807759245b35?w=1600&q=80",
-  other: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=1600&q=80",
+  concert: "/photos/dvorets-07.webp",
+  exhibition: "/photos/dvorets-06.webp",
+  workshop: "/photos/dvorets-11.webp",
+  festival: "/photos/dvorets-03.webp",
+  competition: "/photos/dvorets-04.webp",
+  other: "/photos/dvorets-09-1.webp",
 };
 
 const TYPE_LABELS: Record<string, Record<Locale, string>> = {

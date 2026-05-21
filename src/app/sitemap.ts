@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 import { getOne, getMany } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const STATIC_PATHS: Array<{
   path: string;
   changeFrequency: "daily" | "weekly" | "monthly";
