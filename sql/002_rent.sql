@@ -90,7 +90,7 @@ INSERT INTO halls (slug, name_kk, name_ru, description_kk, description_ru,
     '["Профессиональный звук", "Сценический свет", "LED-экран", "3 гримёрки", "Wi-Fi", "Кондиционер"]'::jsonb,
     0,
     0,
-    '[{"url":"/hero/hall-grand-1.jpg","alt_ru":"Большой зал, сцена","alt_kk":"Үлкен зал, сахна"}]'::jsonb,
+    '[{"url":"/photos/dvorets-08.webp","alt_ru":"Большой зал, сцена","alt_kk":"Үлкен зал, сахна"}]'::jsonb,
     10
 ),
 (
@@ -104,7 +104,7 @@ INSERT INTO halls (slug, name_kk, name_ru, description_kk, description_ru,
     '["Акустическая система", "Проектор", "Экран", "Wi-Fi", "Сцена"]'::jsonb,
     0,
     0,
-    '[{"url":"/hero/hall-chamber-1.jpg","alt_ru":"Камерный зал","alt_kk":"Камералық зал"}]'::jsonb,
+    '[{"url":"/photos/dvorets-10.webp","alt_ru":"Камерный зал","alt_kk":"Камералық зал"}]'::jsonb,
     20
 ),
 (
@@ -118,6 +118,6 @@ INSERT INTO halls (slug, name_kk, name_ru, description_kk, description_ru,
     '["Зеркала", "Станок", "Пианино", "Аудио-система", "Раздевалка"]'::jsonb,
     0,
     0,
-    '[{"url":"/hero/hall-rehearsal-1.jpg","alt_ru":"Репетиционный зал","alt_kk":"Жаттығу залы"}]'::jsonb,
+    '[{"url":"/photos/dvorets-12.webp","alt_ru":"Репетиционный зал","alt_kk":"Жаттығу залы"}]'::jsonb,
     30
 );

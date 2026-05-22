@@ -129,7 +129,7 @@ export default function HallForm({ locale, initial }: Props) {
         </Field>
         <Field label="Photo URLs (одна на строку; первый = cover)" className="sm:col-span-2">
           <textarea rows={4} value={photosText} onChange={(e) => setPhotosText(e.target.value)}
-                    placeholder="/hero/hall-grand-1.jpg"
+                    placeholder="/photos/dvorets-08.webp"
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm" />
         </Field>
         <Field label="Активен">
