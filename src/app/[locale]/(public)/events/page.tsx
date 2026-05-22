@@ -2,39 +2,18 @@ import type { Metadata } from "next";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
 import { eventImage } from "@/lib/event-image";
-import EtnoHeroStrip from "@/components/features/EtnoHeroStrip";
-import EventsCatalog, { type CatalogItem } from "@/components/features/EventsCatalog";
+import DgPageHero from "@/components/layout/DgPageHero";
+import DgEventsCatalog, { type DgEvent } from "@/components/features/DgEventsCatalog";
 
 export const dynamic = "force-dynamic";
 
 const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
 const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
 
-const MONTHS_KK = ["қаң.", "ақп.", "наурыз", "сәуір", "мамыр", "маусым", "шілде", "тамыз", "қыр.", "қаз.", "қар.", "жел."];
-const MONTHS_RU = ["янв.", "фев.", "марта", "апр.", "мая", "июн.", "июл.", "авг.", "сен.", "окт.", "ноя.", "дек."];
-const MONTHS_KK_FULL = ["қаңтар", "ақпан", "наурыз", "сәуір", "мамыр", "маусым", "шілде", "тамыз", "қыркүйек", "қазан", "қараша", "желтоқсан"];
-const MONTHS_RU_FULL = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
-
-function buildKicker(events: { start_date: string }[], locale: Locale): string {
-  if (!events.length) {
-    const now = new Date();
-    const monthsFull = locale === "kk" ? MONTHS_KK_FULL : MONTHS_RU_FULL;
-    return `${(locale === "kk" ? "Афиша · " : "Афиша · ")}${capitalize(monthsFull[now.getMonth()])} ${now.getFullYear()}`;
-  }
-  const dates = events.map((e) => new Date(e.start_date));
-  const min = dates.reduce((a, b) => (a < b ? a : b));
-  const max = dates.reduce((a, b) => (a > b ? a : b));
-  const monthsFull = locale === "kk" ? MONTHS_KK_FULL : MONTHS_RU_FULL;
-  const minM = capitalize(monthsFull[min.getMonth()]);
-  const maxM = capitalize(monthsFull[max.getMonth()]);
-  const year = max.getFullYear();
-  const range = min.getMonth() === max.getMonth() ? minM : `${minM} — ${maxM}`;
-  return `${locale === "kk" ? "Афиша · " : "Афиша · "}${range} ${year}`;
-}
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
+const MONTHS_KK_FULL = ["Қаңтар", "Ақпан", "Наурыз", "Сәуір", "Мамыр", "Маусым", "Шілде", "Тамыз", "Қыркүйек", "Қазан", "Қараша", "Желтоқсан"];
+const MONTHS_RU_FULL = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+const SHORT_KK = ["ҚАҢ", "АҚП", "НАУ", "СӘУ", "МАМ", "МАУ", "ШІЛ", "ТАМ", "ҚЫР", "ҚАЗ", "ҚАР", "ЖЕЛ"];
+const SHORT_RU = ["ЯНВ", "ФЕВ", "МАР", "АПР", "МАЯ", "ИЮН", "ИЮЛ", "АВГ", "СЕН", "ОКТ", "НОЯ", "ДЕК"];
 
 const TYPE_TO_CAT_KK: Record<string, string> = {
   concert: "Концерт",
@@ -146,59 +125,59 @@ export default async function EventsPage({
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
   const events = await loadEvents();
-  const months = locale === "kk" ? MONTHS_KK : MONTHS_RU;
+  const shortMonths = locale === "kk" ? SHORT_KK : SHORT_RU;
+  const longMonths = locale === "kk" ? MONTHS_KK_FULL : MONTHS_RU_FULL;
   const typeMap = locale === "kk" ? TYPE_TO_CAT_KK : TYPE_TO_CAT_RU;
 
-  const items: CatalogItem[] = events.map((e) => {
+  const items: DgEvent[] = events.map((e) => {
     const d = new Date(e.start_date);
     // Asia/Almaty, иначе в UTC-контейнере дата и время съезжают (час «04:00»).
     const dp = new Intl.DateTimeFormat("en-US", {
       timeZone: "Asia/Almaty",
       day: "numeric",
       month: "numeric",
+      year: "numeric",
     }).formatToParts(d);
     const dayNum = dp.find((p) => p.type === "day")?.value ?? "";
     const monthIdx = Number(dp.find((p) => p.type === "month")?.value ?? "1") - 1;
+    const year = dp.find((p) => p.type === "year")?.value ?? "";
     return {
+      id: e.id,
+      href: `/${locale}/events/${e.id}`,
       title: getLocalizedField(e as unknown as Record<string, unknown>, "title", locale),
-      date: `${dayNum} ${months[monthIdx]}`,
+      image: eventImage(e.image_url, e.event_type),
+      day: dayNum,
+      mon: shortMonths[monthIdx],
+      monthLong: longMonths[monthIdx],
+      year,
       time: d.toLocaleTimeString(locale === "kk" ? "kk-KZ" : "ru-RU", {
         hour: "2-digit",
         minute: "2-digit",
         timeZone: "Asia/Almaty",
       }),
       hall: e.location,
-      price: T("Тегін", "Бесплатно"),
+      type: typeMap[e.event_type] ?? typeMap.other,
       free: true,
-      cat: typeMap[e.event_type] ?? typeMap.other,
-      href: `/${locale}/events/${e.id}`,
-      image: eventImage(e.image_url, e.event_type),
+      price: T("Тегін", "Бесплатно"),
     };
   });
 
-  // Фильтр-категории — только те, что реально присутствуют в данных
-  const presentCats = Array.from(new Set(items.map((i) => i.cat)));
-  const orderedCats = [
-    T("Барлығы", "Все"),
-    ...["Концерт", "Театр", T("Шеберлік", "Мастер-класс"), T("Көрме", "Выставка"), "Фестиваль", T("Басқа", "Прочее")].filter(
-      (c) => presentCats.includes(c)
-    ),
-  ];
-
   return (
-    <>
-      <EtnoHeroStrip
-        kicker={buildKicker(events, locale)}
-        title={
-          <>
-            {T("Барлық ", "Все ")}
-            <span style={{ color: "var(--emerald)" }}>
-              {T("іс-шаралар", "события")}
-            </span>
-          </>
-        }
+    <div className="dg-home">
+      <a href="#grid" className="dg-skip-link">{T("Афишаға өту", "Перейти к афише")}</a>
+      <DgPageHero
+        crumbs={[
+          { label: T("Басты бет", "Главная"), href: `/${locale}` },
+          { label: T("Афиша", "Афиша") },
+        ]}
+        tag={T("— Афиша · 2026 —", "— Афиша · 2026 —")}
+        h2Html={T("Сарайдың барлық <strong>іс-шаралары</strong>", "Все мероприятия <strong>Дворца</strong>")}
+        lead={T(
+          "Сатпаев тау-кеншілер сарайының концерттері, спектакльдері, шеберлік сабақтары мен көрмелері. Ай, зал немесе түрі бойынша сүзіңіз.",
+          "Концерты, спектакли, мастер-классы, выставки и конкурсы Дворца горняков. Фильтруйте по месяцу, залу или типу события."
+        )}
       />
-      <EventsCatalog locale={locale} items={items} cats={orderedCats} perPage={12} />
-    </>
+      <DgEventsCatalog locale={locale} items={items} />
+    </div>
   );
 }

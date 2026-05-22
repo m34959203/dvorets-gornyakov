@@ -1259,3 +1259,128 @@ h1, h2, h3, h4 {
 .dg-foot-socials a:hover { color: var(--dg-accent); border-color: var(--dg-accent); }
 .dg-footer-bot { display: flex; justify-content: space-between; align-items: center; padding-top: 22px; flex-wrap: wrap; gap: 14px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--dg-text-3); }
 .dg-footer-bot a:hover { color: var(--dg-accent); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ВНУТРЕННИЕ СТРАНИЦЫ (events / clubs / news / about / contacts / rent / resources)
+   Используют тот же скоуп .dg-home (тёмные токены), без светлых секций.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Page hero (крошки + заголовок + лид) ─── */
+.dg-home .page-hero { padding-block: clamp(60px, 10vh, 130px) clamp(40px, 6vw, 70px); border-bottom: 1px solid var(--dg-hair); }
+.dg-home .crumbs { font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--dg-text-2); display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.dg-home .crumbs a:hover { color: var(--dg-accent); }
+.dg-home .crumbs .sep { color: var(--dg-text-3); }
+.dg-home .page-hero .section-bar { margin-top: 18px; }
+.dg-home .page-lead { max-width: 64ch; font-size: 16px; color: var(--dg-text-2); margin: 22px 0 0; line-height: 1.6; font-weight: 300; }
+
+/* ─── Filters ─── */
+.dg-home .filters { display: flex; gap: 12px; flex-wrap: wrap; padding-block: 22px; border-bottom: 1px solid var(--dg-hair); align-items: center; }
+.dg-home .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dg-home .filter-label { font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--dg-text-3); margin-right: 6px; }
+.dg-home .filter-chip { background: transparent; border: 1px solid var(--dg-hair-2); color: var(--dg-text); cursor: pointer; padding: 8px 14px; border-radius: 999px; font-size: 11.5px; letter-spacing: .12em; font-weight: 400; text-transform: uppercase; transition: border-color .15s, color .15s, background .15s; }
+.dg-home .filter-chip:hover { border-color: var(--dg-accent); color: var(--dg-accent); }
+.dg-home .filter-chip.active { background: var(--dg-accent); border-color: var(--dg-accent); color: #fff; }
+.dg-home .filter-search { display: flex; align-items: center; gap: 8px; border: 1px solid var(--dg-hair-2); border-radius: 999px; padding: 7px 14px; margin-left: auto; }
+.dg-home .filter-search input { background: transparent; border: 0; outline: none; color: var(--dg-text); font-size: 13px; width: 200px; max-width: 50vw; }
+.dg-home .filter-search input::placeholder { color: var(--dg-text-3); }
+.dg-home .filter-search svg { color: var(--dg-text-2); }
+.dg-home .results-count { padding-block: 22px; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--dg-text-2); }
+.dg-home .results-count strong { color: var(--dg-text); font-weight: 500; }
+
+/* Бейдж-тег на постере (тип/премьера) */
+.dg-home .poster-tag { position: absolute; top: 14px; left: 14px; z-index: 2; background: rgba(11,15,26,0.85); color: var(--dg-accent); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; padding: 5px 10px; border-radius: 3px; font-weight: 500; }
+
+/* ─── Clubs grid ─── */
+.dg-home .clubs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--dg-hair); }
+@media (max-width: 960px) { .dg-home .clubs-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .dg-home .clubs-grid { grid-template-columns: 1fr; } }
+.dg-home .club { padding: 28px 24px; border-bottom: 1px solid var(--dg-hair); border-right: 1px solid var(--dg-hair); display: flex; flex-direction: column; gap: 14px; transition: background .15s; min-height: 240px; text-decoration: none; color: inherit; }
+.dg-home .club:hover { background: rgba(224,122,74,0.04); }
+.dg-home .club:nth-child(3n) { border-right: 0; }
+@media (max-width: 960px) {
+  .dg-home .club:nth-child(3n) { border-right: 1px solid var(--dg-hair); }
+  .dg-home .club:nth-child(2n) { border-right: 0; }
+}
+@media (max-width: 560px) { .dg-home .club { border-right: 0; } }
+.dg-home .club-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+.dg-home .club-cat { font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--dg-accent); font-weight: 500; }
+.dg-home .club-age { font-size: 10.5px; letter-spacing: .16em; color: var(--dg-text-2); border: 1px solid var(--dg-hair-2); padding: 4px 10px; border-radius: 999px; white-space: nowrap; text-transform: uppercase; }
+.dg-home .club h3 { font-size: 19px; font-weight: 500; color: var(--dg-text); margin: 0; line-height: 1.25; }
+.dg-home .club-meta { display: grid; gap: 6px; margin-top: auto; font-size: 12.5px; color: var(--dg-text-2); }
+.dg-home .club-meta .row { display: flex; gap: 10px; align-items: center; }
+.dg-home .club-meta svg { color: var(--dg-accent); flex: none; }
+.dg-home .club-meta .free { color: var(--dg-accent); font-weight: 500; }
+.dg-home .club-cta { margin-top: 14px; align-self: flex-start; font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--dg-accent); border-bottom: 1px solid currentColor; padding-bottom: 3px; font-weight: 500; display: inline-flex; gap: 8px; align-items: center; }
+
+/* ─── News grid (16:10 медиа + текст) ─── */
+.dg-home .news-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+@media (max-width: 1100px) { .dg-home .news-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px)  { .dg-home .news-grid { grid-template-columns: 1fr; } }
+.dg-home .news-item { display: flex; flex-direction: column; gap: 14px; text-decoration: none; color: inherit; }
+.dg-home .news-media { aspect-ratio: 16/10; background: var(--dg-bg-3); border-radius: var(--dg-radius); overflow: hidden; position: relative; }
+.dg-home .news-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+.dg-home .news-item:hover .news-media img { transform: scale(1.04); }
+.dg-home .news-date { font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--dg-text-2); }
+.dg-home .news-title { font-size: 16px; font-weight: 500; color: var(--dg-text); margin: 0; line-height: 1.3; transition: color .15s; }
+.dg-home .news-item:hover .news-title { color: var(--dg-accent); }
+.dg-home .news-excerpt { font-size: 13.5px; color: var(--dg-text-2); margin: 0; line-height: 1.55; }
+
+/* ─── Halls (аренда залов) ─── */
+.dg-home .halls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+@media (max-width: 960px) { .dg-home .halls-grid { grid-template-columns: 1fr; max-width: 560px; } }
+.dg-home .hall { display: flex; flex-direction: column; border: 1px solid var(--dg-hair); border-radius: var(--dg-radius); overflow: hidden; background: var(--dg-bg-2); transition: border-color .15s, transform .25s; text-decoration: none; color: inherit; }
+.dg-home .hall:hover { border-color: var(--dg-accent); transform: translateY(-3px); }
+.dg-home .hall-media { aspect-ratio: 16/10; background: var(--dg-bg-3); position: relative; overflow: hidden; }
+.dg-home .hall-media img { width: 100%; height: 100%; object-fit: cover; }
+.dg-home .hall-body { padding: 22px 24px 24px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.dg-home .hall-title { font-size: 19px; font-weight: 500; color: var(--dg-text); margin: 0; }
+.dg-home .hall-seats { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--dg-accent); display: inline-flex; align-items: center; gap: 8px; }
+.dg-home .hall-desc { font-size: 13.5px; color: var(--dg-text-2); line-height: 1.6; flex: 1; }
+.dg-home .hall-foot { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--dg-hair); display: flex; justify-content: space-between; align-items: center; }
+
+/* ─── Прочее: ссылки-списки (resources) ─── */
+.dg-home .link-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--dg-hair); }
+.dg-home .link-list li { border-bottom: 1px solid var(--dg-hair); }
+.dg-home .link-list a { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 4px; color: var(--dg-text); transition: padding-left .2s ease, color .15s; }
+.dg-home .link-list a:hover { padding-left: 12px; color: var(--dg-accent); }
+.dg-home .link-list .t { font-size: 16px; font-weight: 400; }
+.dg-home .link-list svg { color: var(--dg-accent); flex: none; }
+
+/* ─── Empty state (фильтры/поиск без результатов) ─── */
+.dg-home .dg-empty { padding: 70px 0; text-align: center; color: var(--dg-text-2); display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.dg-home .dg-empty svg { color: var(--dg-text-3); }
+.dg-home .dg-empty .msg { font-size: 15px; letter-spacing: .06em; }
+
+/* ─── Dark forms (contacts / rent / enrollment) ─── */
+.dg-home .dg-form { display: grid; gap: 18px; }
+.dg-home .dg-field { display: grid; gap: 8px; }
+.dg-home .dg-label { font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--dg-text-2); }
+.dg-home input[type="text"], .dg-home input[type="email"], .dg-home input[type="tel"],
+.dg-home input[type="date"], .dg-home input[type="number"], .dg-home input[type="time"],
+.dg-home textarea, .dg-home select {
+  background: var(--dg-bg-2); border: 1px solid var(--dg-hair-2); border-radius: var(--dg-radius);
+  color: var(--dg-text); padding: 12px 14px; font: inherit; width: 100%; transition: border-color .15s;
+}
+.dg-home textarea { resize: vertical; min-height: 120px; }
+.dg-home input:focus, .dg-home textarea:focus, .dg-home select:focus { outline: none; border-color: var(--dg-accent); }
+.dg-home input::placeholder, .dg-home textarea::placeholder { color: var(--dg-text-3); }
+.dg-home .dg-btn {
+  display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px; border-radius: 2px;
+  font-size: 11.5px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase;
+  background: var(--dg-accent); color: #fff; border: 1px solid var(--dg-accent); cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s; white-space: nowrap;
+}
+.dg-home .dg-btn:hover { background: var(--dg-accent-2); border-color: var(--dg-accent-2); }
+.dg-home .dg-btn[disabled] { opacity: .5; cursor: default; }
+.dg-home .dg-btn-ghost { background: transparent; color: var(--dg-text); border-color: var(--dg-hair-2); }
+.dg-home .dg-btn-ghost:hover { background: transparent; border-color: var(--dg-accent); color: var(--dg-accent); }
+
+/* ─── Contacts split ─── */
+.dg-home .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+@media (max-width: 880px) { .dg-home .contact-grid { grid-template-columns: 1fr; gap: 40px; } }
+.dg-home .contact-list { display: grid; gap: 22px; }
+.dg-home .contact-row { display: flex; gap: 14px; align-items: flex-start; }
+.dg-home .contact-row svg { color: var(--dg-accent); flex: none; margin-top: 3px; }
+.dg-home .contact-row .lab { font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--dg-text-3); }
+.dg-home .contact-row .val { color: var(--dg-text); margin-top: 4px; }
+.dg-home .contact-row .val a:hover { color: var(--dg-accent); }

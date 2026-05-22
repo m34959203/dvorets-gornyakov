@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import Button from "@/components/ui/Button";
-import { Input, Textarea } from "@/components/ui/Input";
+import DgIcon from "@/components/layout/DgIcon";
 import type { Locale } from "@/lib/i18n";
 
 interface ContactFormProps {
@@ -27,14 +26,23 @@ export default function ContactForm({ locale, messages: t }: ContactFormProps) {
 
   if (status === "success") {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-        <svg className="w-12 h-12 text-green-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <p className="text-green-800 font-medium">{t.sendSuccess}</p>
+      <div
+        style={{
+          border: "1px solid var(--dg-hair-2)",
+          borderRadius: "var(--dg-radius)",
+          padding: "40px 32px",
+          textAlign: "center",
+          color: "var(--dg-text)",
+        }}
+      >
+        <div style={{ color: "var(--dg-accent)", marginBottom: 16 }}>
+          <DgIcon name="mail" size={40} />
+        </div>
+        <p style={{ fontWeight: 500, letterSpacing: "0.04em" }}>{t.sendSuccess}</p>
         <button
           onClick={() => setStatus("idle")}
-          className="mt-3 text-sm text-green-600 hover:underline"
+          className="dg-btn dg-btn-ghost"
+          style={{ marginTop: 20, display: "inline-flex" }}
         >
           {locale === "kk" ? "Жаңа хабарлама" : "Новое сообщение"}
         </button>
@@ -43,43 +51,105 @@ export default function ContactForm({ locale, messages: t }: ContactFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <Input
-        id="contact_name"
-        label={t.name}
-        value={form.name}
-        onChange={(e) => setForm({ ...form, name: e.target.value })}
-        required
-        minLength={2}
-      />
-      <Input
-        id="contact_email"
-        label="Email"
-        type="email"
-        value={form.email}
-        onChange={(e) => setForm({ ...form, email: e.target.value })}
-        required
-      />
-      <Input
-        id="contact_subject"
-        label={t.subject}
-        value={form.subject}
-        onChange={(e) => setForm({ ...form, subject: e.target.value })}
-        required
-        minLength={2}
-      />
-      <Textarea
-        id="contact_message"
-        label={t.message}
-        value={form.message}
-        onChange={(e) => setForm({ ...form, message: e.target.value })}
-        required
-        minLength={10}
-        rows={5}
-      />
-      <Button type="submit" loading={status === "loading"} className="w-full">
-        {locale === "kk" ? "Жіберу" : "Отправить"}
-      </Button>
+    <form onSubmit={handleSubmit} className="dg-form">
+      {/* Name */}
+      <div className="dg-field">
+        <label className="dg-label" htmlFor="contact_name">
+          {t.name}
+        </label>
+        <input
+          id="contact_name"
+          type="text"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          required
+          minLength={2}
+          placeholder={locale === "kk" ? "Аты-жөніңіз" : "Ваше имя"}
+        />
+      </div>
+
+      {/* Email */}
+      <div className="dg-field">
+        <label className="dg-label" htmlFor="contact_email">
+          Email
+        </label>
+        <input
+          id="contact_email"
+          type="email"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          required
+          placeholder={locale === "kk" ? "email@mысал.kz" : "email@example.kz"}
+        />
+      </div>
+
+      {/* Subject */}
+      <div className="dg-field">
+        <label className="dg-label" htmlFor="contact_subject">
+          {t.subject}
+        </label>
+        <input
+          id="contact_subject"
+          type="text"
+          value={form.subject}
+          onChange={(e) => setForm({ ...form, subject: e.target.value })}
+          required
+          minLength={2}
+          placeholder={locale === "kk" ? "Хабарламаның тақырыбы" : "Тема обращения"}
+        />
+      </div>
+
+      {/* Message */}
+      <div className="dg-field">
+        <label className="dg-label" htmlFor="contact_message">
+          {t.message}
+        </label>
+        <textarea
+          id="contact_message"
+          value={form.message}
+          onChange={(e) => setForm({ ...form, message: e.target.value })}
+          required
+          minLength={10}
+          rows={5}
+          placeholder={
+            locale === "kk"
+              ? "Хабарламаңызды жазыңыз..."
+              : "Напишите ваше сообщение..."
+          }
+        />
+      </div>
+
+      {/* Submit */}
+      <div>
+        <button
+          type="submit"
+          className="dg-btn"
+          disabled={status === "loading"}
+          style={{ width: "100%", justifyContent: "center" }}
+        >
+          {status === "loading" ? (
+            locale === "kk" ? "Жіберілуде…" : "Отправка…"
+          ) : (
+            <>
+              {locale === "kk" ? "Жіберу" : "Отправить"}
+              <DgIcon name="arrow" size={16} />
+            </>
+          )}
+        </button>
+
+        {status === "error" && (
+          <p
+            style={{
+              marginTop: 10,
+              fontSize: 12,
+              color: "#e07a4a",
+              letterSpacing: "0.08em",
+            }}
+          >
+            {t.sendError}
+          </p>
+        )}
+      </div>
     </form>
   );
 }

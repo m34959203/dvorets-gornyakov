@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getMessages, isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
+import { isValidLocale, type Locale, getLocalizedField, getMessages } from "@/lib/i18n";
 import { getOne, getMany } from "@/lib/db";
 import type { Hall } from "@/lib/rent/types";
+import DgPageHero from "@/components/layout/DgPageHero";
+import DgIcon from "@/components/layout/DgIcon";
 import AvailabilityCalendar from "@/components/rent/AvailabilityCalendar";
 import RentalRequestForm from "@/components/rent/RentalRequestForm";
 
@@ -24,7 +25,7 @@ const DEMO_HALLS: Record<string, Hall> = {
     equipment_ru: ["Профессиональный звук", "Сценический свет", "LED-экран", "3 гримёрки", "Wi-Fi", "Кондиционер"],
     hourly_price: 0,
     event_price_from: 0,
-    photos: [{ url: "https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=1600&q=80", alt_ru: "Большой зал", alt_kk: "Үлкен зал" }],
+    photos: [{ url: "/photos/dvorets-08.webp", alt_ru: "Большой зал", alt_kk: "Үлкен зал" }],
     layout_url: null,
     is_active: true,
     sort_order: 10,
@@ -45,7 +46,7 @@ const DEMO_HALLS: Record<string, Hall> = {
     equipment_ru: ["Акустическая система", "Проектор", "Экран", "Wi-Fi", "Сцена"],
     hourly_price: 0,
     event_price_from: 0,
-    photos: [{ url: "https://images.unsplash.com/photo-1519683109079-d5f539e1542f?w=1600&q=80", alt_ru: "Камерный зал", alt_kk: "Камералық зал" }],
+    photos: [{ url: "/photos/dvorets-10.webp", alt_ru: "Камерный зал", alt_kk: "Камералық зал" }],
     layout_url: null,
     is_active: true,
     sort_order: 20,
@@ -66,7 +67,7 @@ const DEMO_HALLS: Record<string, Hall> = {
     equipment_ru: ["Зеркала", "Станок", "Пианино", "Аудио-система", "Раздевалка"],
     hourly_price: 0,
     event_price_from: 0,
-    photos: [{ url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1600&q=80", alt_ru: "Репетиционный зал", alt_kk: "Жаттығу залы" }],
+    photos: [{ url: "/photos/dvorets-12.webp", alt_ru: "Репетиционный зал", alt_kk: "Жаттығу залы" }],
     layout_url: null,
     is_active: true,
     sort_order: 30,
@@ -105,9 +106,12 @@ export async function generateMetadata({
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
   const hall = await loadHall(slug);
   if (!hall) return { title: "Not found" };
-  const name = getLocalizedField(hall, "name", locale);
-  const desc = getLocalizedField(hall, "description", locale);
-  return { title: `${name} — ${locale === "kk" ? "Залды жалдау" : "Аренда зала"}`, description: desc };
+  const name = getLocalizedField(hall as unknown as Record<string, unknown>, "name", locale);
+  const desc = getLocalizedField(hall as unknown as Record<string, unknown>, "description", locale);
+  return {
+    title: `${name} — ${locale === "kk" ? "Залды жалдау" : "Аренда зала"}`,
+    description: desc,
+  };
 }
 
 export default async function HallPage({
@@ -117,6 +121,8 @@ export default async function HallPage({
 }) {
   const { locale: lp, slug } = await params;
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
+
   const messages = getMessages(locale);
   const t = messages.rent as unknown as Record<string, unknown>;
 
@@ -124,9 +130,17 @@ export default async function HallPage({
   if (!hall) notFound();
 
   const halls = await loadAllHalls();
-  const name = getLocalizedField(hall, "name", locale);
-  const description = getLocalizedField(hall, "description", locale);
+  const name = getLocalizedField(hall as unknown as Record<string, unknown>, "name", locale);
+  const description = getLocalizedField(hall as unknown as Record<string, unknown>, "description", locale);
   const equipment = (locale === "kk" ? hall.equipment_kk : hall.equipment_ru) ?? [];
+
+  const coverUrl =
+    hall.photos?.[0]?.url ||
+    (slug === "grand"
+      ? "/photos/dvorets-08.webp"
+      : slug === "chamber"
+      ? "/photos/dvorets-10.webp"
+      : "/photos/dvorets-12.webp");
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -136,114 +150,244 @@ export default async function HallPage({
     maximumAttendeeCapacity: hall.capacity,
     address: {
       "@type": "PostalAddress",
-      streetAddress: locale === "kk" ? "Абай д-лы, 10" : "пр. К.И. Сатпаева, 106",
+      streetAddress: T("Абай д-лы, 10", "пр. К.И. Сатпаева, 106"),
       addressLocality: "Сатпаев",
       addressCountry: "KZ",
     },
   };
 
   return (
-    <div className="bg-white">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+    <div className="dg-home">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
-      {/* Header / cover */}
-      <section className="relative isolate overflow-hidden bg-primary-dark text-white">
-        <div
-          className="absolute inset-0 -z-20 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              `linear-gradient(180deg, rgba(9,84,86,0.75) 0%, rgba(26,26,46,0.85) 100%), url(${hall.photos?.[0]?.url ?? "/hero/hero.jpg"})`,
-          }}
-        />
-        <div className="relative mx-auto max-w-5xl px-4 py-20 sm:px-6 lg:py-24">
-          <nav className="mb-5 text-xs text-white/70">
-            <Link href={`/${locale}`} className="hover:text-white">{String(t.breadcrumbHome)}</Link>
-            <span className="mx-2">/</span>
-            <Link href={`/${locale}/rent`} className="hover:text-white">{String(t.breadcrumbHere)}</Link>
-            <span className="mx-2">/</span>
-            <span className="text-white">{name}</span>
-          </nav>
-          <h1 className="text-4xl font-bold sm:text-5xl">{name}</h1>
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-white/85">
-            <span className="rounded-full bg-white/15 px-3 py-1">
-              {String(t.detailCapacity)}: {hall.capacity}
-            </span>
-            <span className="rounded-full bg-accent/90 px-3 py-1 font-semibold text-primary-dark">
-              {locale === "kk" ? "Тегін" : "Бесплатно"}
-            </span>
+      <DgPageHero
+        crumbs={[
+          { label: T("Басты бет", "Главная"), href: `/${locale}` },
+          { label: T("Зал жалдау", "Аренда залов"), href: `/${locale}/rent` },
+          { label: name },
+        ]}
+        tag={T("— Зал —", "— Зал —")}
+        h2Html={name}
+        lead={description}
+      />
+
+      {/* Cover photo */}
+      <section className="section" style={{ borderTop: 0, paddingBlock: 0 }}>
+        <div className="dg-wrap">
+          <div
+            style={{
+              borderRadius: "var(--dg-radius)",
+              overflow: "hidden",
+              aspectRatio: "16/7",
+              background: "var(--dg-bg-2)",
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={coverUrl}
+              alt={name}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
           </div>
         </div>
       </section>
 
-      {/* Body */}
-      <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
-        <Link href={`/${locale}/rent`} className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          {String(t.detailBack)}
-        </Link>
+      {/* Hall facts + calendar */}
+      <section className="section">
+        <div className="dg-wrap">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 340px",
+              gap: 48,
+              alignItems: "start",
+            }}
+            className="hall-detail-grid"
+          >
+            {/* Left: facts + equipment */}
+            <div>
+              <div className="section-bar" style={{ marginBottom: 28 }}>
+                <div className="tag">{T("— Сипаттама —", "— Описание —")}</div>
+                <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Залдың <strong>сипаттамасы</strong>", "<strong>Характеристики</strong> зала") }} />
+              </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[2fr_1fr]">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">{String(t.detailDescription)}</h2>
-            <p className="mt-3 whitespace-pre-line text-gray-700">{description}</p>
-
-            <h3 className="mt-10 text-xl font-bold text-gray-900">{String(t.detailEquipment)}</h3>
-            <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {equipment.map((item, i) => (
-                <li key={i} className="flex items-start gap-3 rounded-xl bg-gray-50 p-3">
-                  <svg className="mt-0.5 h-5 w-5 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm text-gray-800">{item}</span>
+              <ul className="feature-meta">
+                <li>
+                  <span className="lab">
+                    <DgIcon name="users" size={15} />
+                    {T("Сыйымдылық", "Вместимость")}
+                  </span>
+                  <span className="val">{hall.capacity} {T("орын", "мест")}</span>
                 </li>
-              ))}
-            </ul>
+                <li>
+                  <span className="lab">
+                    <DgIcon name="pin" size={15} />
+                    {T("Орналасуы", "Расположение")}
+                  </span>
+                  <span className="val">
+                    {T("Дворец горняков, Сәтбаев", "Дворец горняков, г. Сатпаев")}
+                  </span>
+                </li>
+                <li>
+                  <span className="lab">
+                    <DgIcon name="coin" size={15} />
+                    {T("Іс-шара құны", "Стоимость")}
+                  </span>
+                  <span className="val price">{T("Тегін", "Бесплатно")}</span>
+                </li>
+              </ul>
 
-            {hall.photos && hall.photos.length > 1 && (
-              <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {hall.photos.slice(1).map((p, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img key={i} src={p.url}
-                       alt={(locale === "kk" ? p.alt_kk : p.alt_ru) || name}
-                       className="aspect-[4/3] w-full rounded-xl object-cover" />
-                ))}
-              </div>
-            )}
-          </div>
+              {/* Equipment */}
+              {equipment.length > 0 && (
+                <div style={{ marginTop: 36 }}>
+                  <div
+                    style={{
+                      fontSize: 10.5,
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      color: "var(--dg-text-3)",
+                      marginBottom: 16,
+                    }}
+                  >
+                    {String(t.detailEquipment)}
+                  </div>
+                  <ul
+                    style={{
+                      listStyle: "none",
+                      margin: 0,
+                      padding: 0,
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                      gap: "10px 16px",
+                    }}
+                  >
+                    {equipment.map((item, i) => (
+                      <li
+                        key={i}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          fontSize: 13.5,
+                          color: "var(--dg-text-2)",
+                          paddingBlock: 8,
+                          borderBottom: "1px solid var(--dg-hair)",
+                        }}
+                      >
+                        <span style={{ color: "var(--dg-accent)", flex: "none" }}>
+                          <DgIcon name="arrow" size={13} />
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-          <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-2xl bg-gradient-to-br from-primary to-primary-dark p-6 text-white shadow-lg">
-              <div className="text-sm uppercase tracking-wide text-white/70">
-                {String(t.detailEvent)}
-              </div>
-              <div className="mt-1 text-3xl font-bold">
-                {locale === "kk" ? "Тегін" : "Бесплатно"}
-              </div>
-              <a href="#book"
-                 className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-primary-dark transition hover:bg-accent-light">
-                {String(t.heroCta)}
-              </a>
+              {/* Additional photos */}
+              {hall.photos && hall.photos.length > 1 && (
+                <div
+                  style={{
+                    marginTop: 36,
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                    gap: 12,
+                  }}
+                >
+                  {hall.photos.slice(1).map((p, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={i}
+                      src={p.url}
+                      alt={(locale === "kk" ? p.alt_kk : p.alt_ru) || name}
+                      style={{
+                        aspectRatio: "4/3",
+                        width: "100%",
+                        objectFit: "cover",
+                        borderRadius: "var(--dg-radius)",
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-            <AvailabilityCalendar
-              halls={[hall]}
-              locale={locale}
-              labels={{
-                selectHall: String(t.calendarSelectHall),
-                busy: String(t.calendarBusy),
-                free: String(t.calendarFree),
-                onRequest: String(t.calendarOnRequest),
-                monthFormat: { month: "long", year: "numeric" },
-              }}
-            />
-          </aside>
+
+            {/* Right: sticky calendar + CTA */}
+            <aside style={{ position: "sticky", top: 96 }}>
+              <div
+                style={{
+                  background: "var(--dg-bg-2)",
+                  border: "1px solid var(--dg-hair)",
+                  borderRadius: "var(--dg-radius)",
+                  padding: "24px",
+                  marginBottom: 20,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 16,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 10.5,
+                    letterSpacing: "0.22em",
+                    textTransform: "uppercase",
+                    color: "var(--dg-text-3)",
+                  }}
+                >
+                  {String(t.detailEvent)}
+                </div>
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 500,
+                    color: "var(--dg-accent)",
+                  }}
+                >
+                  {T("Тегін", "Бесплатно")}
+                </div>
+                <a
+                  href="#book"
+                  className="dg-btn"
+                  style={{ justifyContent: "center", width: "100%" }}
+                >
+                  <DgIcon name="calendar" size={16} />
+                  {String(t.heroCta)}
+                </a>
+              </div>
+              <AvailabilityCalendar
+                halls={[hall]}
+                locale={locale}
+                labels={{
+                  selectHall: String(t.calendarSelectHall),
+                  busy: String(t.calendarBusy),
+                  free: String(t.calendarFree),
+                  onRequest: String(t.calendarOnRequest),
+                  monthFormat: { month: "long", year: "numeric" },
+                }}
+              />
+            </aside>
+          </div>
         </div>
       </section>
 
       {/* Booking form */}
-      <section id="book" className="bg-[color:var(--background)] py-20">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+      <section id="book" className="section">
+        <div className="dg-wrap">
+          <div className="section-bar" style={{ marginBottom: 36 }}>
+            <div className="tag">{T("— Өтінім —", "— Заявка —")}</div>
+            <h2
+              className="h2"
+              dangerouslySetInnerHTML={{
+                __html: T(
+                  "Зал <strong>жалдау өтінімі</strong>",
+                  "<strong>Заявка</strong> на аренду зала"
+                ),
+              }}
+            />
+          </div>
           <RentalRequestForm
             halls={halls}
             locale={locale}

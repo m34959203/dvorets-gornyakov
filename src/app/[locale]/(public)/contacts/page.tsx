@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { isValidLocale, type Locale, getMessages } from "@/lib/i18n";
+import { isValidLocale, type Locale } from "@/lib/i18n";
+import DgPageHero from "@/components/layout/DgPageHero";
+import DgIcon from "@/components/layout/DgIcon";
 import ContactForm from "@/components/features/ContactForm";
 
 const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
@@ -54,105 +56,171 @@ export default async function ContactsPage({
 }) {
   const { locale: localeParam } = await params;
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
-  const messages = getMessages(locale);
-  const t = messages.contacts;
-  const c = messages.common;
+  const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
+
+  const formMessages: Record<string, string> = {
+    name:         T("Аты-жөні", "ФИО"),
+    subject:      T("Тақырып", "Тема"),
+    message:      T("Хабарлама", "Сообщение"),
+    sendSuccess:  T("Хабарлама жіберілді!", "Сообщение отправлено!"),
+    sendError:    T("Жіберу қатесі", "Ошибка отправки"),
+    feedbackTitle: T("Кері байланыс", "Обратная связь"),
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">{t.title}</h1>
+    <div className="dg-home">
+      <DgPageHero
+        crumbs={[
+          { label: T("Басты бет", "Главная"), href: `/${locale}` },
+          { label: T("Байланыс", "Контакты") },
+        ]}
+        tag={T("— Байланыс —", "— Контакты —")}
+        h2Html={T(
+          "<strong>Байланысыңыз</strong> бізбен",
+          "Свяжитесь <strong>с нами</strong>"
+        )}
+        lead={T(
+          "Сарайға келіңіз, қоңырау шалыңыз немесе форм арқылы хабарлама жіберіңіз — біз сізге жауап береміз.",
+          "Приходите, звоните или отправьте сообщение через форму — мы обязательно ответим."
+        )}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Contact Info + Map */}
-        <div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {locale === "kk" ? "Байланыс ақпараты" : "Контактная информация"}
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <svg className="w-6 h-6 text-primary mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <div>
-                  <div className="text-sm text-gray-500">{c.address}</div>
-                  <div className="font-medium text-gray-900">{messages.footer.address}</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <svg className="w-6 h-6 text-primary mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                <div>
-                  <div className="text-sm text-gray-500">{c.phone}</div>
-                  <div className="font-medium text-gray-900">
-                    <a href="tel:+77106362330" className="hover:text-primary">+7 (71063) 6-23-30</a>
-                    <span className="text-xs text-gray-400 ml-2">— {locale === "kk" ? "қабылдау" : "приёмная"}</span>
-                  </div>
-                  <div className="font-medium text-gray-900 mt-1">
-                    <a href="tel:+77106362440" className="hover:text-primary">+7 (71063) 6-24-40</a>
-                    <span className="text-xs text-gray-400 ml-2">— {locale === "kk" ? "касса" : "касса"}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <svg className="w-6 h-6 text-primary mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <div>
-                  <div className="text-sm text-gray-500">{c.email}</div>
-                  <div className="font-medium text-gray-900">
-                    <a href="mailto:info@dvorets-gornyakov.kz" className="hover:text-primary">info@dvorets-gornyakov.kz</a>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <svg className="w-6 h-6 text-primary mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                  <div className="text-sm text-gray-500">{c.workingHours}</div>
-                  <div className="font-medium text-gray-900">
-                    {locale === "kk" ? "Дс-Жм: 09:00-18:00, Сн-Жс: 10:00-17:00" : "Пн-Пт: 09:00-18:00, Сб-Вс: 10:00-17:00"}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <section className="section" style={{ borderTop: 0 }}>
+        <div className="dg-wrap">
+          <div className="contact-grid">
 
-          {/* Map placeholder */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="aspect-video bg-gray-200 flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <svg className="w-12 h-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                </svg>
-                <p className="text-sm">
-                  {locale === "kk" ? "101300, Ұлытау обл., Сәтбаев қ., Қ.И. Сәтбаев д-лы, 106" : "101300, область Ұлытау, г. Сатпаев, пр. К.И. Сатпаева, 106"}
-                </p>
-                <p className="text-xs mt-1 text-gray-400">47.8889, 67.5429</p>
+            {/* ─── Left: contact info ─── */}
+            <div>
+              <div className="contact-list">
+                {/* Address */}
+                <div className="contact-row">
+                  <DgIcon name="pin" size={20} />
+                  <div>
+                    <div className="lab">{T("Мекенжай", "Адрес")}</div>
+                    <div className="val">
+                      {T(
+                        "К.И. Сәтбаев даңғылы, 106",
+                        "Проспект К.И. Сатпаева, 106"
+                      )}
+                      <br />
+                      {T(
+                        "101300, Сатпаев қ., Қазақстан",
+                        "101300, г. Сатпаев, Казахстан"
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Phone support */}
+                <div className="contact-row">
+                  <DgIcon name="phone" size={20} />
+                  <div>
+                    <div className="lab">{T("Телефон", "Телефон")}</div>
+                    <div className="val">
+                      <a href="tel:+77106362330">+7 (71063) 6-23-30</a>
+                      <span style={{ opacity: 0.55, marginLeft: 8 }}>
+                        — {T("қабылдау", "приёмная")}
+                      </span>
+                      <br />
+                      <a href="tel:+77106362440">+7 (71063) 6-24-40</a>
+                      <span style={{ opacity: 0.55, marginLeft: 8 }}>
+                        — {T("касса", "касса")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="contact-row">
+                  <DgIcon name="mail" size={20} />
+                  <div>
+                    <div className="lab">Email</div>
+                    <div className="val">
+                      <a href="mailto:info@dvorets-gornyakov.kz">
+                        info@dvorets-gornyakov.kz
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hours */}
+                <div className="contact-row">
+                  <DgIcon name="clock" size={20} />
+                  <div>
+                    <div className="lab">{T("Жұмыс уақыты", "Часы работы")}</div>
+                    <div className="val">
+                      {T("Дс–Жм: 09:00–18:00", "Пн–Пт: 09:00–18:00")}
+                      <br />
+                      {T("Сн–Жс: 10:00–17:00", "Сб–Вс: 10:00–17:00")}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Socials row */}
+              <div className="dg-foot-socials" style={{ marginTop: 36 }}>
+                <a
+                  href="https://www.facebook.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                >
+                  <DgIcon name="fb" size={22} />
+                </a>
+                <a
+                  href="https://www.instagram.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                >
+                  <DgIcon name="ig" size={22} />
+                </a>
+                <a
+                  href="https://www.youtube.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube"
+                >
+                  <DgIcon name="yt" size={22} />
+                </a>
+              </div>
+
+              {/* Map link */}
+              <div style={{ marginTop: 32 }}>
                 <a
                   href="https://2gis.kz/satpaev"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline mt-2 inline-block"
+                  className="dg-btn dg-btn-ghost"
+                  style={{ display: "inline-flex" }}
                 >
-                  {locale === "kk" ? "2GIS-те ашу →" : "Открыть в 2GIS →"}
+                  <DgIcon name="pin" size={15} />
+                  {T("2GIS-те ашу", "Открыть в 2GIS")}
+                  <DgIcon name="arrow" size={15} />
                 </a>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Feedback Form */}
-        <div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">{t.feedbackTitle}</h2>
-            <ContactForm locale={locale} messages={t} />
+            {/* ─── Right: feedback form ─── */}
+            <div>
+              <div
+                className="section-bar"
+                style={{ marginBottom: 28 }}
+              >
+                <div className="tag">{T("— Форма —", "— Форма —")}</div>
+                <h2
+                  className="h2"
+                  dangerouslySetInnerHTML={{
+                    __html: T("Кері байланыс", "Обратная <strong>связь</strong>"),
+                  }}
+                />
+              </div>
+              <ContactForm locale={locale} messages={formMessages} />
+            </div>
+
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

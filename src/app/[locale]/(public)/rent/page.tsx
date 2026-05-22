@@ -1,15 +1,79 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getMessages, isValidLocale, type Locale } from "@/lib/i18n";
+import { isValidLocale, type Locale, getLocalizedField, getMessages } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
 import type { Hall } from "@/lib/rent/types";
-import HallCard from "@/components/rent/HallCard";
+import DgPageHero from "@/components/layout/DgPageHero";
+import DgIcon from "@/components/layout/DgIcon";
 import AvailabilityCalendar from "@/components/rent/AvailabilityCalendar";
 import RentalRequestForm from "@/components/rent/RentalRequestForm";
 import RentFAQ from "@/components/rent/RentFAQ";
-import RentalChecklist from "@/components/features/RentalChecklist";
 
 export const dynamic = "force-dynamic";
+
+const DEMO_HALLS: Hall[] = [
+  {
+    id: "demo-grand",
+    slug: "grand",
+    name_kk: "Үлкен концерт залы",
+    name_ru: "Большой концертный зал",
+    description_kk: "Сарайдың басты залы — кең сахна, кәсіби дыбыс және жарық жүйелері, балкон. Концерт, фестиваль және үлкен іс-шараларға ыңғайлы.",
+    description_ru: "Главный зал дворца — просторная сцена, профессиональный звук и свет, балкон. Подходит для концертов, фестивалей и крупных мероприятий.",
+    capacity: 650,
+    equipment_kk: ["Кәсіби дыбыс жүйесі", "Сахналық жарық", "LED-экран", "3 гримёрка", "Wi-Fi", "Кондиционер"],
+    equipment_ru: ["Профессиональный звук", "Сценический свет", "LED-экран", "3 гримёрки", "Wi-Fi", "Кондиционер"],
+    hourly_price: 0,
+    event_price_from: 0,
+    photos: [{ url: "/photos/dvorets-08.webp", alt_ru: "Большой зал", alt_kk: "Үлкен зал" }],
+    layout_url: null,
+    is_active: true,
+    sort_order: 10,
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
+  },
+  {
+    id: "demo-chamber",
+    slug: "chamber",
+    name_kk: "Камералық зал",
+    name_ru: "Камерный зал",
+    description_kk: "Акустикалық ортасы жақсы шағын зал. Камералық концерт, презентация, лекция, қонақ жиналыстарына ыңғайлы.",
+    description_ru: "Небольшой зал с хорошей акустикой. Подходит для камерных концертов, презентаций, лекций и встреч.",
+    capacity: 120,
+    equipment_kk: ["Акустикалық жүйе", "Проектор", "Экран", "Wi-Fi", "Сахна"],
+    equipment_ru: ["Акустическая система", "Проектор", "Экран", "Wi-Fi", "Сцена"],
+    hourly_price: 0,
+    event_price_from: 0,
+    photos: [{ url: "/photos/dvorets-10.webp", alt_ru: "Камерный зал", alt_kk: "Камералық зал" }],
+    layout_url: null,
+    is_active: true,
+    sort_order: 20,
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
+  },
+  {
+    id: "demo-rehearsal",
+    slug: "rehearsal",
+    name_kk: "Жаттығу залы",
+    name_ru: "Репетиционный зал",
+    description_kk: "Айна қабырғалы, таза еденді жаттығу залы. Би, вокал және театр ұжымдарына арналған.",
+    description_ru: "Зал с зеркальной стеной и ровным полом. Для танцевальных, вокальных и театральных репетиций.",
+    capacity: 40,
+    equipment_kk: ["Айналар", "Станок", "Пианино", "Дыбыс жүйесі", "Киім ауыстыру бөлмесі"],
+    equipment_ru: ["Зеркала", "Станок", "Пианино", "Аудио-система", "Раздевалка"],
+    hourly_price: 0,
+    event_price_from: 0,
+    photos: [{ url: "/photos/dvorets-12.webp", alt_ru: "Репетиционный зал", alt_kk: "Жаттығу залы" }],
+    layout_url: null,
+    is_active: true,
+    sort_order: 30,
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
+  },
+];
+
+function getBaseUrl(): string {
+  return (process.env.NEXT_PUBLIC_APP_URL ?? "https://dvorets-gornyakov.kz").replace(/\/$/, "");
+}
 
 export async function generateMetadata({
   params,
@@ -18,26 +82,37 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: lp } = await params;
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
-  const m = getMessages(locale);
-  const r = m.rent as unknown as Record<string, string>;
+  const title =
+    locale === "kk"
+      ? "Залдарды жалдау — Ш. Ділдебаев атындағы тау-кенші сарайы"
+      : "Аренда залов — Дворец горняков им. Ш. Дільдебаева";
+  const description =
+    locale === "kk"
+      ? "Сәтбаевта концерт, камералық және жаттығу залдарын жалдау. Онлайн өтінім."
+      : "Аренда концертного, камерного и репетиционного залов в г. Сатпаев. Онлайн заявка.";
+  const baseUrl = getBaseUrl();
   return {
-    title: r.metaTitle,
-    description: r.metaDescription,
-    openGraph: { title: r.metaTitle, description: r.metaDescription },
+    title,
+    description,
+    openGraph: { title, description },
+    alternates: {
+      canonical: `${baseUrl}/${locale}/rent`,
+      languages: { kk: `${baseUrl}/kk/rent`, ru: `${baseUrl}/ru/rent` },
+    },
   };
 }
 
 async function loadHalls(): Promise<Hall[]> {
   try {
-    return await getMany<Hall>(
+    const rows = await getMany<Hall>(
       `SELECT id, slug, name_kk, name_ru, description_kk, description_ru,
               capacity, equipment_kk, equipment_ru, hourly_price, event_price_from,
               photos, layout_url, is_active, sort_order, created_at, updated_at
          FROM halls WHERE is_active = TRUE ORDER BY sort_order ASC, name_ru ASC`
     );
+    return rows.length ? rows : DEMO_HALLS;
   } catch {
-    // DB not available — fallback to empty list; page still renders
-    return [];
+    return DEMO_HALLS;
   }
 }
 
@@ -48,116 +123,120 @@ export default async function RentPage({
 }) {
   const { locale: lp } = await params;
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
+
   const messages = getMessages(locale);
   const t = messages.rent as unknown as Record<string, unknown>;
 
   const halls = await loadHalls();
-
   const faq = (t.faq as { q: string; a: string }[]) ?? [];
 
-  const rentalChecklistMessages = messages.rental as unknown as Parameters<typeof RentalChecklist>[0]["messages"];
-
   return (
-    <div>
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden bg-primary-dark text-white">
-        <div
-          className="absolute inset-0 -z-20 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "linear-gradient(135deg, rgba(9,84,86,0.92) 0%, rgba(13,115,119,0.75) 50%, rgba(26,26,46,0.9) 100%), url(/hero/hero.jpg)",
-          }}
-        />
-        <div className="relative mx-auto flex max-w-5xl flex-col items-center px-4 py-24 text-center sm:px-6 sm:py-28 lg:py-32">
-          <nav className="mb-6 text-xs text-white/70" aria-label="breadcrumb">
-            <Link href={`/${locale}`} className="hover:text-white">
-              {String(t.breadcrumbHome)}
-            </Link>
-            <span className="mx-2">/</span>
-            <span className="text-white">{String(t.breadcrumbHere)}</span>
-          </nav>
-          <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.22em] text-white/90 backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            {String(t.heroBadge)}
-          </span>
-          <h1 className="max-w-3xl text-balance text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
-            {String(t.heroTitle)}
-          </h1>
-          <p className="mt-5 max-w-2xl text-lg text-white/85">{String(t.heroLead)}</p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a href="#request"
-               className="inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-base font-semibold text-primary-dark shadow-lg shadow-accent/20 transition hover:bg-accent-light">
-              {String(t.heroCta)}
-            </a>
-            <a href="#halls"
-               className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-7 py-3.5 text-base font-semibold text-white backdrop-blur transition hover:bg-white/20">
-              {String(t.heroScroll)}
-            </a>
-          </div>
-        </div>
-      </section>
+    <div className="dg-home">
+      <a href="#halls" className="dg-skip-link">{T("Залдар тізіміне өту", "Перейти к залам")}</a>
 
-      {/* Halls */}
-      <section id="halls" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">{String(t.hallsTitle)}</h2>
-          <p className="mt-3 text-lg text-gray-600">{String(t.hallsLead)}</p>
-        </div>
-        {halls.length > 0 ? (
-          <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {halls.map((h) => (
-              <HallCard
-                key={h.id}
-                hall={h}
-                locale={locale}
-                labels={{
-                  capacity: String(t.hallCapacity),
-                  from: String(t.hallFrom),
-                  currency: String(t.hallCurrency),
-                  details: String(t.hallDetails),
-                }}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="mt-12 text-center text-gray-500">—</p>
+      <DgPageHero
+        crumbs={[
+          { label: T("Басты бет", "Главная"), href: `/${locale}` },
+          { label: T("Зал жалдау", "Аренда залов") },
+        ]}
+        tag={T("— Залдар —", "— Залы —")}
+        h2Html={T(
+          "Іс-шараға <strong>зал жалдау</strong>",
+          "<strong>Аренда</strong> залов"
         )}
+        lead={T(
+          "40, 120 және 650 орынға арналған үш зал. Дыбыс, жарық, сахна — бәрі дайын.",
+          "Три зала на 40, 120 и 650 мест. Звук, свет, сцена — всё готово к вашему мероприятию."
+        )}
+      />
+
+      {/* Halls grid */}
+      <section id="halls" className="section" style={{ borderTop: 0 }}>
+        <div className="dg-wrap">
+          <div className="halls-grid">
+            {halls.map((h) => {
+              const name = getLocalizedField(h as unknown as Record<string, unknown>, "name", locale);
+              const desc = getLocalizedField(h as unknown as Record<string, unknown>, "description", locale);
+              const cover =
+                h.photos?.[0]?.url ||
+                (h.slug === "grand"
+                  ? "/photos/dvorets-08.webp"
+                  : h.slug === "chamber"
+                  ? "/photos/dvorets-10.webp"
+                  : "/photos/dvorets-12.webp");
+              const alt = h.photos?.[0]
+                ? (locale === "kk" ? h.photos[0].alt_kk : h.photos[0].alt_ru) || name
+                : name;
+              return (
+                <Link key={h.id} href={`/${locale}/rent/${h.slug}`} className="hall">
+                  <div className="hall-media">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={cover} alt={alt} />
+                  </div>
+                  <div className="hall-body">
+                    <h3 className="hall-title">{name}</h3>
+                    <div className="hall-seats">
+                      <DgIcon name="users" size={14} />
+                      {h.capacity} {T("орын", "мест")}
+                    </div>
+                    <p className="hall-desc">{desc}</p>
+                    <div className="hall-foot">
+                      <span style={{ fontSize: 13, color: "var(--dg-text-2)" }}>
+                        {T("Тегін", "Бесплатно")}
+                      </span>
+                      <span className="section-link" style={{ fontSize: 13 }}>
+                        {T("Толығырақ", "Подробнее")}
+                        <DgIcon name="arrow" size={14} />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </section>
 
-      {/* Checklist (reuse) */}
-      <RentalChecklist locale={locale} messages={rentalChecklistMessages} />
-
-      {/* Calendar */}
+      {/* Availability calendar */}
       {halls.length > 0 && (
-        <section className="bg-white py-16">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">{String(t.calendarTitle)}</h2>
-              <p className="mt-3 text-gray-600">{String(t.calendarLead)}</p>
+        <section className="section">
+          <div className="dg-wrap">
+            <div className="section-bar" style={{ marginBottom: 36 }}>
+              <div className="tag">{T("— Кесте —", "— Расписание —")}</div>
+              <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Залдардың <strong>бос уақыты</strong>", "Свободное <strong>время залов</strong>") }} />
             </div>
-            <div className="mt-10">
-              <AvailabilityCalendar
-                halls={halls}
-                locale={locale}
-                labels={{
-                  selectHall: String(t.calendarSelectHall),
-                  busy: String(t.calendarBusy),
-                  free: String(t.calendarFree),
-                  onRequest: String(t.calendarOnRequest),
-                  monthFormat: { month: "long", year: "numeric" },
-                }}
-              />
-            </div>
+            <AvailabilityCalendar
+              halls={halls}
+              locale={locale}
+              labels={{
+                selectHall: String(t.calendarSelectHall),
+                busy: String(t.calendarBusy),
+                free: String(t.calendarFree),
+                onRequest: String(t.calendarOnRequest),
+                monthFormat: { month: "long", year: "numeric" },
+              }}
+            />
           </div>
         </section>
       )}
 
       {/* FAQ */}
-      <RentFAQ title={String(t.faqTitle)} items={faq} />
+      {faq.length > 0 && (
+        <section className="section">
+          <div className="dg-wrap">
+            <RentFAQ title={String(t.faqTitle)} items={faq} />
+          </div>
+        </section>
+      )}
 
       {/* Request form */}
-      <section id="request" className="bg-[color:var(--background)] py-20">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <section id="request" className="section">
+        <div className="dg-wrap">
+          <div className="section-bar" style={{ marginBottom: 36 }}>
+            <div className="tag">{T("— Өтінім —", "— Заявка —")}</div>
+            <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Зал <strong>жалдау өтінімі</strong>", "<strong>Заявка</strong> на аренду зала") }} />
+          </div>
           {halls.length > 0 ? (
             <RentalRequestForm
               halls={halls}
@@ -187,7 +266,7 @@ export default async function RentPage({
               }}
             />
           ) : (
-            <p className="text-center text-gray-500">—</p>
+            <p style={{ color: "var(--dg-text-2)", textAlign: "center" }}>—</p>
           )}
         </div>
       </section>

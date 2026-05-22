@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Hall } from "@/lib/rent/types";
 import type { Locale } from "@/lib/i18n";
 import { getLocalizedField } from "@/lib/i18n";
+import DgIcon from "@/components/layout/DgIcon";
 
 interface Props {
   halls: Hall[];
@@ -71,68 +72,155 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
       : ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <select
-          value={hallId}
-          onChange={(e) => setHallId(e.target.value)}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm"
-          aria-label={labels.selectHall}
-        >
-          {halls.map((h) => (
-            <option key={h.id} value={h.id}>
-              {getLocalizedField(h, "name", locale)}
-            </option>
-          ))}
-        </select>
-        <div className="flex items-center gap-2">
+    <div
+      style={{
+        background: "var(--dg-bg-2)",
+        border: "1px solid var(--dg-hair)",
+        borderRadius: "var(--dg-radius)",
+        padding: 24,
+      }}
+    >
+      {/* Controls */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 20,
+        }}
+      >
+        {halls.length > 1 && (
+          <select
+            value={hallId}
+            onChange={(e) => setHallId(e.target.value)}
+            aria-label={labels.selectHall}
+            style={{ flex: 1, minWidth: 160 }}
+          >
+            {halls.map((h) => (
+              <option key={h.id} value={h.id}>
+                {getLocalizedField(h as unknown as Record<string, unknown>, "name", locale)}
+              </option>
+            ))}
+          </select>
+        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <button
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
-            className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50"
             aria-label="prev"
+            style={{
+              background: "transparent",
+              border: "1px solid var(--dg-hair-2)",
+              borderRadius: 2,
+              padding: 6,
+              cursor: "pointer",
+              color: "var(--dg-text)",
+              display: "grid",
+              placeItems: "center",
+              transition: "border-color .15s, color .15s",
+            }}
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
+            <DgIcon name="chev-l" size={16} />
           </button>
-          <div className="min-w-40 text-center font-semibold capitalize text-gray-900">
+          <div
+            style={{
+              minWidth: 160,
+              textAlign: "center",
+              fontSize: 13,
+              fontWeight: 500,
+              letterSpacing: "0.06em",
+              textTransform: "capitalize",
+              color: "var(--dg-text)",
+            }}
+          >
             {cursor.toLocaleDateString(loc, labels.monthFormat)}
           </div>
           <button
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
-            className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50"
             aria-label="next"
+            style={{
+              background: "transparent",
+              border: "1px solid var(--dg-hair-2)",
+              borderRadius: 2,
+              padding: 6,
+              cursor: "pointer",
+              color: "var(--dg-text)",
+              display: "grid",
+              placeItems: "center",
+              transition: "border-color .15s, color .15s",
+            }}
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
+            <DgIcon name="chev-r" size={16} />
           </button>
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-500">
+      {/* Weekday headers */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(7, 1fr)",
+          gap: 4,
+          textAlign: "center",
+          marginBottom: 4,
+        }}
+      >
         {weekdays.map((w) => (
-          <div key={w} className="py-2">{w}</div>
+          <div
+            key={w}
+            style={{
+              fontSize: 10,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "var(--dg-text-3)",
+              paddingBlock: 6,
+            }}
+          >
+            {w}
+          </div>
         ))}
       </div>
-      <div className="mt-1 grid grid-cols-7 gap-1">
+
+      {/* Day cells */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
         {days.map((d, i) => {
-          if (!d) return <div key={i} className="aspect-square" />;
+          if (!d) return <div key={i} style={{ aspectRatio: "1" }} />;
           const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
           const isPast = d < today;
           const isBusy = busy.has(iso);
+
+          const bg = isPast
+            ? "transparent"
+            : isBusy
+            ? "rgba(248,113,113,0.12)"
+            : "rgba(52,211,153,0.10)";
+          const color = isPast
+            ? "var(--dg-text-3)"
+            : isBusy
+            ? "#f87171"
+            : "#34d399";
+          const ring = isPast
+            ? "none"
+            : isBusy
+            ? "1px solid rgba(248,113,113,0.3)"
+            : "1px solid rgba(52,211,153,0.25)";
+
           return (
             <div
               key={i}
-              className={
-                "relative grid aspect-square place-items-center rounded-lg text-sm transition " +
-                (isPast
-                  ? "bg-gray-50 text-gray-300"
-                  : isBusy
-                    ? "bg-red-50 text-red-700 ring-1 ring-red-200"
-                    : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 hover:bg-emerald-100")
-              }
               title={isBusy ? labels.busy : labels.free}
+              style={{
+                aspectRatio: "1",
+                display: "grid",
+                placeItems: "center",
+                borderRadius: 3,
+                fontSize: 12,
+                background: bg,
+                color,
+                border: ring,
+                transition: "background .15s",
+              }}
             >
               {d.getDate()}
             </div>
@@ -140,14 +228,48 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
         })}
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-gray-600">
-        <span className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded bg-emerald-200" /> {labels.free}
+      {/* Legend */}
+      <div
+        style={{
+          marginTop: 16,
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 16,
+          fontSize: 11,
+          color: "var(--dg-text-3)",
+          letterSpacing: "0.1em",
+        }}
+      >
+        <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <span
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: 2,
+              background: "rgba(52,211,153,0.3)",
+              flexShrink: 0,
+            }}
+          />
+          {labels.free}
         </span>
-        <span className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded bg-red-200" /> {labels.busy}
+        <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <span
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: 2,
+              background: "rgba(248,113,113,0.3)",
+              flexShrink: 0,
+            }}
+          />
+          {labels.busy}
         </span>
-        {loading && <span className="ml-auto text-gray-400">…</span>}
+        {loading && (
+          <span style={{ marginLeft: "auto", color: "var(--dg-text-3)", fontSize: 18, lineHeight: 1 }}>
+            …
+          </span>
+        )}
       </div>
     </div>
   );

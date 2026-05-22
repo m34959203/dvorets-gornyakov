@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
-import { getMessages, isValidLocale, type Locale } from "@/lib/i18n";
+import Link from "next/link";
+import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
-import NewsCard from "@/components/features/NewsCard";
+import DgPageHero from "@/components/layout/DgPageHero";
 
 export const dynamic = "force-dynamic";
 
 const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
 const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
+
+const FALLBACK_PHOTOS = [
+  "/photos/dvorets-02.webp",
+  "/photos/dvorets-06.webp",
+  "/photos/dvorets-13.webp",
+];
 
 function getBaseUrl(): string {
   const env = process.env.NEXT_PUBLIC_APP_URL;
@@ -119,6 +126,16 @@ async function loadNews(): Promise<{ items: NewsItem[]; isDemo: boolean }> {
   }
 }
 
+function formatDate(isoString: string, locale: Locale): string {
+  const d = new Date(isoString);
+  return d.toLocaleDateString(locale === "kk" ? "kk-KZ" : "ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Almaty",
+  });
+}
+
 export default async function NewsPage({
   params,
 }: {
@@ -126,23 +143,67 @@ export default async function NewsPage({
 }) {
   const { locale: localeParam } = await params;
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
-  const messages = getMessages(locale);
-  const t = messages.news;
+  const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
   const { items } = await loadNews();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">{t.title}</h1>
-      {items.length === 0 ? (
-        <p className="text-gray-500">{t.noNews}</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
-            <NewsCard key={item.id} news={item} locale={locale} />
-          ))}
+    <div className="dg-home">
+      <a href="#news-grid" className="dg-skip-link">
+        {T("Жаңалықтарға өту", "Перейти к новостям")}
+      </a>
+      <DgPageHero
+        crumbs={[
+          { label: T("Басты бет", "Главная"), href: `/${locale}` },
+          { label: T("Жаңалықтар", "Новости") },
+        ]}
+        tag={T("— Жаңалықтар —", "— Новости —")}
+        h2Html={T(
+          "Соңғы <strong>жаңалықтар</strong>",
+          "Последние <strong>новости</strong>"
+        )}
+        lead={T(
+          "Сарайдың өмірінен ең маңызды оқиғалар, жетістіктер мен хабарландырулар.",
+          "Главные события, достижения и анонсы из жизни Дворца горняков."
+        )}
+      />
+
+      <section className="section" style={{ borderTop: 0 }}>
+        <div className="dg-wrap">
+          <div id="news-grid" className="news-grid">
+            {items.map((n, idx) => {
+              const title = getLocalizedField(
+                n as unknown as Record<string, unknown>,
+                "title",
+                locale
+              );
+              const excerpt = getLocalizedField(
+                n as unknown as Record<string, unknown>,
+                "excerpt",
+                locale
+              );
+              const imgSrc =
+                n.image_url ?? FALLBACK_PHOTOS[idx % FALLBACK_PHOTOS.length];
+              const dateStr = formatDate(n.published_at, locale);
+
+              return (
+                <Link
+                  key={n.id}
+                  href={`/${locale}/news/${n.slug}`}
+                  className="news-item"
+                >
+                  <div className="news-media">
+                    <img src={imgSrc} alt={title} loading="lazy" />
+                  </div>
+                  <p className="news-date">{dateStr}</p>
+                  <h3 className="news-title">{title}</h3>
+                  {excerpt && <p className="news-excerpt">{excerpt}</p>}
+                </Link>
+              );
+            })}
+          </div>
         </div>
-      )}
+      </section>
     </div>
   );
 }
