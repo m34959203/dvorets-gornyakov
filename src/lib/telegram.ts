@@ -5,9 +5,14 @@ interface TelegramResult {
   description?: string;
 }
 
-export async function sendTelegramMessage(text: string, parseMode: "HTML" | "Markdown" = "HTML"): Promise<boolean> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const channelId = process.env.TELEGRAM_CHANNEL_ID;
+export async function sendTelegramMessage(
+  text: string,
+  parseMode: "HTML" | "Markdown" = "HTML",
+  creds?: { token?: string | null; chatId?: string | null }
+): Promise<boolean> {
+  // Приоритет — креды из конфига (БД), фолбэк на env
+  const token = creds?.token || process.env.TELEGRAM_BOT_TOKEN;
+  const channelId = creds?.chatId || process.env.TELEGRAM_CHANNEL_ID;
 
   if (!token || !channelId) {
     console.warn("Telegram not configured");

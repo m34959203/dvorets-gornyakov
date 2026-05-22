@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getMany } from "@/lib/db";
-import AutoPublishToggles from "@/components/features/AutoPublishToggles";
 
 export const dynamic = "force-dynamic";
 
@@ -66,7 +66,11 @@ export default async function SocialPublicationsPage({
         )}
       </p>
 
-      <AutoPublishToggles locale={locale} />
+      <p className="mb-6 text-sm">
+        <Link href={`/${locale}/admin/social-media`} className="font-medium text-primary hover:underline">
+          {T("← Соцсеттер баптаулары (қосу/токендер)", "← Настройки соцсетей (включение/токены)")}
+        </Link>
+      </p>
 
       {rows.length === 0 ? (
         <p className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">

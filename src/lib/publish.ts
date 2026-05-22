@@ -4,23 +4,17 @@ import { sendInstagramPost } from "@/lib/instagram";
 import { sendFacebookLinkPost, sendFacebookPhotoPost } from "@/lib/facebook";
 import { getDefaultTemplate, renderTemplate } from "@/lib/social-templates";
 import { alreadyPublished, recordPublication, type SocialPlatform, type PublishKind } from "@/lib/social-publications";
+import { getAllConfigs, type SocialConfig } from "@/lib/social-config";
 
 export type { PublishKind };
 
 async function getSetting(key: string): Promise<string | null> {
   try {
-    const row = await getOne<{ value: string }>(
-      `SELECT value FROM site_settings WHERE key = $1`,
-      [key]
-    );
+    const row = await getOne<{ value: string }>(`SELECT value FROM site_settings WHERE key = $1`, [key]);
     return row?.value ?? null;
   } catch {
     return null;
   }
-}
-
-async function enabled(key: string): Promise<boolean> {
-  return (await getSetting(key)) === "true";
 }
 
 async function getBaseUrl(): Promise<string> {
@@ -66,21 +60,23 @@ const FB_FALLBACK_NEWS =
 const FB_FALLBACK_EVENT =
   "🎭 {{title_ru}}\n🇰🇿 {{title_kk}}\n\n📅 {{date_ru}}\n📍 {{location}}\n\nПодробнее / Толығырақ: {{url}}";
 
+interface Fallbacks { telegram: string; instagram: string; facebook: string }
+
 async function renderForPlatform(
   platform: SocialPlatform,
   kind: "news" | "event",
   vars: Record<string, string>,
-  fallback: string
+  fallback: string,
+  lang: "kk" | "ru"
 ): Promise<string> {
   const tpl = await getDefaultTemplate(platform, kind);
-  const body = tpl?.body_ru || tpl?.body_kk || fallback;
+  const body = lang === "kk"
+    ? tpl?.body_kk || tpl?.body_ru || fallback
+    : tpl?.body_ru || tpl?.body_kk || fallback;
   return renderTemplate(body, vars);
 }
 
-/**
- * Публикует на одну платформу с дедупом и логированием (по образцу AIMAK):
- * пропускает, если уже была успешная публикация элемента; пишет результат в журнал.
- */
+/** Дедуп + лог одной платформы (по образцу AIMAK). */
 async function runPlatform(
   platform: SocialPlatform,
   kind: PublishKind,
@@ -106,80 +102,89 @@ async function runPlatform(
   }
 }
 
-export async function publishNews(news: NewsPayload): Promise<void> {
-  const base = await getBaseUrl();
-  const url = `${base}/ru/news/${news.slug}`;
-  const itemId = news.slug;
-  const vars = {
-    title_ru: news.title_ru,
-    title_kk: news.title_kk,
-    excerpt_ru: news.excerpt_ru,
-    excerpt_kk: news.excerpt_kk,
-    url,
-  };
-  const img = absolutize(news.image_url, base);
+/** Общий публикатор: проходит по платформам, конфиг и креды берёт из БД (env-фолбэк в send-функциях). */
+async function publishItem(opts: {
+  kind: PublishKind;
+  itemId: string;
+  templateKind: "news" | "event";
+  vars: Record<string, string>;
+  img: string | null;
+  url: string;
+  fb: Fallbacks;
+}): Promise<void> {
+  const { kind, itemId, templateKind, vars, img, url, fb } = opts;
+  const configs = await getAllConfigs();
+  const cfg = (p: SocialPlatform): SocialConfig | undefined => configs.find((c) => c.platform === p);
+  const lang = (p: SocialPlatform): "kk" | "ru" => (cfg(p)?.default_language === "ru" ? "ru" : "kk");
 
-  if (await enabled("auto_telegram_news")) {
-    await runPlatform("telegram", "news", itemId, async () => {
-      const text = await renderForPlatform("telegram", "news", vars, TG_FALLBACK_NEWS);
-      return { ok: await sendTelegramMessage(text, "HTML") };
+  const tg = cfg("telegram");
+  if (tg?.enabled) {
+    await runPlatform("telegram", kind, itemId, async () => {
+      const text = await renderForPlatform("telegram", templateKind, vars, fb.telegram, lang("telegram"));
+      return { ok: await sendTelegramMessage(text, "HTML", { token: tg.bot_token, chatId: tg.chat_id }) };
     });
   }
 
-  if (await enabled("auto_instagram_news")) {
-    await runPlatform("instagram", "news", itemId, async () => {
+  const ig = cfg("instagram");
+  if (ig?.enabled) {
+    await runPlatform("instagram", kind, itemId, async () => {
       if (!img) return { ok: false, error: "no image_url" };
-      const caption = await renderForPlatform("instagram", "news", vars, IG_FALLBACK_NEWS);
-      return { ok: await sendInstagramPost(img, caption.slice(0, 2200)) };
+      const caption = await renderForPlatform("instagram", templateKind, vars, fb.instagram, lang("instagram"));
+      return { ok: await sendInstagramPost(img, caption.slice(0, 2200), { token: ig.access_token, igUserId: ig.page_id }) };
     });
   }
 
-  if (await enabled("auto_facebook_news")) {
-    await runPlatform("facebook", "news", itemId, async () => {
-      const message = await renderForPlatform("facebook", "news", vars, FB_FALLBACK_NEWS);
-      const id = img ? await sendFacebookPhotoPost(img, message) : await sendFacebookLinkPost(message, url);
+  const f = cfg("facebook");
+  if (f?.enabled) {
+    await runPlatform("facebook", kind, itemId, async () => {
+      const message = await renderForPlatform("facebook", templateKind, vars, fb.facebook, lang("facebook"));
+      const creds = { pageId: f.facebook_page_id, token: f.facebook_access_token };
+      const id = img ? await sendFacebookPhotoPost(img, message, creds) : await sendFacebookLinkPost(message, url, creds);
       return { ok: Boolean(id), externalId: id };
     });
   }
 }
 
+export async function publishNews(news: NewsPayload): Promise<void> {
+  const base = await getBaseUrl();
+  const url = `${base}/ru/news/${news.slug}`;
+  await publishItem({
+    kind: "news",
+    itemId: news.slug,
+    templateKind: "news",
+    vars: {
+      title_ru: news.title_ru,
+      title_kk: news.title_kk,
+      excerpt_ru: news.excerpt_ru,
+      excerpt_kk: news.excerpt_kk,
+      url,
+    },
+    img: absolutize(news.image_url, base),
+    url,
+    fb: { telegram: TG_FALLBACK_NEWS, instagram: IG_FALLBACK_NEWS, facebook: FB_FALLBACK_NEWS },
+  });
+}
+
 export async function publishEvent(ev: EventPayload): Promise<void> {
   const base = await getBaseUrl();
   const url = `${base}/ru/events/${ev.id}`;
-  const itemId = ev.id;
   const d = new Date(ev.start_date);
   const date_ru = d.toLocaleString("ru-RU", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Almaty" });
   const date_kk = d.toLocaleString("kk-KZ", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Almaty" });
-  const vars = {
-    title_ru: ev.title_ru,
-    title_kk: ev.title_kk,
-    date_ru,
-    date_kk,
-    location: ev.location || "",
+  await publishItem({
+    kind: "events",
+    itemId: ev.id,
+    templateKind: "event",
+    vars: {
+      title_ru: ev.title_ru,
+      title_kk: ev.title_kk,
+      date_ru,
+      date_kk,
+      location: ev.location || "",
+      url,
+    },
+    img: absolutize(ev.image_url || null, base),
     url,
-  };
-  const img = absolutize(ev.image_url || null, base);
-
-  if (await enabled("auto_telegram_events")) {
-    await runPlatform("telegram", "events", itemId, async () => {
-      const text = await renderForPlatform("telegram", "event", vars, TG_FALLBACK_EVENT);
-      return { ok: await sendTelegramMessage(text, "HTML") };
-    });
-  }
-
-  if (await enabled("auto_instagram_events")) {
-    await runPlatform("instagram", "events", itemId, async () => {
-      if (!img) return { ok: false, error: "no image_url" };
-      const caption = await renderForPlatform("instagram", "event", vars, IG_FALLBACK_EVENT);
-      return { ok: await sendInstagramPost(img, caption.slice(0, 2200)) };
-    });
-  }
-
-  if (await enabled("auto_facebook_events")) {
-    await runPlatform("facebook", "events", itemId, async () => {
-      const message = await renderForPlatform("facebook", "event", vars, FB_FALLBACK_EVENT);
-      const id = img ? await sendFacebookPhotoPost(img, message) : await sendFacebookLinkPost(message, url);
-      return { ok: Boolean(id), externalId: id };
-    });
-  }
+    fb: { telegram: TG_FALLBACK_EVENT, instagram: IG_FALLBACK_EVENT, facebook: FB_FALLBACK_EVENT },
+  });
 }

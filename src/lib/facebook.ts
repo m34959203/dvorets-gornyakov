@@ -9,19 +9,24 @@ interface FbResp {
   error?: { message?: string };
 }
 
-function creds(): { pageId: string; token: string } | null {
-  const pageId = process.env.FACEBOOK_PAGE_ID;
-  const token = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+export interface FbCreds {
+  pageId?: string | null;
+  token?: string | null;
+}
+
+function creds(override?: FbCreds): { pageId: string; token: string } | null {
+  const pageId = override?.pageId || process.env.FACEBOOK_PAGE_ID;
+  const token = override?.token || process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
   if (!pageId || !token) {
-    console.warn("[facebook] FACEBOOK_PAGE_ID / FACEBOOK_PAGE_ACCESS_TOKEN not set — skip");
+    console.warn("[facebook] page id / access token not set — skip");
     return null;
   }
   return { pageId, token };
 }
 
 /** Текстовый пост со ссылкой. Возвращает id поста или null. */
-export async function sendFacebookLinkPost(message: string, link: string): Promise<string | null> {
-  const c = creds();
+export async function sendFacebookLinkPost(message: string, link: string, override?: FbCreds): Promise<string | null> {
+  const c = creds(override);
   if (!c) return null;
   const params = new URLSearchParams({ message, link, access_token: c.token });
   try {
@@ -43,8 +48,8 @@ export async function sendFacebookLinkPost(message: string, link: string): Promi
 }
 
 /** Фото-пост с подписью. imageUrl должен быть публично доступен. Возвращает id или null. */
-export async function sendFacebookPhotoPost(imageUrl: string, caption: string): Promise<string | null> {
-  const c = creds();
+export async function sendFacebookPhotoPost(imageUrl: string, caption: string, override?: FbCreds): Promise<string | null> {
+  const c = creds(override);
   if (!c) return null;
   const params = new URLSearchParams({ url: imageUrl, caption, access_token: c.token });
   try {

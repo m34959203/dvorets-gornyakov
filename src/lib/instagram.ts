@@ -58,10 +58,11 @@ async function publishContainer(
 
 export async function sendInstagramPost(
   imageUrl: string,
-  caption: string
+  caption: string,
+  creds?: { token?: string | null; igUserId?: string | null }
 ): Promise<boolean> {
-  const token = process.env.INSTAGRAM_ACCESS_TOKEN;
-  const igUserId = process.env.INSTAGRAM_ACCOUNT_ID;
+  const token = creds?.token || process.env.INSTAGRAM_ACCESS_TOKEN;
+  const igUserId = creds?.igUserId || process.env.INSTAGRAM_ACCOUNT_ID;
 
   if (!token || !igUserId) {
     console.warn("[instagram] INSTAGRAM_ACCESS_TOKEN / INSTAGRAM_ACCOUNT_ID not set — skip");
