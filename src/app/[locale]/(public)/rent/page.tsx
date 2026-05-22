@@ -82,10 +82,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: lp } = await params;
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
-  const title =
-    locale === "kk"
-      ? "Залдарды жалдау — Ш. Ділдебаев атындағы тау-кенші сарайы"
-      : "Аренда залов — Дворец горняков им. Ш. Дільдебаева";
+  const title = locale === "kk" ? "Залдарды жалдау" : "Аренда залов";
   const description =
     locale === "kk"
       ? "Сәтбаевта концерт, камералық және жаттығу залдарын жалдау. Онлайн өтінім."

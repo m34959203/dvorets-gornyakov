@@ -4,8 +4,6 @@ import { isValidLocale, type Locale } from "@/lib/i18n";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
 
-const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
-const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
 
 function getBaseUrl(): string {
   const env = process.env.NEXT_PUBLIC_APP_URL;
@@ -20,10 +18,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: lp } = await params;
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
-  const title =
-    locale === "kk"
-      ? `Біз туралы — ${SITE_NAME_KK}`
-      : `О нас — ${SITE_NAME_RU}`;
+  const title = locale === "kk" ? "Біз туралы" : "О нас";
   const description =
     locale === "kk"
       ? "Ш. Ділдебаев атындағы тау-кенші сарайының тарихы, миссиясы және жетекшілігі — Сәтбаев қаласындағы мәдени орталық (1974/2000)."

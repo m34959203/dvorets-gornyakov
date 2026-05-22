@@ -7,8 +7,6 @@ import DgEventsCatalog, { type DgEvent } from "@/components/features/DgEventsCat
 
 export const dynamic = "force-dynamic";
 
-const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
-const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
 
 const MONTHS_KK_FULL = ["Қаңтар", "Ақпан", "Наурыз", "Сәуір", "Мамыр", "Маусым", "Шілде", "Тамыз", "Қыркүйек", "Қазан", "Қараша", "Желтоқсан"];
 const MONTHS_RU_FULL = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
@@ -45,10 +43,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: lp } = await params;
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
-  const title =
-    locale === "kk"
-      ? `Іс-шаралар — ${SITE_NAME_KK}`
-      : `Афиша — ${SITE_NAME_RU}`;
+  // Короткая метка — название сарая/города добавит template из layout
+  const title = locale === "kk" ? "Іс-шаралар" : "Афиша";
   const description =
     locale === "kk"
       ? "Концерттер, спектакльдер, шеберханалар мен фестивальдер афишасы — Сәтбаев қаласы."
