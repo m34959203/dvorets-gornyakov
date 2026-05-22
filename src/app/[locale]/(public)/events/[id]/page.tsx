@@ -1,4 +1,4 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   isValidLocale,
@@ -8,7 +8,8 @@ import {
 } from "@/lib/i18n";
 import { getOne } from "@/lib/db";
 import { eventImage } from "@/lib/event-image";
-import Badge from "@/components/ui/Badge";
+import DgPageHero from "@/components/layout/DgPageHero";
+import DgIcon from "@/components/layout/DgIcon";
 import EventSubscribe from "@/components/features/EventSubscribe";
 
 export const dynamic = "force-dynamic";
@@ -117,6 +118,12 @@ const TYPE_LABELS: Record<string, Record<Locale, string>> = {
   other: { kk: "Басқа", ru: "Другое" },
 };
 
+function getBaseUrl(): string {
+  const env = process.env.NEXT_PUBLIC_APP_URL;
+  return (env || "https://dvorets-gornyakov.kz").replace(/\/$/, "");
+}
+
+/** Asia/Almaty-aware full date+time label */
 function formatAlmaty(iso: string, locale: Locale): string {
   return new Date(iso).toLocaleString(
     locale === "kk" ? "kk-KZ" : "ru-RU",
@@ -128,6 +135,63 @@ function formatAlmaty(iso: string, locale: Locale): string {
   );
 }
 
+/** Short "22 марта 2026" / "22 наурыз 2026" for tag line */
+function formatShortDate(iso: string, locale: Locale): string {
+  return new Date(iso).toLocaleDateString(
+    locale === "kk" ? "kk-KZ" : "ru-RU",
+    { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Almaty" }
+  );
+}
+
+// ── generateMetadata (preserves per-event og:image) ─────────────────────────
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}): Promise<Metadata> {
+  const { locale: lp, id } = await params;
+  const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const event = (await loadEvent(id)) ?? DEMO_EVENTS[id];
+  if (!event) return {};
+
+  const title = getLocalizedField(
+    event as unknown as Record<string, unknown>,
+    "title",
+    locale
+  );
+  const description =
+    getLocalizedField(
+      event as unknown as Record<string, unknown>,
+      "description",
+      locale
+    ) || title;
+  const cover = eventImage(event.image_url, event.event_type);
+  const baseUrl = getBaseUrl();
+  const canonical = `${baseUrl}/${locale}/events/${id}`;
+  const ogImage = cover.startsWith("http") ? cover : `${baseUrl}${cover}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      images: [{ url: ogImage, width: 1200, height: 675, alt: title }],
+    },
+    alternates: {
+      canonical,
+      languages: {
+        kk: `${baseUrl}/kk/events/${id}`,
+        ru: `${baseUrl}/ru/events/${id}`,
+      },
+    },
+  };
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
 export default async function EventDetailPage({
   params,
 }: {
@@ -137,119 +201,110 @@ export default async function EventDetailPage({
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
   const messages = getMessages(locale);
   const t = messages.events;
+  const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
   const event = (await loadEvent(id)) ?? DEMO_EVENTS[id];
   if (!event) {
     notFound();
   }
 
-  const title = getLocalizedField(event, "title", locale);
-  const description = getLocalizedField(event, "description", locale);
+  const title = getLocalizedField(
+    event as unknown as Record<string, unknown>,
+    "title",
+    locale
+  );
+  const description = getLocalizedField(
+    event as unknown as Record<string, unknown>,
+    "description",
+    locale
+  );
   const typeLabel =
     TYPE_LABELS[event.event_type]?.[locale] || event.event_type;
 
   const startLabel = formatAlmaty(event.start_date, locale);
-  const endLabel = event.end_date ? formatAlmaty(event.end_date, locale) : null;
+  const endLabel = event.end_date
+    ? formatAlmaty(event.end_date, locale)
+    : null;
+  const shortDate = formatShortDate(event.start_date, locale);
+  const cover = eventImage(event.image_url, event.event_type);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Link
-        href={`/${locale}/events`}
-        className="inline-flex items-center text-primary hover:text-primary-dark mb-6"
-      >
-        <svg
-          className="w-4 h-4 mr-1"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-        {messages.common.back}
-      </Link>
+    <div className="dg-home">
+      <DgPageHero
+        crumbs={[
+          { label: T("Басты бет", "Главная"), href: `/${locale}` },
+          { label: T("Афиша", "Афиша"), href: `/${locale}/events` },
+          { label: title },
+        ]}
+        tag={`${typeLabel} · ${shortDate}`}
+        h2Html={title}
+      />
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={eventImage(event.image_url, event.event_type)}
-          alt={title}
-          className="w-full aspect-video object-cover"
-        />
-
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-4 gap-4">
-            <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-            <Badge variant="info">{typeLabel}</Badge>
-          </div>
-
-          <div className="flex flex-wrap gap-4 mb-6 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <svg
-                className="w-5 h-5 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              <span>
-                {startLabel}
-                {endLabel ? ` — ${endLabel}` : ""}
-              </span>
-            </div>
-            {event.location && (
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-5 h-5 text-primary"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                </svg>
-                <span>{event.location}</span>
+      <section className="section" style={{ borderTop: 0 }}>
+        <div className="dg-wrap">
+          <div className="detail-grid">
+            {/* ── Main column ─────────────────────────────────────── */}
+            <main>
+              <div className="detail-cover">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={cover} alt={title} />
               </div>
-            )}
-          </div>
 
-          <div className="mb-6 flex flex-wrap items-center gap-3">
-            <EventSubscribe
-              eventId={event.id}
-              locale={locale}
-              labels={{
-                subscribe: t.subscribe,
-                subscribeSuccess: t.subscribeSuccess,
-              }}
-            />
-            <span className="text-sm text-gray-500">
-              {locale === "kk"
-                ? "Іс-шара туралы еске салу алыңыз"
-                : "Получите напоминание о мероприятии"}
-            </span>
-          </div>
+              <ul className="feature-meta" style={{ marginTop: 28 }}>
+                <li>
+                  <span className="lab">
+                    <DgIcon name="calendar" size={16} />
+                    {T("Күні / уақыты", "Дата / время")}
+                  </span>
+                  <span className="val">
+                    {startLabel}
+                    {endLabel ? ` — ${endLabel}` : ""}
+                  </span>
+                </li>
+                {event.location && (
+                  <li>
+                    <span className="lab">
+                      <DgIcon name="pin" size={16} />
+                      {T("Орын / зал", "Место / зал")}
+                    </span>
+                    <span className="val">{event.location}</span>
+                  </li>
+                )}
+                <li>
+                  <span className="lab">
+                    <DgIcon name="coin" size={16} />
+                    {T("Кіру", "Стоимость")}
+                  </span>
+                  <span className="val price">
+                    {T("Тегін", "Бесплатно")}
+                  </span>
+                </li>
+              </ul>
 
-          {description && (
-            <div className="prose max-w-none text-gray-700 mb-8 whitespace-pre-wrap">
-              <p>{description}</p>
-            </div>
-          )}
+              {description && (
+                <div className="dg-prose" style={{ marginTop: 32 }}>
+                  <p>{description}</p>
+                </div>
+              )}
+            </main>
+
+            {/* ── Aside ───────────────────────────────────────────── */}
+            <aside className="detail-aside">
+              <h3>
+                {T("Іс-шара туралы еске салу", "Напоминание о событии")}
+              </h3>
+              <EventSubscribe
+                eventId={event.id}
+                locale={locale}
+                labels={{
+                  subscribe: t.subscribe,
+                  subscribeSuccess: t.subscribeSuccess,
+                }}
+              />
+            </aside>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { isValidLocale, type Locale, getMessages, getLocalizedField } from "@/lib/i18n";
+import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getOne } from "@/lib/db";
 import { localizeNewsCategory } from "@/lib/news-category";
+import DgPageHero from "@/components/layout/DgPageHero";
+import DgIcon from "@/components/layout/DgIcon";
 
 export const dynamic = "force-dynamic";
 
@@ -157,7 +159,6 @@ export default async function NewsArticlePage({
 }) {
   const { locale: localeParam, slug } = await params;
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
-  const messages = getMessages(locale);
 
   const dbRow = await loadArticle(slug);
 
@@ -188,53 +189,93 @@ export default async function NewsArticlePage({
     videoUrl = demo.video_url || "";
   }
 
+  const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
+
   const dateLabel = new Date(publishedAt).toLocaleDateString(
     locale === "kk" ? "kk-KZ" : "ru-RU",
-    { day: "numeric", month: "long", year: "numeric" }
+    { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Almaty" }
   );
 
+  const categoryLabel = category ? localizeNewsCategory(category, locale) : "";
+  const tagLine = [categoryLabel, dateLabel].filter(Boolean).join(" · ");
+
+  const imageUrl = dbRow?.image_url ?? "/photos/dvorets-06.webp";
+
+  // Detect HTML content (produced by rich-text editor) vs plain text
+  const isHtml = content.trimStart().startsWith("<");
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Link
-        href={`/${locale}/news`}
-        className="inline-flex items-center text-primary hover:text-primary-dark mb-6"
-      >
-        <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-        {messages.common.back}
-      </Link>
+    <div className="dg-home">
+      <DgPageHero
+        crumbs={[
+          { label: T("Басты бет", "Главная"), href: `/${locale}` },
+          { label: T("Жаңалықтар", "Новости"), href: `/${locale}/news` },
+          { label: title },
+        ]}
+        tag={tagLine}
+        h2Html={title}
+      />
 
-      <article>
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">{title}</h1>
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <time>{dateLabel}</time>
-            {category && (
-              <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs">
-                {localizeNewsCategory(category, locale)}
-              </span>
+      <section className="section" style={{ borderTop: 0 }}>
+        <div className="dg-wrap">
+          <article style={{ maxWidth: "72ch" }}>
+            {/* Cover image */}
+            <div className="detail-cover" style={{ marginBottom: 36 }}>
+              <img src={imageUrl} alt={title} />
+            </div>
+
+            {/* Category badge + date meta */}
+            {(categoryLabel || dateLabel) && (
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
+                {categoryLabel && (
+                  <div className="poster-tag" style={{ position: "static", display: "inline-block" }}>
+                    {categoryLabel}
+                  </div>
+                )}
+                {dateLabel && (
+                  <span className="news-date" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <DgIcon name="calendar" size={13} />
+                    <time dateTime={publishedAt}>{dateLabel}</time>
+                  </span>
+                )}
+              </div>
             )}
+
+            {/* Embed / video */}
+            {embedCode ? (
+              <div
+                style={{ aspectRatio: "16/9", overflow: "hidden", borderRadius: 8, marginBottom: 28, background: "#000" }}
+                dangerouslySetInnerHTML={{ __html: embedCode }}
+              />
+            ) : videoUrl ? (
+              <video
+                controls
+                style={{ width: "100%", aspectRatio: "16/9", borderRadius: 8, marginBottom: 28, background: "#000" }}
+                src={videoUrl}
+              />
+            ) : null}
+
+            {/* Article body */}
+            <div className="dg-prose">
+              {isHtml ? (
+                <div dangerouslySetInnerHTML={{ __html: content }} />
+              ) : (
+                content.split(/\n\n+/).map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))
+              )}
+            </div>
+          </article>
+
+          {/* Back link */}
+          <div style={{ marginTop: 48 }}>
+            <Link href={`/${locale}/news`} className="section-link" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <DgIcon name="chev-l" size={16} />
+              {T("Барлық жаңалықтар", "Все новости")}
+            </Link>
           </div>
-        </header>
-
-        {embedCode ? (
-          <div
-            className="aspect-video rounded-xl overflow-hidden mb-8 bg-black"
-            dangerouslySetInnerHTML={{ __html: embedCode }}
-          />
-        ) : videoUrl ? (
-          <video
-            controls
-            className="w-full aspect-video rounded-xl mb-8 bg-black"
-            src={videoUrl}
-          />
-        ) : null}
-
-        <div className="prose prose-lg max-w-none text-gray-700 whitespace-pre-wrap">
-          {content}
         </div>
-      </article>
+      </section>
     </div>
   );
 }

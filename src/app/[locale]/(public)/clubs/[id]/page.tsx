@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { isValidLocale, type Locale, getMessages, getLocalizedField } from "@/lib/i18n";
+import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getOne } from "@/lib/db";
-import Badge from "@/components/ui/Badge";
+import { clubImage } from "@/lib/event-image";
+import DgPageHero from "@/components/layout/DgPageHero";
+import DgIcon from "@/components/layout/DgIcon";
 import EnrollmentForm from "@/components/features/EnrollmentForm";
 
 export const dynamic = "force-dynamic";
@@ -138,155 +139,126 @@ export default async function ClubDetailPage({
 }) {
   const { locale: localeParam, id } = await params;
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
-  const messages = getMessages(locale);
-  const t = messages.clubs;
+
+  const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
   if (!UUID_RE.test(id)) notFound();
 
   const club = await loadClub(id);
   if (!club) notFound();
 
-  const name = getLocalizedField(club, "name", locale);
-  const description = getLocalizedField(club, "description", locale);
+  const name = getLocalizedField(club as unknown as Record<string, unknown>, "name", locale);
+  const description = getLocalizedField(club as unknown as Record<string, unknown>, "description", locale);
   const schedule: ScheduleItem[] = parseSchedule(club.schedule);
+  const cover = clubImage(club.image_url, club.direction);
+
+  const directionLabel = T(
+    club.direction || "Жалпы",
+    club.direction || "Общее"
+  );
+  const ageLabel = `${club.age_group} ${T("жас", "лет")}`;
+  const tagLabel = `${directionLabel} · ${ageLabel}`;
+
+  // Messages needed for form
+  const formMessages: Record<string, string> = {
+    childName: T("Баланың аты-жөні", "Имя ребёнка"),
+    childAge: T("Баланың жасы", "Возраст ребёнка"),
+    parentName: T("Ата-ана / өкілдің аты-жөні", "Имя родителя / представителя"),
+    phone: T("Телефон", "Телефон"),
+    enroll: T("Жазылу", "Записаться"),
+    enrollError: T("Қате орын алды. Қайталаңыз.", "Произошла ошибка. Попробуйте ещё раз."),
+    enrollSuccess: T(
+      "Өтініміңіз қабылданды! Тезірек хабарласамыз.",
+      "Заявка принята! Мы свяжемся с вами в ближайшее время."
+    ),
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Link
-        href={`/${locale}/clubs`}
-        className="inline-flex items-center text-primary hover:text-primary-dark mb-6"
-      >
-        <svg
-          className="w-4 h-4 mr-1"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-        {messages.common.back}
-      </Link>
+    <div className="dg-home">
+      <DgPageHero
+        crumbs={[
+          { label: T("Басты бет", "Главная"), href: `/${locale}` },
+          { label: T("Үйірмелер", "Кружки"), href: `/${locale}/clubs` },
+          { label: name },
+        ]}
+        tag={tagLabel}
+        h2Html={name}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Club Info */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            {club.image_url ? (
-              <div className="aspect-video bg-gray-100">
+      <section className="section" style={{ borderTop: 0 }}>
+        <div className="dg-wrap">
+          <div className="detail-grid">
+            {/* ── MAIN ── */}
+            <div>
+              <div className="detail-cover">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={club.image_url}
-                  alt={name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                <svg
-                  className="w-20 h-20 text-primary/30"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-              </div>
-            )}
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4 gap-4">
-                <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
-                <Badge variant="primary">{club.direction}</Badge>
-              </div>
-              <p className="text-gray-700 leading-relaxed mb-6 whitespace-pre-wrap">
-                {description}
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <svg
-                    className="w-5 h-5 text-primary"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                  <div>
-                    <div className="text-xs text-gray-500">{t.instructor}</div>
-                    <div className="font-medium text-gray-900">
-                      {club.instructor_name || "—"}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <svg
-                    className="w-5 h-5 text-primary"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                    />
-                  </svg>
-                  <div>
-                    <div className="text-xs text-gray-500">{t.ageGroup}</div>
-                    <div className="font-medium text-gray-900">
-                      {club.age_group} {locale === "kk" ? "жас" : "лет"}
-                    </div>
-                  </div>
-                </div>
+                <img src={cover} alt={name} />
               </div>
 
-              {/* Schedule */}
-              {schedule.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="font-semibold text-gray-900 mb-3">
-                    {t.schedule}
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {schedule.map(({ day, time }, i) => (
-                      <div
-                        key={`${day}-${time}-${i}`}
-                        className="px-3 py-2 bg-primary/5 border border-primary/20 rounded-lg text-sm"
-                      >
-                        <span className="font-medium text-primary">{day}</span>{" "}
-                        <span className="text-gray-600">{time}</span>
-                      </div>
-                    ))}
-                  </div>
+              <ul className="feature-meta" style={{ marginTop: 28 }}>
+                <li>
+                  <span className="lab">
+                    <DgIcon name="stars" size={14} />
+                    {T("Бағыт", "Направление")}
+                  </span>
+                  <span className="val">{club.direction}</span>
+                </li>
+                <li>
+                  <span className="lab">
+                    <DgIcon name="users" size={14} />
+                    {T("Жас тобы", "Возраст")}
+                  </span>
+                  <span className="val">{ageLabel}</span>
+                </li>
+                <li>
+                  <span className="lab">
+                    <DgIcon name="user" size={14} />
+                    {T("Педагог", "Педагог")}
+                  </span>
+                  <span className="val">{club.instructor_name || "—"}</span>
+                </li>
+
+                {schedule.length > 0 && (
+                  <li>
+                    <span className="lab">
+                      <DgIcon name="calendar" size={14} />
+                      {T("Кесте", "Расписание")}
+                    </span>
+                    <span className="val">
+                      {schedule.map(({ day, time }, i) => (
+                        <span key={`${day}-${time}-${i}`} style={{ display: "block" }}>
+                          {day}
+                          {time ? ` — ${time}` : ""}
+                        </span>
+                      ))}
+                    </span>
+                  </li>
+                )}
+
+                <li>
+                  <span className="lab">
+                    <DgIcon name="coin" size={14} />
+                    {T("Құны", "Стоимость")}
+                  </span>
+                  <span className="val price">{T("Тегін", "Бесплатно")}</span>
+                </li>
+              </ul>
+
+              {description && (
+                <div className="dg-prose" style={{ marginTop: 28 }}>
+                  <p style={{ whiteSpace: "pre-wrap" }}>{description}</p>
                 </div>
               )}
             </div>
-          </div>
-        </div>
 
-        {/* Enrollment Form */}
-        <div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-24">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">{t.enroll}</h2>
-            <EnrollmentForm clubId={club.id} locale={locale} messages={t} />
+            {/* ── ASIDE ── */}
+            <aside className="detail-aside">
+              <h3>{T("Үйірмеге жазылу", "Записаться в кружок")}</h3>
+              <EnrollmentForm clubId={club.id} locale={locale} messages={formMessages} />
+            </aside>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
