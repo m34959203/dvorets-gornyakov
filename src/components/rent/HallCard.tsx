@@ -21,10 +21,10 @@ export default function HallCard({ hall, locale, labels }: Props) {
   const cover =
     hall.photos?.[0]?.url ||
     (hall.slug === "grand"
-      ? "/photos/dvorets-08.webp"
+      ? "/photos/dvorets-07.webp"
       : hall.slug === "chamber"
-      ? "/photos/dvorets-10.webp"
-      : "/photos/dvorets-12.webp");
+      ? "/photos/dvorets-12.webp"
+      : "/photos/dvorets-11.webp");
   const alt = hall.photos?.[0]
     ? locale === "kk"
       ? hall.photos[0].alt_kk || name

@@ -26,7 +26,7 @@ const DEMO_HALLS: Record<string, Hall> = {
     equipment_ru: ["Профессиональный звук", "Сценический свет", "LED-экран", "3 гримёрки", "Wi-Fi", "Кондиционер"],
     hourly_price: 0,
     event_price_from: 0,
-    photos: [{ url: "/photos/dvorets-08.webp", alt_ru: "Большой зал", alt_kk: "Үлкен зал" }],
+    photos: [{ url: "/photos/dvorets-07.webp", alt_ru: "Большой зал", alt_kk: "Үлкен зал" }],
     layout_url: null,
     is_active: true,
     sort_order: 10,
@@ -47,7 +47,7 @@ const DEMO_HALLS: Record<string, Hall> = {
     equipment_ru: ["Акустическая система", "Проектор", "Экран", "Wi-Fi", "Сцена"],
     hourly_price: 0,
     event_price_from: 0,
-    photos: [{ url: "/photos/dvorets-10.webp", alt_ru: "Камерный зал", alt_kk: "Камералық зал" }],
+    photos: [{ url: "/photos/dvorets-12.webp", alt_ru: "Камерный зал", alt_kk: "Камералық зал" }],
     layout_url: null,
     is_active: true,
     sort_order: 20,
@@ -68,7 +68,7 @@ const DEMO_HALLS: Record<string, Hall> = {
     equipment_ru: ["Зеркала", "Станок", "Пианино", "Аудио-система", "Раздевалка"],
     hourly_price: 0,
     event_price_from: 0,
-    photos: [{ url: "/photos/dvorets-12.webp", alt_ru: "Репетиционный зал", alt_kk: "Жаттығу залы" }],
+    photos: [{ url: "/photos/dvorets-11.webp", alt_ru: "Репетиционный зал", alt_kk: "Жаттығу залы" }],
     layout_url: null,
     is_active: true,
     sort_order: 30,
@@ -140,10 +140,10 @@ export default async function HallPage({
   const coverUrl =
     hall.photos?.[0]?.url ||
     (slug === "grand"
-      ? "/photos/dvorets-08.webp"
+      ? "/photos/dvorets-07.webp"
       : slug === "chamber"
-      ? "/photos/dvorets-10.webp"
-      : "/photos/dvorets-12.webp");
+      ? "/photos/dvorets-12.webp"
+      : "/photos/dvorets-11.webp");
 
   const jsonLd = {
     "@context": "https://schema.org",
