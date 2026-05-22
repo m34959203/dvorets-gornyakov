@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getOne } from "@/lib/db";
+import { eventImage } from "@/lib/event-image";
 
 const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
 const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
@@ -18,6 +19,7 @@ type EventRow = {
   description_kk: string | null;
   description_ru: string | null;
   image_url: string | null;
+  event_type: string;
 };
 
 const UUID_RE =
@@ -27,7 +29,7 @@ async function loadEventMeta(id: string): Promise<EventRow | null> {
   if (!UUID_RE.test(id)) return null;
   try {
     return await getOne<EventRow>(
-      `SELECT id, title_kk, title_ru, description_kk, description_ru, image_url
+      `SELECT id, title_kk, title_ru, description_kk, description_ru, image_url, event_type
          FROM events WHERE id = $1`,
       [id]
     );
@@ -61,7 +63,9 @@ export async function generateMetadata({
 
   const title = getLocalizedField(row, "title", locale);
   const description = getLocalizedField(row, "description", locale);
-  const images = row.image_url ? [row.image_url] : [];
+  // Per-event og:image: фото события или фолбэк по типу (не пустой массив,
+  // иначе перебивает корневой og:image пустотой).
+  const images = [eventImage(row.image_url, row.event_type)];
   return {
     title: `${title} — ${locale === "kk" ? SITE_NAME_KK : SITE_NAME_RU}`,
     description,
