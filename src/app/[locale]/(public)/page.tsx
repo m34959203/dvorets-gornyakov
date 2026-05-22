@@ -105,10 +105,10 @@ export default async function HomePage({
   const titleOf = (e: EventRow) =>
     getLocalizedField(e as unknown as Record<string, unknown>, "title", locale);
 
-  // ── Расписание: 4 ближайших + дни-события для календаря ──
-  const scheduleItems = events.slice(0, 4).map((e) => {
+  // ── Расписание: список ближайших + дни-события для календаря ──
+  const scheduleItems = events.slice(0, 6).map((e) => {
     const chip = formatDateChip(e.start_date, locale);
-    return { id: e.id, d: chip.d, m: chip.m, wd: chip.wd, title: titleOf(e), time: chip.time, hall: e.location };
+    return { id: e.id, d: parseInt(chip.d, 10), m: chip.m, wd: chip.wd, title: titleOf(e), time: chip.time, hall: e.location };
   });
   const eventDays = new Set(events.map((e) => almatyParts(e.start_date).day));
   const refDate = events.length ? events[0].start_date : new Date().toISOString();
@@ -208,34 +208,32 @@ export default async function HomePage({
           </div>
 
           <div className="sched-grid-2">
-            <div>
-              <div className="sched-row">
+            <div className="sched-panel">
+              <div className="sched-phead">
+                <span className="lab">{T("Айдың афишасы", "Афиша месяца")}</span>
+                <span className="count"><em>{events.length}</em> {T("оқиға", "событий")}</span>
+              </div>
+              <ul className="sched-list">
                 {scheduleItems.map((s) => (
-                  <Link href={`/${locale}/events/${s.id}`} className="sched-card" key={s.id}>
-                    <div className="date">
-                      <div className="day">{s.d}</div>
-                      <div className="mon">{s.m} · {s.wd}</div>
-                    </div>
-                    <h3 className="title">{s.title}</h3>
-                    <div className="meta">
-                      <span>{s.time}</span>
-                      <span className="sep">·</span>
-                      <span>{s.hall}</span>
-                    </div>
-                  </Link>
+                  <li className="sched-item" key={s.id}>
+                    <Link href={`/${locale}/events/${s.id}`}>
+                      <span className="sched-when">
+                        <span className="d">{s.d}</span>
+                        <span className="m">{s.m}</span>
+                      </span>
+                      <span className="sched-info">
+                        <span className="s-title">{s.title}</span>
+                        <span className="s-meta">
+                          <span>{s.time}</span>
+                          <span className="sep">·</span>
+                          <span>{s.hall}</span>
+                        </span>
+                      </span>
+                      <span className="sched-free">{T("Тегін", "Бесплатно")}</span>
+                    </Link>
+                  </li>
                 ))}
-              </div>
-              <div className="sched-progress">
-                <div className="sched-dots">
-                  {[0, 1, 2, 3].map((i) => (
-                    <span key={i} className={"dot" + (i === 0 ? " active" : "")} />
-                  ))}
-                </div>
-                <div className="sched-arrows">
-                  <button className="arrow-btn" disabled aria-label={T("Артқа", "Назад")}><DgIcon name="chev-l" size={16} /></button>
-                  <button className="arrow-btn" aria-label={T("Алға", "Вперёд")}><DgIcon name="chev-r" size={16} /></button>
-                </div>
-              </div>
+              </ul>
             </div>
 
             {/* Календарь */}
