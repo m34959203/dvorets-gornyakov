@@ -1435,3 +1435,12 @@ h1, h2, h3, h4 {
 .dg-home .quiz-match .nm { font-size: 14px; font-weight: 500; color: var(--dg-text); }
 .dg-home .quiz-match a { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--dg-accent); border: 1px solid var(--dg-accent); border-radius: 999px; padding: 6px 14px; white-space: nowrap; transition: background .15s, color .15s; }
 .dg-home .quiz-match a:hover { background: var(--dg-accent); color: #fff; }
+
+/* ─── Бронирование через бота (rent/[slug]) ─── */
+.dg-home .book-bot { max-width: 660px; }
+.dg-home .book-bot-lead { color: var(--dg-text-2); font-size: 16px; line-height: 1.6; margin: 0 0 24px; max-width: 56ch; }
+.dg-home .book-bot-btns { display: flex; flex-wrap: wrap; gap: 14px; }
+.dg-home .book-bot-btns .dg-btn { padding: 16px 26px; }
+.dg-home .book-wa { background: transparent; color: var(--dg-text); border-color: var(--dg-hair-2); }
+.dg-home .book-wa:hover { background: transparent; border-color: var(--dg-accent); color: var(--dg-accent); }
+.dg-home .book-bot-note { margin: 22px 0 0; font-size: 13.5px; color: var(--dg-text-2); }

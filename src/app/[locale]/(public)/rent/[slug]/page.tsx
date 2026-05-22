@@ -7,6 +7,7 @@ import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
 import AvailabilityCalendar from "@/components/rent/AvailabilityCalendar";
 import RentalRequestForm from "@/components/rent/RentalRequestForm";
+import { getBotLinks } from "@/lib/rent/bot/links";
 
 export const dynamic = "force-dynamic";
 
@@ -130,6 +131,8 @@ export default async function HallPage({
   if (!hall) notFound();
 
   const halls = await loadAllHalls();
+  const botLinks = await getBotLinks(hall.slug);
+  const hasBot = Boolean(botLinks.telegram || botLinks.whatsapp);
   const name = getLocalizedField(hall as unknown as Record<string, unknown>, "name", locale);
   const description = getLocalizedField(hall as unknown as Record<string, unknown>, "description", locale);
   const equipment = (locale === "kk" ? hall.equipment_kk : hall.equipment_ru) ?? [];
@@ -365,7 +368,7 @@ export default async function HallPage({
         </div>
       </section>
 
-      {/* Booking form */}
+      {/* Booking — через бота (с фолбэком на форму) */}
       <section id="book" className="section">
         <div className="dg-wrap">
           <div className="section-bar" style={{ marginBottom: 36 }}>
@@ -373,13 +376,39 @@ export default async function HallPage({
             <h2
               className="h2"
               dangerouslySetInnerHTML={{
-                __html: T(
-                  "Зал <strong>жалдау өтінімі</strong>",
-                  "<strong>Заявка</strong> на аренду зала"
-                ),
+                __html: hasBot
+                  ? T("Ботта <strong>2 минутта брондаңыз</strong>", "Забронируйте <strong>за 2 минуты в боте</strong>")
+                  : T("Зал <strong>жалдау өтінімі</strong>", "<strong>Заявка</strong> на аренду зала"),
               }}
             />
           </div>
+
+          {hasBot ? (
+            <div className="book-bot">
+              <p className="book-bot-lead">
+                {T(
+                  "Бот залды, күнді мен уақытты сұрап, өтінімді әкімшіге жібереді. Ыңғайлы мессенджерді таңдаңыз:",
+                  "Бот спросит зал, дату и время и отправит заявку администратору. Выберите удобный мессенджер:"
+                )}
+              </p>
+              <div className="book-bot-btns">
+                {botLinks.telegram && (
+                  <a className="dg-btn book-tg" href={botLinks.telegram} target="_blank" rel="noopener noreferrer">
+                    <DgIcon name="tg" size={18} /> {T("Telegram-ботта брондау", "Забронировать в Telegram")}
+                  </a>
+                )}
+                {botLinks.whatsapp && (
+                  <a className="dg-btn book-wa" href={botLinks.whatsapp} target="_blank" rel="noopener noreferrer">
+                    <DgIcon name="phone" size={18} /> {T("WhatsApp арқылы брондау", "Забронировать в WhatsApp")}
+                  </a>
+                )}
+              </div>
+              <p className="book-bot-note">
+                {T("Немесе кассаға қоңырау шалыңыз:", "Или позвоните в кассу:")}{" "}
+                <a href="tel:+77106362440" style={{ color: "var(--dg-accent)" }}>+7 (71063) 6-24-40</a>
+              </p>
+            </div>
+          ) : (
           <RentalRequestForm
             halls={halls}
             locale={locale}
@@ -408,6 +437,7 @@ export default async function HallPage({
               >,
             }}
           />
+          )}
         </div>
       </section>
     </div>
