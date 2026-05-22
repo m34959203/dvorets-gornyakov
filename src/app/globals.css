@@ -1075,7 +1075,7 @@ h1, h2, h3, h4 {
 .dg-home .sched-phead .lab { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--dg-text-2); }
 .dg-home .sched-phead .count { font-size: 22px; font-weight: 500; color: var(--dg-text); letter-spacing: -0.01em; }
 .dg-home .sched-phead .count em { font-style: normal; color: var(--dg-accent); }
-.dg-home .sched-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; flex: 1; }
+.dg-home .sched-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
 .dg-home .sched-item { border-bottom: 1px solid var(--dg-hair); }
 .dg-home .sched-item:last-child { border-bottom: 0; }
 .dg-home .sched-item > a {
