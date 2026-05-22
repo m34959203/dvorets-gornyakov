@@ -47,6 +47,20 @@ export default function EtnoHero({ slogan, subline }: EtnoHeroProps) {
             "radial-gradient(ellipse at 70% 40%, rgba(212,168,67,0.35) 0%, transparent 55%), linear-gradient(160deg, #074143 0%, #095456 50%, #0d7377 100%)",
         }}
       >
+        {/* Размытое фото фасада — фотографическая фактура под орнаментом.
+            blur+scale скрывают низкое разрешение исходника (613×409). */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: 'url("/photos/dvorets-01.webp")',
+            backgroundSize: "cover",
+            backgroundPosition: "center 35%",
+            filter: "blur(6px)",
+            transform: "scale(1.08)",
+            opacity: 0.3,
+          }}
+        />
         {/* Силуэт зала */}
         <svg
           viewBox="0 0 1440 760"

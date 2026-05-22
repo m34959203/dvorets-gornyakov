@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
+import { eventImage } from "@/lib/event-image";
 import EtnoHeroStrip from "@/components/features/EtnoHeroStrip";
 import EventsCatalog, { type CatalogItem } from "@/components/features/EventsCatalog";
 
@@ -171,6 +172,7 @@ export default async function EventsPage({
       free: true,
       cat: typeMap[e.event_type] ?? typeMap.other,
       href: `/${locale}/events/${e.id}`,
+      image: eventImage(e.image_url, e.event_type),
     };
   });
 
