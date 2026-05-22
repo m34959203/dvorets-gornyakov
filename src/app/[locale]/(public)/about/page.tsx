@@ -106,7 +106,7 @@ export default async function AboutPage({
                   "Дворец горняков им. Ш. Дильдебаева, г. Сатпаев"
                 )}
               />
-              <div className="about-photo-tag">Сатпаев · 1974</div>
+              <div className="about-photo-tag">{T("Сәтбаев · 1974", "Сатпаев · 1974")}</div>
             </div>
 
             <div className="about-text">

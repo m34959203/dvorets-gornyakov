@@ -38,7 +38,7 @@ export default async function Header({ locale }: HeaderProps) {
           <div className="dg-brand-text">
             <div className="dg-brand-name">DVORETS GORNYAKOV</div>
             <div className="dg-brand-sub">
-              {locale === "kk" ? "Сатпаев · Тау-кенші сарайы" : "Сатпаев · Дворец горняков"}
+              {locale === "kk" ? "Сәтбаев · Тау-кенші сарайы" : "Сатпаев · Дворец горняков"}
             </div>
           </div>
         </Link>

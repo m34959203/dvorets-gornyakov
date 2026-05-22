@@ -185,7 +185,7 @@ export default async function HomePage({
           <h1 className="hero-h1">
             {T("Сүйікті әртістеріңізді ", "Встречайте своих любимых артистов ")}
             <strong>{T("ең үздік залда", "в лучшем зале")}</strong>
-            {T(" қарсы алыңыз — Сатпаев қаласында", " города Сатпаев")}
+            {T(" қарсы алыңыз — Сәтбаев қаласында", " города Сатпаев")}
           </h1>
         </div>
         <a href="#schedule" className="hero-scroll" aria-label={T("Төмен айналдыру", "Прокрутить вниз")}>
@@ -438,7 +438,7 @@ export default async function HomePage({
           <div className="about-grid">
             <div className="about-photo">
               <img src="/photos/dvorets-01.webp" alt={T("Тау-кеншілер сарайының ғимараты", "Здание Дворца горняков")} />
-              <div className="about-photo-tag">Сатпаев · 1974</div>
+              <div className="about-photo-tag">{T("Сәтбаев · 1974", "Сатпаев · 1974")}</div>
             </div>
 
             <div className="about-text">
@@ -482,7 +482,7 @@ export default async function HomePage({
             <span /><span /><span /><span /><span /><span /><span /><span />
           </div>
           <h2 className="brand-wall-name">Dvorets Gornyakov</h2>
-          <div className="brand-wall-sub">{T("Сатпаев · Тау-кеншілер сарайы", "Сатпаев · Дворец горняков")}</div>
+          <div className="brand-wall-sub">{T("Сәтбаев · Тау-кеншілер сарайы", "Сатпаев · Дворец горняков")}</div>
         </div>
       </section>
     </div>
