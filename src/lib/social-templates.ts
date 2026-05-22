@@ -1,6 +1,6 @@
 import { getOne } from "@/lib/db";
 
-type Platform = "telegram" | "instagram";
+type Platform = "telegram" | "instagram" | "facebook";
 type Kind = "news" | "event";
 
 interface TemplateRow {
