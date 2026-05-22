@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import { getLocalizedField } from "@/lib/i18n";
+import { clubImage } from "@/lib/event-image";
 
 interface Club {
   id: string;
@@ -30,23 +31,11 @@ const DIRECTION_LABELS: Record<string, Record<Locale, string>> = {
   general: { kk: "Жалпы", ru: "Общее" },
 };
 
-// Реальные фото Дворца (источник: КГКП «Центр культуры и творчества им. Ш. Дильдебаева»).
-const FALLBACK_IMG: Record<string, string> = {
-  vocal: "/photos/dvorets-05.webp",
-  dance: "/photos/dvorets-11.webp",
-  art: "/photos/dvorets-13.webp",
-  theater: "/photos/dvorets-09-1.webp",
-  music: "/photos/dvorets-04.webp",
-  craft: "/photos/dvorets-08.webp",
-  sport: "/photos/dvorets-10.webp",
-  general: "/photos/dvorets-01.webp",
-};
-
 export default function ClubCard({ club, locale }: ClubCardProps) {
   const name = getLocalizedField(club, "name", locale);
   const description = getLocalizedField(club, "description", locale);
   const cat = DIRECTION_LABELS[club.direction]?.[locale] || club.direction;
-  const img = club.image_url || FALLBACK_IMG[club.direction] || FALLBACK_IMG.general;
+  const img = clubImage(club.image_url, club.direction);
 
   return (
     <Link href={`/${locale}/clubs/${club.id}`} className="club-card no-underline">

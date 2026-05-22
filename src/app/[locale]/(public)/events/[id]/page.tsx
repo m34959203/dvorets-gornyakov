@@ -7,6 +7,7 @@ import {
   getLocalizedField,
 } from "@/lib/i18n";
 import { getOne } from "@/lib/db";
+import { eventImage } from "@/lib/event-image";
 import Badge from "@/components/ui/Badge";
 import EventSubscribe from "@/components/features/EventSubscribe";
 
@@ -107,16 +108,6 @@ const DEMO_EVENTS: Record<string, EventRow> = {
   },
 };
 
-// Реальные фото Дворца (источник: КГКП «Центр культуры и творчества им. Ш. Дильдебаева»).
-const FALLBACK_IMG: Record<string, string> = {
-  concert: "/photos/dvorets-07.webp",
-  exhibition: "/photos/dvorets-06.webp",
-  workshop: "/photos/dvorets-11.webp",
-  festival: "/photos/dvorets-03.webp",
-  competition: "/photos/dvorets-04.webp",
-  other: "/photos/dvorets-09-1.webp",
-};
-
 const TYPE_LABELS: Record<string, Record<Locale, string>> = {
   concert: { kk: "Концерт", ru: "Концерт" },
   exhibition: { kk: "Көрме", ru: "Выставка" },
@@ -185,7 +176,7 @@ export default async function EventDetailPage({
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={event.image_url || FALLBACK_IMG[event.event_type] || FALLBACK_IMG.other}
+          src={eventImage(event.image_url, event.event_type)}
           alt={title}
           className="w-full aspect-video object-cover"
         />

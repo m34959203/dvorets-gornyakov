@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import { getLocalizedField } from "@/lib/i18n";
+import { eventImage } from "@/lib/event-image";
 
 interface Event {
   id: string;
@@ -34,16 +35,6 @@ const MONTH_ABBR: Record<Locale, string[]> = {
   ru: ["ЯНВ", "ФЕВ", "МАР", "АПР", "МАЙ", "ИЮН", "ИЮЛ", "АВГ", "СЕН", "ОКТ", "НОЯ", "ДЕК"],
 };
 
-// Реальные фото Дворца (источник: КГКП «Центр культуры и творчества им. Ш. Дильдебаева»).
-const FALLBACK_IMG: Record<string, string> = {
-  concert: "/photos/dvorets-07.webp",
-  exhibition: "/photos/dvorets-06.webp",
-  workshop: "/photos/dvorets-11.webp",
-  festival: "/photos/dvorets-03.webp",
-  competition: "/photos/dvorets-04.webp",
-  other: "/photos/dvorets-09-1.webp",
-};
-
 export default function EventCard({ event, locale }: EventCardProps) {
   const title = getLocalizedField(event, "title", locale);
   const d = new Date(event.start_date);
@@ -63,7 +54,7 @@ export default function EventCard({ event, locale }: EventCardProps) {
     minute: "2-digit",
     timeZone: "Asia/Almaty",
   });
-  const img = event.image_url || FALLBACK_IMG[event.event_type] || FALLBACK_IMG.other;
+  const img = eventImage(event.image_url, event.event_type);
   const entryLabel = event.is_partner
     ? locale === "kk" ? "Серіктестік" : "Партнёрское"
     : locale === "kk" ? "Тегін" : "Бесплатно";

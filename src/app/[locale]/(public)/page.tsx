@@ -2,6 +2,7 @@ import Link from "next/link";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
 import { almatyParts } from "@/lib/utils";
+import { eventImage } from "@/lib/event-image";
 import EtnoHero from "@/components/features/EtnoHero";
 import EtnoSchedule from "@/components/features/EtnoSchedule";
 import PosterCard, { type Poster } from "@/components/features/PosterCard";
@@ -192,6 +193,7 @@ export default async function HomePage({
       price: T("Тегін", "Бесплатно"),
       free: true,
       href: `/${locale}/events/${e.id}`,
+      image: eventImage(e.image_url, e.event_type),
     };
   };
 

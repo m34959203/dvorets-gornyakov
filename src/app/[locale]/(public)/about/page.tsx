@@ -96,6 +96,25 @@ export default async function AboutPage({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">{t.title}</h1>
 
+      {/* Фото фасада */}
+      <figure className="mb-12">
+        <img
+          src="/photos/dvorets-01.webp"
+          alt={
+            locale === "kk"
+              ? "Ш. Ділдебаев атындағы тау-кенші сарайы, Сәтбаев қаласы"
+              : "Дворец горняков им. Ш. Дильдебаева, г. Сатпаев"
+          }
+          className="w-full max-h-[440px] object-cover rounded-xl shadow-sm"
+          loading="lazy"
+        />
+        <figcaption className="text-sm text-gray-500 mt-2">
+          {locale === "kk"
+            ? "Ғимарат және Қ. И. Сәтбаевқа ескерткіш. Фото: КГКП «Ш. Ділдебаев атындағы мәдениет және шығармашылық орталығы»"
+            : "Здание и памятник К. И. Сатпаеву. Фото: КГКП «Центр культуры и творчества им. Ш. Дильдебаева»"}
+        </figcaption>
+      </figure>
+
       {/* History */}
       <section className="mb-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-4 ornament-top pt-6">{t.history}</h2>

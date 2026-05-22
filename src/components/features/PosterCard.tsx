@@ -8,6 +8,7 @@ export interface Poster {
   price: string;
   href?: string;
   free?: boolean;
+  image?: string;
 }
 
 interface PosterCardProps {
@@ -73,9 +74,18 @@ export default function PosterCard({ p, idx, detailsLabel = "Подробнее"
   const bg = PALETTES[idx % PALETTES.length];
   const isFree = p.free ?? /^(Тегін|Бесплатно|Free)$/i.test(p.price);
   const href = p.href ?? "#";
+  // С фото — реальный снимок под полупрозрачным брендовым тинтом (заголовок читаем).
+  // Без фото — фолбэк на градиент-палитру, как было.
+  const coverStyle = p.image
+    ? {
+        backgroundImage: `linear-gradient(160deg, rgba(9,84,86,0.45) 0%, rgba(7,65,67,0.78) 100%), url("${p.image}")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }
+    : { background: bg };
   return (
     <article className="poster-card">
-      <div className="poster-cover" style={{ background: bg }}>
+      <div className="poster-cover" style={coverStyle}>
         <div className="poster-cover-inner">
           <div className="poster-cover-kicker">Афиша</div>
           <div className="poster-cover-title">{p.title}</div>
