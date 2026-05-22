@@ -12,12 +12,10 @@ const BASE_URL = (
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
-  // template НЕ задаём здесь — иначе он оборачивает локализованный title
-  // публичного layout (получался русский суффикс на /kk). Локаль-специфичные
-  // title/template живут в [locale]/(public)/layout.tsx. Тут — нейтральный фолбэк.
-  title: {
-    default: SITE_TITLE,
-  },
+  // Простая строка-фолбэк (без template) — иначе template оборачивал бы
+  // локализованный title публичного layout русским суффиксом на /kk.
+  // Локаль-специфичные title/template живут в [locale]/(public)/layout.tsx.
+  title: SITE_TITLE,
   description: SITE_DESC,
   openGraph: {
     title: SITE_TITLE,
