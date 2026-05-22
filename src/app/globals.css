@@ -1395,6 +1395,8 @@ h1, h2, h3, h4 {
 .dg-home .detail-aside { position: sticky; top: 104px; background: var(--dg-bg-2); border: 1px solid var(--dg-hair); border-radius: var(--dg-radius); padding: 26px; }
 @media (max-width: 900px) { .dg-home .detail-aside { position: static; } }
 .dg-home .detail-aside h3 { font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: var(--dg-text); font-weight: 500; margin: 0 0 18px; }
+.dg-home .hall-detail-grid { display: grid; grid-template-columns: 1fr 340px; gap: 48px; align-items: start; }
+@media (max-width: 900px) { .dg-home .hall-detail-grid { grid-template-columns: 1fr; gap: 32px; } }
 
 /* Article / rich-text prose on dark */
 .dg-home .dg-prose { color: var(--dg-text-2); font-size: 16px; line-height: 1.75; max-width: 72ch; font-weight: 300; }

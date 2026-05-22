@@ -198,15 +198,7 @@ export default async function HallPage({
       {/* Hall facts + calendar */}
       <section className="section">
         <div className="dg-wrap">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 340px",
-              gap: 48,
-              alignItems: "start",
-            }}
-            className="hall-detail-grid"
-          >
+          <div className="hall-detail-grid">
             {/* Left: facts + equipment */}
             <div>
               <div className="section-bar" style={{ marginBottom: 28 }}>
