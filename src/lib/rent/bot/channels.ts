@@ -1,50 +1,10 @@
 import type { BotOption } from "./engine";
 
-const TG_API = "https://api.telegram.org/bot";
-
-/** Telegram: отправка сообщения с inline-кнопками (по одной в ряд). */
-export async function tgSend(chatId: number | string, text: string, options?: BotOption[]): Promise<void> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  if (!token) {
-    console.warn("[bot] TELEGRAM_BOT_TOKEN not set");
-    return;
-  }
-  const body: Record<string, unknown> = { chat_id: chatId, text, parse_mode: "HTML" };
-  if (options && options.length) {
-    body.reply_markup = {
-      inline_keyboard: options.map((o) => [{ text: o.label, callback_data: o.value }]),
-    };
-  }
-  try {
-    const res = await fetch(`${TG_API}${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) console.error("[bot] tgSend http", res.status, await res.text());
-  } catch (e) {
-    console.error("[bot] tgSend error:", e);
-  }
-}
-
-export async function tgAnswerCallback(callbackId: string): Promise<void> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  if (!token) return;
-  try {
-    await fetch(`${TG_API}${token}/answerCallbackQuery`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ callback_query_id: callbackId }),
-    });
-  } catch {
-    /* ignore */
-  }
-}
-
 /**
- * WhatsApp: отправка через Baileys-гейт (как в других проектах).
+ * WhatsApp: отправка через внешний Baileys-гейт (резервный путь).
+ * Основной WA-канал — встроенный сокет (src/lib/wa/runtime.ts), который
+ * отвечает напрямую. Эта функция оставлена для опционального внешнего гейта.
  * Опции рендерятся нумерованным списком — пользователь отвечает цифрой.
- * Контракт гейта: POST {WA_GATEWAY_SEND_URL} { to, message } + Bearer WA_GATEWAY_TOKEN.
  */
 export async function waSend(to: string, text: string, options?: BotOption[]): Promise<void> {
   const url = process.env.WA_GATEWAY_SEND_URL;

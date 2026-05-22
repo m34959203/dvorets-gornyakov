@@ -132,7 +132,7 @@ export default async function HallPage({
 
   const halls = await loadAllHalls();
   const botLinks = await getBotLinks(hall.slug);
-  const hasBot = Boolean(botLinks.telegram || botLinks.whatsapp);
+  const hasBot = Boolean(botLinks.whatsapp);
   const name = getLocalizedField(hall as unknown as Record<string, unknown>, "name", locale);
   const description = getLocalizedField(hall as unknown as Record<string, unknown>, "description", locale);
   const equipment = (locale === "kk" ? hall.equipment_kk : hall.equipment_ru) ?? [];
@@ -392,11 +392,6 @@ export default async function HallPage({
                 )}
               </p>
               <div className="book-bot-btns">
-                {botLinks.telegram && (
-                  <a className="dg-btn book-tg" href={botLinks.telegram} target="_blank" rel="noopener noreferrer">
-                    <DgIcon name="tg" size={18} /> {T("Telegram-ботта брондау", "Забронировать в Telegram")}
-                  </a>
-                )}
                 {botLinks.whatsapp && (
                   <a className="dg-btn book-wa" href={botLinks.whatsapp} target="_blank" rel="noopener noreferrer">
                     <DgIcon name="phone" size={18} /> {T("WhatsApp арқылы брондау", "Забронировать в WhatsApp")}
