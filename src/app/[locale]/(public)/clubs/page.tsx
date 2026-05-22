@@ -1,7 +1,8 @@
-import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
+import { isValidLocale, type Locale, getLocalizedField, getMessages } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgClubsCatalog, { type DgClub } from "@/components/features/DgClubsCatalog";
+import RecommendQuiz from "@/components/features/RecommendQuiz";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,7 @@ export default async function ClubsPage({
   const { locale: localeParam } = await params;
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
+  const messages = getMessages(locale);
 
   const clubs = await loadClubs();
   const items: DgClub[] = clubs.map((c) => {
@@ -94,6 +96,13 @@ export default async function ClubsPage({
           "Бесплатные кружки для детей от 3 лет и взрослых. Выберите направление по интересам и возрасту — запись открыта на 2026/2027 учебный год."
         )}
       />
+
+      <section className="section" style={{ borderTop: 0, paddingBottom: 0 }}>
+        <div className="dg-wrap">
+          <RecommendQuiz locale={locale} messages={messages.clubs} />
+        </div>
+      </section>
+
       <DgClubsCatalog locale={locale} items={items} />
     </div>
   );

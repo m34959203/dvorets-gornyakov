@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Button from "@/components/ui/Button";
 import type { Locale } from "@/lib/i18n";
+import DgIcon from "@/components/layout/DgIcon";
 
 interface RecommendQuizProps {
   locale: Locale;
@@ -84,6 +84,7 @@ interface Match {
 }
 
 export default function RecommendQuiz({ locale, messages: t }: RecommendQuizProps) {
+  const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
   const [step, setStep] = useState(-1); // -1 = not started
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [result, setResult] = useState<string | null>(null);
@@ -96,7 +97,6 @@ export default function RecommendQuiz({ locale, messages: t }: RecommendQuizProp
     if (!currentQuestion) return;
     const newAnswers = { ...answers, [currentQuestion.id]: value };
     setAnswers(newAnswers);
-
     if (step < questions.length - 1) {
       setStep(step + 1);
     } else {
@@ -116,7 +116,7 @@ export default function RecommendQuiz({ locale, messages: t }: RecommendQuizProp
       setResult(data.data?.recommendation || data.error || "Error");
       setMatches(Array.isArray(data.data?.matches) ? data.data.matches : []);
     } catch {
-      setResult(locale === "kk" ? "Қате орын алды" : "Произошла ошибка");
+      setResult(T("Қате орын алды", "Произошла ошибка"));
     } finally {
       setLoading(false);
     }
@@ -129,119 +129,89 @@ export default function RecommendQuiz({ locale, messages: t }: RecommendQuizProp
     setMatches([]);
   };
 
-  // Not started
+  // Не начат
   if (step === -1) {
     return (
-      <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl p-8 text-center">
-        <h3 className="text-xl font-bold text-gray-900 mb-2">{t.quizTitle}</h3>
-        <p className="text-gray-600 mb-6">
-          {locale === "kk"
-            ? "5 сұраққа жауап беріп, өзіңізге сәйкес үйірмені табыңыз"
-            : "Ответьте на 5 вопросов и найдите подходящий кружок"}
+      <div className="quiz">
+        <div className="quiz-eyebrow">{T("AI-көмекші", "AI-помощник")}</div>
+        <h3>{t.quizTitle}</h3>
+        <p className="quiz-sub">
+          {T(
+            "5 сұраққа жауап беріп, өзіңізге сәйкес үйірмені табыңыз.",
+            "Ответьте на 5 вопросов и найдите подходящий кружок."
+          )}
         </p>
-        <Button onClick={() => setStep(0)} size="lg">
-          {t.quizStart}
-        </Button>
+        <button className="dg-btn" onClick={() => setStep(0)}>
+          {t.quizStart} <DgIcon name="arrow" size={12} />
+        </button>
       </div>
     );
   }
 
-  // Loading result
+  // Загрузка
   if (loading) {
     return (
-      <div className="bg-white rounded-xl p-8 text-center border border-gray-100">
-        <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-        <p className="text-gray-600">
-          {locale === "kk" ? "AI сіз үшін үйірме іздеуде..." : "AI подбирает кружок для вас..."}
-        </p>
+      <div className="quiz">
+        <div className="quiz-loading">
+          <div className="quiz-spinner" />
+          <p>{T("AI сіз үшін үйірме іздеуде…", "AI подбирает кружок для вас…")}</p>
+        </div>
       </div>
     );
   }
 
-  // Show result
+  // Результат
   if (result) {
     return (
-      <div className="bg-white rounded-xl p-6 border border-gray-100">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">{t.quizResult}</h3>
-        <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap mb-6">
-          {result}
-        </div>
+      <div className="quiz">
+        <div className="quiz-eyebrow">{t.quizResult}</div>
+        <p className="quiz-result">{result}</p>
 
-        <div className="rounded-xl bg-gradient-to-br from-primary/5 to-accent/10 p-5 mb-6">
-          <p className="text-sm text-gray-700 mb-3">
-            {locale === "kk"
-              ? "Ұнаған үйірмеге жазылыңыз:"
-              : "Запишитесь на понравившийся кружок:"}
-          </p>
+        <div className="quiz-matches">
           {matches.length > 0 ? (
-            <div className="space-y-2">
-              {matches.map((m) => (
-                <div
-                  key={m.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white/80 px-3 py-2"
-                >
-                  <span className="text-sm font-semibold text-gray-900">
-                    {locale === "kk" ? m.name_kk : m.name_ru}
-                  </span>
-                  <Link
-                    href={`/${locale}/clubs/${m.id}`}
-                    className="bg-accent text-primary-dark hover:bg-accent-light rounded-full px-4 py-1.5 text-xs font-semibold"
-                  >
-                    {locale === "kk" ? "Жазылу" : "Записаться"}
-                  </Link>
-                </div>
-              ))}
-            </div>
+            matches.map((m) => (
+              <div key={m.id} className="quiz-match">
+                <span className="nm">{T(m.name_kk, m.name_ru)}</span>
+                <Link href={`/${locale}/clubs/${m.id}`}>{T("Жазылу", "Записаться")}</Link>
+              </div>
+            ))
           ) : (
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href={`/${locale}/clubs`}
-                className="bg-accent text-primary-dark hover:bg-accent-light rounded-full px-5 py-2 text-sm font-semibold"
-              >
-                {locale === "kk" ? "Үйірмелерді көру" : "Смотреть кружки"}
-              </Link>
+            <div className="quiz-match">
+              <span className="nm">{T("Барлық үйірмелерді қараңыз", "Посмотрите все кружки")}</span>
+              <Link href={`/${locale}/clubs`}>{T("Көру", "Смотреть")}</Link>
             </div>
           )}
         </div>
 
-        <Button onClick={reset} variant="outline">
-          {locale === "kk" ? "Қайтадан бастау" : "Начать заново"}
-        </Button>
+        <button className="dg-btn dg-btn-ghost" onClick={reset}>
+          {T("Қайтадан бастау", "Начать заново")}
+        </button>
       </div>
     );
   }
 
-  // Show question
   if (!currentQuestion) return null;
 
+  // Вопрос
   return (
-    <div className="bg-white rounded-xl p-6 border border-gray-100">
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-sm text-gray-500">
+    <div className="quiz">
+      <div className="quiz-head">
+        <span className="quiz-step">
           {t.quizQuestion} {step + 1} / {questions.length}
         </span>
-        <div className="flex gap-1">
+        <div className="quiz-bars">
           {questions.map((_, i) => (
-            <div
-              key={i}
-              className={`w-8 h-1.5 rounded-full ${i <= step ? "bg-primary" : "bg-gray-200"}`}
-            />
+            <div key={i} className={"quiz-bar" + (i <= step ? " on" : "")} />
           ))}
         </div>
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        {locale === "kk" ? currentQuestion.text_kk : currentQuestion.text_ru}
-      </h3>
+      <h3 className="quiz-q">{T(currentQuestion.text_kk, currentQuestion.text_ru)}</h3>
 
-      <div className="space-y-2">
+      <div className="quiz-opts">
         {currentQuestion.options.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => handleAnswer(option.value)}
-            className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 transition-colors text-sm font-medium"
-          >
-            {locale === "kk" ? option.label_kk : option.label_ru}
+          <button key={option.value} className="quiz-opt" onClick={() => handleAnswer(option.value)}>
+            {T(option.label_kk, option.label_ru)}
           </button>
         ))}
       </div>
