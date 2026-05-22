@@ -106,7 +106,7 @@ export default async function HomePage({
     getLocalizedField(e as unknown as Record<string, unknown>, "title", locale);
 
   // ── Расписание: список ближайших + дни-события для календаря ──
-  const scheduleItems = events.slice(0, 6).map((e) => {
+  const scheduleItems = events.slice(0, 8).map((e) => {
     const chip = formatDateChip(e.start_date, locale);
     return { id: e.id, d: parseInt(chip.d, 10), m: chip.m, wd: chip.wd, title: titleOf(e), time: chip.time, hall: e.location };
   });
@@ -213,27 +213,37 @@ export default async function HomePage({
                 <span className="lab">{T("Айдың афишасы", "Афиша месяца")}</span>
                 <span className="count"><em>{events.length}</em> {T("оқиға", "событий")}</span>
               </div>
-              <ul className="sched-list">
-                {scheduleItems.map((s) => (
-                  <li className="sched-item" key={s.id}>
-                    <Link href={`/${locale}/events/${s.id}`}>
-                      <span className="sched-when">
-                        <span className="d">{s.d}</span>
-                        <span className="m">{s.m}</span>
-                      </span>
-                      <span className="sched-info">
-                        <span className="s-title">{s.title}</span>
-                        <span className="s-meta">
-                          <span>{s.time}</span>
-                          <span className="sep">·</span>
-                          <span>{s.hall}</span>
+              {scheduleItems.length > 0 ? (
+                <ul className="sched-list">
+                  {scheduleItems.map((s) => (
+                    <li className="sched-item" key={s.id}>
+                      <Link href={`/${locale}/events/${s.id}`}>
+                        <span className="sched-when">
+                          <span className="d">{s.d}</span>
+                          <span className="m">{s.m}</span>
                         </span>
-                      </span>
-                      <span className="sched-free">{T("Тегін", "Бесплатно")}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+                        <span className="sched-info">
+                          <span className="s-title">{s.title}</span>
+                          <span className="s-meta">
+                            <span>{s.time}</span>
+                            <span className="sep">·</span>
+                            <span>{s.hall}</span>
+                          </span>
+                        </span>
+                        <span className="sched-free">{T("Тегін", "Бесплатно")}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="sched-empty">
+                  <DgIcon name="calendar" size={32} stroke={1.1} />
+                  <p>{T("Жақын арада жоспарланған оқиғалар жоқ", "Ближайших событий пока нет")}</p>
+                  <Link href={`/${locale}/events`} className="section-link">
+                    {T("Бүкіл афишаны қарау", "Смотреть всю афишу")} <DgIcon name="arrow" size={12} />
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Календарь */}
