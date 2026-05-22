@@ -19,8 +19,8 @@ interface HeaderClientProps {
 }
 
 const LANGS: { code: Locale; label: string }[] = [
-  { code: "ru", label: "РУС" },
   { code: "kk", label: "ҚАЗ" },
+  { code: "ru", label: "РУС" },
 ];
 
 export default function HeaderClient({ locale, navItems }: HeaderClientProps) {
@@ -43,7 +43,7 @@ export default function HeaderClient({ locale, navItems }: HeaderClientProps) {
     return segments.join("/") || `/${next}`;
   };
 
-  const current = LANGS.find((l) => l.code === locale)?.label ?? "РУС";
+  const current = LANGS.find((l) => l.code === locale)?.label ?? "ҚАЗ";
 
   return (
     <>

@@ -53,8 +53,8 @@ export async function handleInbound(
       );
       if (hall) data = { hall_id: hall.id, hall_name: hall.name_ru };
     }
-    const g = greeting("ru");
-    const state: BotState = { step: "lang", data, locale: "ru" };
+    const g = greeting("kk");
+    const state: BotState = { step: "lang", data, locale: "kk" };
     await saveSession(channel, chatId, state);
     return { reply: g.reply, options: g.options };
   }
@@ -67,8 +67,8 @@ export async function handleInbound(
   // Нет сессии — приветствуем
   let state = await getSession(channel, chatId);
   if (!state) {
-    const g = greeting("ru");
-    await saveSession(channel, chatId, { step: "lang", data: {}, locale: "ru" });
+    const g = greeting("kk");
+    await saveSession(channel, chatId, { step: "lang", data: {}, locale: "kk" });
     return { reply: g.reply, options: g.options };
   }
 

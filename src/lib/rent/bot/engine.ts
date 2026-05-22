@@ -146,7 +146,7 @@ function etypeLabel(l: BotLocale, v: string): string {
 }
 
 export function initialState(): BotState {
-  return { step: "lang", data: {}, locale: "ru" };
+  return { step: "lang", data: {}, locale: "kk" };
 }
 
 /** Стартовое сообщение (после /start). presetHall — если пришёл диплинк rent_<slug>. */
@@ -186,7 +186,7 @@ export function advance(state: BotState, input: string, ctx: EngineCtx): EngineR
         { value: "ru", label: "Русский" },
         { value: "kk", label: "Қазақша" },
       ]);
-      const locale: BotLocale = v === "kk" ? "kk" : "ru";
+      const locale: BotLocale = v === "ru" ? "ru" : "kk";
       // Зал мог быть предустановлен диплинком
       if (data.hall_id) {
         return {
