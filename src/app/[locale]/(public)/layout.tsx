@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Script from "next/script";
 import { Suspense } from "react";
 import { getMessages, isValidLocale, type Locale } from "@/lib/i18n";
@@ -7,6 +8,60 @@ import Footer from "@/components/layout/Footer";
 import ChatBot from "@/components/features/ChatBot";
 import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
 import { getMany } from "@/lib/db";
+
+// Локализованные метаданные: на /kk — казахские (город «Сәтбаев»), на /ru — русские.
+// Переопределяют дефолтные (русские) метаданные из корневого layout.
+const META = {
+  kk: {
+    title: "Ш. Дільдебаев атындағы тау-кеншілер сарайы — Сәтбаев",
+    template: "%s · Тау-кеншілер сарайы · Сәтбаев",
+    desc:
+      "«Ш. Дільдебаев атындағы мәдениет және шығармашылық орталығы» КМҚК (Тау-кеншілер сарайы) — Сәтбаев қаласының мәдени орталығы, Ұлытау облысы. 22 ұжым, 3 зал, концерттер мен іс-шаралар афишасы.",
+    ogLocale: "kk_KZ",
+    siteName: "Ш. Дільдебаев атындағы тау-кеншілер сарайы",
+    ogAlt: "Тау-кеншілер сарайы, Сәтбаев қаласы",
+  },
+  ru: {
+    title: "Дворец горняков им. Ш. Дильдебаева — Сатпаев",
+    template: "%s · Дворец горняков · Сатпаев",
+    desc:
+      "КГКП «Центр культуры и творчества им. Ш. Дильдебаева» (Дворец горняков) — культурный центр города Сатпаев, область Ұлытау. 22 коллектива, 3 зала, афиша концертов и событий.",
+    ogLocale: "ru_RU",
+    siteName: "Дворец горняков им. Ш. Дильдебаева",
+    ogAlt: "Дворец горняков им. Ш. Дильдебаева, г. Сатпаев",
+  },
+} as const;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: lp } = await params;
+  const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const m = META[locale];
+  return {
+    title: { default: m.title, template: m.template },
+    description: m.desc,
+    alternates: {
+      languages: { kk: "/kk", ru: "/ru" },
+    },
+    openGraph: {
+      title: m.title,
+      description: m.desc,
+      type: "website",
+      siteName: m.siteName,
+      locale: m.ogLocale,
+      images: [{ url: "/photos/og-cover.jpg", width: 1200, height: 630, alt: m.ogAlt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: m.title,
+      description: m.desc,
+      images: ["/photos/og-cover.jpg"],
+    },
+  };
+}
 
 interface SettingRow {
   key: string;
