@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
 import { getCurrentUser } from "@/lib/auth";
 import { getMany } from "@/lib/db";
+import AutoPublishToggles from "@/components/features/AutoPublishToggles";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,8 @@ export default async function SocialPublicationsPage({
           "Журнал автопубликаций новостей и событий. Успешная публикация повторно не отправляется."
         )}
       </p>
+
+      <AutoPublishToggles locale={locale} />
 
       {rows.length === 0 ? (
         <p className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">

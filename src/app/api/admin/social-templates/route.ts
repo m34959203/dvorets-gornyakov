@@ -5,7 +5,7 @@ import { apiError, apiSuccess } from "@/lib/utils";
 import { z } from "zod";
 
 const createSchema = z.object({
-  platform: z.enum(["telegram", "instagram"]),
+  platform: z.enum(["telegram", "instagram", "facebook"]),
   kind: z.enum(["news", "event"]),
   name: z.string().min(1).max(100),
   body_kk: z.string().default(""),

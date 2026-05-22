@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
 
-type Platform = "telegram" | "instagram";
+type Platform = "telegram" | "instagram" | "facebook";
 type Kind = "news" | "event";
 
 interface Template {
@@ -265,6 +265,7 @@ export default function SocialTemplatesPage() {
                 >
                   <option value="telegram">Telegram</option>
                   <option value="instagram">Instagram</option>
+                  <option value="facebook">Facebook</option>
                 </select>
               </label>
               <label className="block">
