@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { chatWithGeminiTools } from "@/lib/gemini";
+import { chatWithGroqTools, hasGroq } from "@/lib/groq";
 import { bookHallDeclaration, runBookHall } from "@/lib/ai/tools/bookHall";
 import { chatbotSchema, parseBody } from "@/lib/validators";
 import { apiError, apiSuccess } from "@/lib/utils";
@@ -137,7 +138,10 @@ Rules:
     }));
     msgs.push({ role: "user", parts: [{ text: message }] });
 
-    const result = await chatWithGeminiTools(msgs, knowledgeContext, [bookHallDeclaration], { purpose: "chatbot" });
+    // Groq (free) — primary, если задан ключ; иначе Gemini.
+    const result = hasGroq()
+      ? await chatWithGroqTools(msgs, knowledgeContext, [bookHallDeclaration], { purpose: "chatbot" })
+      : await chatWithGeminiTools(msgs, knowledgeContext, [bookHallDeclaration], { purpose: "chatbot" });
 
     // Бот запросил бронь → валидируем и пишем в bookings
     if (result.kind === "call" && result.name === "book_hall") {

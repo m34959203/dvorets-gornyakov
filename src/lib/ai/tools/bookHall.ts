@@ -22,7 +22,7 @@ export const bookHallDeclaration = {
       organizer: { type: "string", description: "ФИО или название организации" },
       phone: { type: "string", description: "Телефон в формате +7XXXXXXXXXX" },
       purpose: { type: "string", description: "Цель мероприятия, 1–2 предложения" },
-      attendees: { type: "integer", description: "Ожидаемое число гостей (>0)" },
+      attendees: { type: "string", description: "Ожидаемое число гостей строкой, например \"50\"" },
     },
     required: ["hall", "date", "start_time", "end_time", "organizer", "phone", "purpose", "attendees"],
   },
