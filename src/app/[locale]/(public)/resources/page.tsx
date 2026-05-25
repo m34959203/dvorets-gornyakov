@@ -32,7 +32,7 @@ export default async function ResourcesPage({
           "Полезные ссылки на партнёрские учреждения и государственные порталы."
         )}
       />
-      <section className="section" style={{ borderTop: 0 }}>
+      <section className="section section--light" style={{ borderTop: 0 }}>
         <div className="dg-wrap">
           <ul className="link-list">
             {resources.map((r) => (

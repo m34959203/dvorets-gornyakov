@@ -168,7 +168,7 @@ export default async function NewsPage({
         )}
       />
 
-      <section className="section" style={{ borderTop: 0 }}>
+      <section className="section section--light" style={{ borderTop: 0 }}>
         <div className="dg-wrap">
           <div id="news-grid" className="news-grid">
             {items.map((n, idx) => {

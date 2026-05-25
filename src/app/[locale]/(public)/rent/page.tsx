@@ -149,7 +149,7 @@ export default async function RentPage({
       />
 
       {/* Halls grid */}
-      <section id="halls" className="section" style={{ borderTop: 0 }}>
+      <section id="halls" className="section section--light" style={{ borderTop: 0 }}>
         <div className="dg-wrap">
           <div className="halls-grid">
             {halls.map((h) => {
@@ -197,7 +197,7 @@ export default async function RentPage({
 
       {/* Availability calendar */}
       {halls.length > 0 && (
-        <section className="section">
+        <section className="section section--light">
           <div className="dg-wrap">
             <div className="section-bar" style={{ marginBottom: 36 }}>
               <div className="tag">{T("— Кесте —", "— Расписание —")}</div>
@@ -220,7 +220,7 @@ export default async function RentPage({
 
       {/* FAQ */}
       {faq.length > 0 && (
-        <section className="section">
+        <section className="section section--light">
           <div className="dg-wrap">
             <RentFAQ title={String(t.faqTitle)} items={faq} />
           </div>

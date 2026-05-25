@@ -100,7 +100,7 @@ export default async function AboutPage({
       />
 
       {/* ═══ About grid: photo + history + stats ═══ */}
-      <section className="section" style={{ borderTop: 0 }}>
+      <section className="section section--light" style={{ borderTop: 0 }}>
         <div className="dg-wrap">
           <div className="about-grid">
             <div className="about-photo">
@@ -162,7 +162,7 @@ export default async function AboutPage({
       </section>
 
       {/* ═══ Mission ═══ */}
-      <section className="section">
+      <section className="section section--light">
         <div className="dg-wrap">
           <div className="section-bar">
             <div className="tag">— {T("Миссия", "Миссия")} —</div>
@@ -193,7 +193,7 @@ export default async function AboutPage({
       </section>
 
       {/* ═══ Namesake ═══ */}
-      <section className="section">
+      <section className="section section--light">
         <div className="dg-wrap">
           <div className="section-bar">
             <div className="tag">— {T("Сарай аты берілген тұлға", "Имя дворца")} —</div>
@@ -261,7 +261,7 @@ export default async function AboutPage({
       </section>
 
       {/* ═══ Контакты (объединено со страницы /contacts) ═══ */}
-      <section className="section section--light" id="contacts">
+      <section className="section" id="contacts">
         <div className="dg-wrap">
           <div className="section-bar">
             <div className="tag">— {T("Байланыс", "Контакты")} —</div>

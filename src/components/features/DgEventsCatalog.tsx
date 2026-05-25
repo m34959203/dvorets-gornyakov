@@ -122,7 +122,7 @@ export default function DgEventsCatalog({ locale, items }: Props) {
         </div>
       </div>
 
-      <section className="section" id="grid" style={{ borderTop: 0, paddingTop: 12 }}>
+      <section className="section section--light" id="grid" style={{ borderTop: 0, paddingTop: 12 }}>
         <div className="dg-wrap">
           {filtered.length === 0 ? (
             <div className="dg-empty">

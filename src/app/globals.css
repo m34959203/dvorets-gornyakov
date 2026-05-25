@@ -826,6 +826,10 @@ h1, h2, h3, h4 {
   --dg-text:    #111111;
   --dg-text-2:  #4B5563;  /* WCAG AA на белом (7.6:1) — вторичный текст */
   --dg-text-3:  #6B7280;  /* WCAG AA на белом (4.95:1) — кикеры/метки, было #9CA3AF (2.5:1, провал) */
+  /* Коралл как ТЕКСТ/иконки/тонкие бордюры на белом проваливает WCAG (2.98:1) →
+     тёмный терракот (8.1:1). Яркий коралл остаётся для заливок кнопок и .poster-tag (см. ниже). */
+  --dg-accent:   #7A3D18;
+  --dg-accent-2: #934A20;
   --dg-hair:    rgba(17,17,17,0.10);
   --dg-hair-2:  rgba(17,17,17,0.18);
   --dg-hair-3:  rgba(17,17,17,0.28);
@@ -833,6 +837,10 @@ h1, h2, h3, h4 {
   color: var(--dg-text);
 }
 .dg-home .section--light + .section--light { border-top: 1px solid var(--dg-hair); }
+/* Тонкая граница на стыке тёмная→светлая, чтобы переход не «обрывался» */
+.dg-home .section + .section--light { border-top: 1px solid rgba(0, 0, 0, 0.06); }
+/* .poster-tag несёт собственный тёмный фон поверх фото → яркий коралл даже в светлой секции */
+.dg-home .section--light .poster-tag { color: #E07A4A; }
 
 .dg-home {
   background: var(--dg-bg);
