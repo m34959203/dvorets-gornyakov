@@ -73,6 +73,26 @@ export default function ChatBot({ locale, messages: t }: ChatBotProps) {
     }
   };
 
+  // Внешнее открытие чата (CTA «Спросить помощника») с автоотправкой реплики.
+  const sendRef = useRef(sendMessage);
+  sendRef.current = sendMessage;
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      setIsOpen(true);
+      const msg = (e as CustomEvent).detail?.message as string | undefined;
+      if (msg) setTimeout(() => sendRef.current(msg), 120);
+    };
+    window.addEventListener("dg:open-chat", onOpen);
+    return () => window.removeEventListener("dg:open-chat", onOpen);
+  }, []);
+
+  // Подсказки при открытии (отправляются как реплики).
+  const suggestions: { icon: string; text: string }[] = [
+    { icon: "🏛", text: locale === "kk" ? "Зал жалдағым келеді" : "Хочу арендовать зал" },
+    { icon: "🎤", text: locale === "kk" ? "Үйірмеге жазылғым келеді" : "Хочу записаться в кружок" },
+    { icon: "📅", text: locale === "kk" ? "Осы аптада не бар?" : "Что на этой неделе?" },
+  ];
+
   const toggleVoice = () => {
     if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
       return;
@@ -174,6 +194,22 @@ export default function ChatBot({ locale, messages: t }: ChatBotProps) {
             )}
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Suggested questions (показываем в начале диалога) */}
+          {chatMessages.length <= 1 && !isLoading && (
+            <div className="px-3 pb-1 flex flex-wrap gap-2">
+              {suggestions.map((s) => (
+                <button
+                  key={s.text}
+                  type="button"
+                  onClick={() => sendMessage(s.text)}
+                  className="text-xs px-3 py-1.5 rounded-full border border-[#E07A4A]/40 text-[#7A3D18] hover:bg-[#E07A4A]/10 transition-colors"
+                >
+                  {s.icon} {s.text}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Input */}
           <div className="border-t border-gray-100 p-3">

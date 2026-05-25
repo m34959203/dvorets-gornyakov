@@ -163,6 +163,80 @@ export async function chatWithGemini(
   return reply;
 }
 
+// ─── Function calling (бот аренды зала) ───────────────────────────────────
+export interface GeminiTool {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+}
+
+export type GeminiToolResult =
+  | { kind: "text"; text: string }
+  | { kind: "call"; name: string; args: Record<string, unknown> };
+
+interface GeminiToolsResponse {
+  candidates?: { content?: { parts?: { text?: string; functionCall?: { name: string; args: Record<string, unknown> } }[] } }[];
+  usageMetadata?: GeminiUsageMetadata;
+  error?: { message: string };
+}
+
+/**
+ * Чат с поддержкой function calling. Возвращает либо текст, либо запрос вызова tool.
+ * При недоступности/отсутствии ключа/бюджета — text-фолбэк (бот не падает).
+ */
+export async function chatWithGeminiTools(
+  messages: GeminiMessage[],
+  systemPrompt: string,
+  tools: GeminiTool[],
+  options: ChatOptions = {}
+): Promise<GeminiToolResult> {
+  const purpose = options.purpose ?? "chatbot";
+  const userId = options.userId ?? null;
+
+  if (process.env.AI_DISABLED === "1" || !process.env.GEMINI_API_KEY) {
+    await logGeneration({ model: GEMINI_MODEL, purpose, userId, durationMs: 0, success: false, error: process.env.GEMINI_API_KEY ? "ai_disabled" : "no_api_key" });
+    return { kind: "text", text: UNAVAILABLE_REPLY };
+  }
+  if (!(await withinBudget())) {
+    await logGeneration({ model: GEMINI_MODEL, purpose, userId, durationMs: 0, success: false, error: "budget_exceeded" });
+    return { kind: "text", text: BUDGET_EXCEEDED_REPLY };
+  }
+
+  const body = {
+    contents: messages,
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+    tools: [{ functionDeclarations: tools }],
+    generationConfig: { temperature: 0.4, topP: 0.9, maxOutputTokens: 1024 },
+  };
+
+  const startTime = Date.now();
+  let success = false;
+  let errorMsg: string | null = null;
+  try {
+    const response = await fetch(`${GEMINI_API_URL}?key=${process.env.GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data: GeminiToolsResponse = await response.json();
+    if (data.error) {
+      errorMsg = data.error.message;
+      return { kind: "text", text: UNAVAILABLE_REPLY };
+    }
+    const parts = data.candidates?.[0]?.content?.parts ?? [];
+    const call = parts.find((p) => p.functionCall)?.functionCall;
+    success = true;
+    if (call) return { kind: "call", name: call.name, args: call.args ?? {} };
+    const text = parts.map((p) => p.text).filter(Boolean).join("\n") || FALLBACK_REPLY;
+    return { kind: "text", text };
+  } catch (err) {
+    errorMsg = err instanceof Error ? err.message : String(err);
+    return { kind: "text", text: UNAVAILABLE_REPLY };
+  } finally {
+    await logGeneration({ model: GEMINI_MODEL, purpose, userId, durationMs: Date.now() - startTime, success, error: errorMsg });
+  }
+}
+
 export async function translateText(
   text: string,
   fromLang: "kk" | "ru",

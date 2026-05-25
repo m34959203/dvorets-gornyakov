@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { chatWithGemini } from "@/lib/gemini";
+import { chatWithGeminiTools } from "@/lib/gemini";
+import { bookHallDeclaration, runBookHall } from "@/lib/ai/tools/bookHall";
 import { chatbotSchema, parseBody } from "@/lib/validators";
 import { apiError, apiSuccess } from "@/lib/utils";
 import { getMany } from "@/lib/db";
@@ -119,6 +120,15 @@ Rules:
 - Be friendly and helpful
 - Keep responses concise (2–4 sentences typically)
 - If asked about enrollment, direct to the clubs page or phone
+
+=== АРЕНДА ЗАЛА (бронь через tool book_hall) ===
+Когда пользователь хочет арендовать/забронировать зал — веди диалог и собери ВСЕ поля:
+зал (Большой 650 / Камерный 120 / Репетиционный 40), дата (не раньше завтра, YYYY-MM-DD),
+время с и до (HH:MM), ФИО или организация, телефон +7XXXXXXXXXX, цель мероприятия, число гостей.
+Спрашивай дружелюбно, по 1–2 поля за реплику. Когда ВСЁ собрано — кратко подтверди сводку
+и вызови tool book_hall с этими аргументами. НЕ выдумывай доступность (проверит администратор).
+НЕ проси оплату (мероприятия в КГКП бесплатные/по согласованию). Сегодня: ${new Date().toISOString().slice(0, 10)}.
+Если разговор не про бронь — отвечай обычным режимом про дворец.
 `;
 
     const msgs = (history || []).map((h) => ({
@@ -127,7 +137,35 @@ Rules:
     }));
     msgs.push({ role: "user", parts: [{ text: message }] });
 
-    const reply = await chatWithGemini(msgs, knowledgeContext, { purpose: "chatbot" });
+    const result = await chatWithGeminiTools(msgs, knowledgeContext, [bookHallDeclaration], { purpose: "chatbot" });
+
+    // Бот запросил бронь → валидируем и пишем в bookings
+    if (result.kind === "call" && result.name === "book_hall") {
+      const res = await runBookHall(result.args, lang);
+      if (res.ok) {
+        return apiSuccess({
+          reply:
+            lang === "kk"
+              ? `Дайын! Өтінім №${res.ref} қабылданды. Әкімшілік 24 сағат ішінде хабарласады. Рахмет!`
+              : `Готово! Заявка №${res.ref} принята. Администратор свяжется в течение 24 часов. Спасибо!`,
+          booking: { id: res.id, ref: res.ref },
+        });
+      }
+      // Валидация не прошла — просим уточнить, без 500
+      return apiSuccess({
+        reply:
+          lang === "kk"
+            ? "Деректерді тексеріп, қайта жіберіңізші (күні ертеңнен ерте емес, телефон +7XXXXXXXXXX)."
+            : "Проверьте данные и повторите, пожалуйста (дата не раньше завтра, телефон +7XXXXXXXXXX).",
+      });
+    }
+
+    const reply =
+      result.kind === "text"
+        ? result.text
+        : lang === "kk"
+        ? "Сұранысты түсінбедім, нақтылаңызшы."
+        : "Не понял запрос, уточните, пожалуйста.";
 
     // Fallback: если Gemini вернул заглушку «недоступен» — пробуем KB (БД + hardcoded)
     const looksUnavailable = UNAVAILABLE_MARKERS.some((m) => reply.includes(m));

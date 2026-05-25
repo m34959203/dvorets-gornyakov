@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { isValidLocale, type Locale, getLocalizedField, getMessages } from "@/lib/i18n";
+import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
 import type { Hall } from "@/lib/rent/types";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
-import RentalRequestForm from "@/components/rent/RentalRequestForm";
+import AskAssistantCta from "@/components/rent/AskAssistantCta";
 
 export const dynamic = "force-dynamic";
 
@@ -120,9 +120,6 @@ export default async function RentPage({
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
-  const messages = getMessages(locale);
-  const t = messages.rent as unknown as Record<string, unknown>;
-
   const halls = await loadHalls();
 
   return (
@@ -193,44 +190,28 @@ export default async function RentPage({
       </section>
 
 
-      {/* Request form */}
+      {/* CTA: бронь через AI-помощника или по телефону */}
       <section id="request" className="section">
         <div className="dg-wrap">
-          <div className="section-bar" style={{ marginBottom: 36 }}>
-            <div className="tag">{T("— Өтінім —", "— Заявка —")}</div>
-            <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Зал <strong>жалдау өтінімі</strong>", "<strong>Заявка</strong> на аренду зала") }} />
+          <div className="section-bar" style={{ marginBottom: 28 }}>
+            <div className="tag">{T("— Брондау —", "— Бронирование —")}</div>
+            <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Зал <strong>брондау</strong>", "Забронировать <strong>зал</strong>") }} />
           </div>
-          {halls.length > 0 ? (
-            <RentalRequestForm
-              halls={halls}
-              locale={locale}
-              labels={{
-                title: String(t.formTitle),
-                hall: String(t.formHall),
-                name: String(t.formName),
-                phone: String(t.formPhone),
-                email: String(t.formEmail),
-                date: String(t.formDate),
-                timeFrom: String(t.formTimeFrom),
-                timeTo: String(t.formTimeTo),
-                guests: String(t.formGuests),
-                eventType: String(t.formEventType),
-                equipment: String(t.formEquipment),
-                message: String(t.formMessage),
-                submit: String(t.formSubmit),
-                submitting: String(t.formSubmitting),
-                success: String(t.formSuccess),
-                error: String(t.formError),
-                eventTypes: t.formEventTypes as Record<string, string>,
-                equipmentOptions: t.formEquipmentOptions as Record<
-                  "mic" | "projector" | "lights" | "streaming" | "catering",
-                  string
-                >,
-              }}
+          <p style={{ color: "var(--dg-text-2)", maxWidth: 620, marginBottom: 28 }}>
+            {T(
+              "Брондау AI-көмекші арқылы: ол залды, күні мен уақытты таңдауға көмектеседі және өтінім қалдырады. Әкімшілік қолжетімділікті растайды.",
+              "Бронирование через AI-помощника: он поможет выбрать зал, дату и время и оформит заявку. Доступность подтверждает администратор."
+            )}
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "center" }}>
+            <AskAssistantCta
+              label={T("Көмекшіден сұрау", "Спросить помощника")}
+              message={T("Зал жалдағым келеді", "Хочу арендовать зал")}
             />
-          ) : (
-            <p style={{ color: "var(--dg-text-2)", textAlign: "center" }}>—</p>
-          )}
+            <a href="tel:+77106362330" className="section-link">
+              {T("Қоңырау шалу", "Позвонить")}: +7 (71063) 6-23-30
+            </a>
+          </div>
         </div>
       </section>
     </div>
