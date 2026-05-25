@@ -158,6 +158,7 @@ export default async function EventsPage({
       type: typeMap[e.event_type] ?? typeMap.other,
       free: true,
       price: T("Тегін", "Бесплатно"),
+      tag: typeMap[e.event_type] ?? typeMap.other,
     };
   });
 
