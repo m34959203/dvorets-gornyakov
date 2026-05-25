@@ -1420,7 +1420,7 @@ h1, h2, h3, h4 {
 .dg-home .results-count strong { color: var(--dg-text); font-weight: 500; }
 
 /* Бейдж-тег на постере (тип/премьера) */
-.dg-home .poster-tag { position: absolute; top: 14px; left: 14px; z-index: 2; background: rgba(11,15,26,0.85); color: var(--dg-accent); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; padding: 5px 10px; border-radius: 3px; font-weight: 500; }
+.dg-home .poster-tag { position: absolute; top: 14px; left: 14px; z-index: 2; background: rgba(11,15,26,0.92); color: var(--dg-accent); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; padding: 5px 10px; border-radius: 3px; font-weight: 500; }
 
 /* ─── Clubs grid ─── */
 .dg-home .clubs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--dg-hair); }
