@@ -41,7 +41,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center py-12 px-4" style={{ background: "#0E0E20" }}>
+    <div className="min-h-[calc(100vh-84px)] flex items-center justify-center py-12 px-4" style={{ background: "#0E0E20" }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex w-14 h-14 rounded-full items-center justify-center mb-4"
