@@ -866,8 +866,8 @@ h1, h2, h3, h4 {
   font-family: var(--font-body); font-size: 11.5px;
 }
 .dg-topbar-inner {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 20px; min-height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 28px; min-height: 38px;
 }
 .dg-topbar-label {
   color: #6B7280; letter-spacing: .18em; text-transform: uppercase;
