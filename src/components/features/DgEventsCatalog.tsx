@@ -54,6 +54,36 @@ function buildRail(locale: Locale): RailDay[] {
   return out;
 }
 
+const GRID_WEEKDAYS = {
+  ru: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+  kk: ["Дс", "Сс", "Ср", "Бс", "Жм", "Сб", "Жс"],
+};
+
+interface GridCell { day: number; iso: string; today: boolean; }
+interface MonthGrid { label: string; year: number; cells: (GridCell | null)[]; }
+
+// Сетки 3 месяцев окна (текущий + 2). monthWindow — длинные названия для заголовков.
+function buildGrids(monthWindow: string[]): MonthGrid[] {
+  const todayIso = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Almaty" }).format(new Date());
+  const [Y, M] = todayIso.split("-").map(Number);
+  const grids: MonthGrid[] = [];
+  for (let k = 0; k < 3; k++) {
+    const first = new Date(Date.UTC(Y, M - 1 + k, 1, 12));
+    const y = first.getUTCFullYear();
+    const mIdx = first.getUTCMonth();
+    const daysInMonth = new Date(Date.UTC(y, mIdx + 1, 0, 12)).getUTCDate();
+    const startWeekday = (first.getUTCDay() + 6) % 7; // понедельник = 0
+    const cells: (GridCell | null)[] = [];
+    for (let i = 0; i < startWeekday; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) {
+      const iso = `${y}-${String(mIdx + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      cells.push({ day: d, iso, today: iso === todayIso });
+    }
+    grids.push({ label: monthWindow[k] ?? "", year: y, cells });
+  }
+  return grids;
+}
+
 export interface DgEvent {
   id: string;
   href: string;
@@ -105,8 +135,11 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
   const [type, setType] = useState(ALL);
   const [query, setQuery] = useState("");
   const [selectedIso, setSelectedIso] = useState<string | null>(null);
+  const [view, setView] = useState<"list" | "grid" | "rail">("list");
 
   const rail = useMemo(() => buildRail(locale), [locale]);
+  const grids = useMemo(() => buildGrids(monthWindow), [monthWindow]);
+  const weekdays = locale === "kk" ? GRID_WEEKDAYS.kk : GRID_WEEKDAYS.ru;
   const hasEvent = useMemo(() => new Set(items.map((e) => e.iso)), [items]);
   const railRef = useRef<HTMLDivElement>(null);
   // Индексы первых дней месяцев в ленте (для прокрутки по клику на чип месяца).
@@ -149,8 +182,19 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
   const pickMonth = (m: string) => {
     setMonth(m);
     const o = monthWindow.indexOf(m);
-    if (o >= 0 && monthStarts[o] != null) scrollRailToIdx(monthStarts[o]);
+    if (view === "rail" && o >= 0 && monthStarts[o] != null) scrollRailToIdx(monthStarts[o]);
   };
+
+  // Переключение вида. На «Список» сбрасываем выбранный день (он выбирается только в сетке/ленте).
+  const changeView = (v: "list" | "grid" | "rail") => {
+    setView(v);
+    if (v === "list") setSelectedIso(null);
+  };
+  const VIEWS: { id: "list" | "grid" | "rail"; kk: string; ru: string }[] = [
+    { id: "list", kk: "Тізім", ru: "Список" },
+    { id: "grid", kk: "Ай торы", ru: "Сетка месяца" },
+    { id: "rail", kk: "Күндер", ru: "Лента дат" },
+  ];
 
   const chip = (val: string, active: string, set: (v: string) => void) => (
     <button key={val} className={"filter-chip" + (val === active ? " active" : "")} onClick={() => set(val)}>
@@ -162,7 +206,24 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
     <>
       <div className="dg-wrap">
         <div className="dg-controls">
+        {/* Переключатель вида */}
+        <div className="dg-view" role="tablist" aria-label={T("Көрініс", "Вид")}>
+          {VIEWS.map((v) => (
+            <button
+              type="button"
+              key={v.id}
+              role="tab"
+              aria-selected={view === v.id}
+              className={"dg-view-btn" + (view === v.id ? " active" : "")}
+              onClick={() => changeView(v.id)}
+            >
+              {T(v.kk, v.ru)}
+            </button>
+          ))}
+        </div>
+
         {/* Лента дат */}
+        {view === "rail" && (
         <div className="dg-daterail">
           <button
             type="button"
@@ -202,6 +263,48 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
             <DgIcon name="chev-r" size={16} />
           </button>
         </div>
+        )}
+
+        {/* Сетка месяца */}
+        {view === "grid" && (
+          <div className="dg-grids">
+            {grids.map((g) => (
+              <div className="cal" key={g.label + g.year}>
+                <div className="cal-head">
+                  <div>
+                    <div className="cal-month">{g.label}</div>
+                    <div className="cal-year" style={{ marginTop: 4 }}>{g.year}</div>
+                  </div>
+                </div>
+                <div className="cal-grid" role="grid">
+                  {weekdays.map((d) => (
+                    <div key={d} className="cal-dow">{d}</div>
+                  ))}
+                  {g.cells.map((c, i) =>
+                    c === null ? (
+                      <div key={i} className="cal-cell dim" />
+                    ) : (
+                      <button
+                        type="button"
+                        key={c.iso}
+                        onClick={() => pickDay(c.iso)}
+                        aria-pressed={selectedIso === c.iso}
+                        className={
+                          "cal-cell" +
+                          (c.today ? " today" : "") +
+                          (hasEvent.has(c.iso) ? " event" : "") +
+                          (selectedIso === c.iso ? " sel" : "")
+                        }
+                      >
+                        {c.day}
+                      </button>
+                    )
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="filters">
           <div className="filter-group">

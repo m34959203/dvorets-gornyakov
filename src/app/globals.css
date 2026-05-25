@@ -1382,6 +1382,26 @@ h1, h2, h3, h4 {
 .dg-home .dg-controls .filters:last-of-type { border-bottom: 0; padding-bottom: 6px; }
 .dg-home .dg-controls .results-count { padding-bottom: 4px; }
 
+/* Переключатель вида: Список · Сетка · Лента */
+.dg-home .dg-view {
+  display: inline-flex; gap: 2px; background: var(--dg-bg-3);
+  border: 1px solid var(--dg-hair); border-radius: 999px; padding: 3px; margin: 10px 0 2px;
+}
+.dg-home .dg-view-btn {
+  background: transparent; border: 0; color: var(--dg-text-2); cursor: pointer;
+  padding: 8px 16px; border-radius: 999px; font-size: 11px; letter-spacing: .12em;
+  text-transform: uppercase; font-weight: 500; transition: background .15s, color .15s; white-space: nowrap;
+}
+.dg-home .dg-view-btn:hover { color: var(--dg-text); }
+.dg-home .dg-view-btn.active { background: var(--dg-accent); color: #fff; }
+
+/* Сетка месяца (3 месяца окна) */
+.dg-home .dg-grids { display: grid; grid-template-columns: repeat(auto-fit, minmax(248px, 1fr)); gap: 16px; padding: 16px 0 6px; }
+.dg-home .dg-grids .cal { background: var(--dg-bg-3); padding: 18px; }
+.dg-home .dg-grids .cal-cell { background: transparent; border: 0; font-family: inherit; cursor: pointer; }
+.dg-home .dg-grids .cal-cell.dim { cursor: default; }
+.dg-home .cal-cell.sel { background: var(--dg-accent); color: #fff; box-shadow: none; }
+
 /* ═════════════ Date-rail (лента дат на /events) ═════════════ */
 .dg-home .dg-daterail { position: relative; padding-top: 18px; }
 .dg-home .dg-daterail-track {

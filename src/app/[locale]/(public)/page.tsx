@@ -253,10 +253,8 @@ export default async function HomePage({
                   <div className="cal-month">{monthName}</div>
                   <div className="cal-year" style={{ marginTop: 4 }}>{yearLabel}</div>
                 </div>
-                <div className="cal-nav">
-                  <button aria-label={T("Алдыңғы ай", "Предыдущий месяц")}><DgIcon name="chev-l" size={14} /></button>
-                  <button aria-label={T("Келесі ай", "Следующий месяц")}><DgIcon name="chev-r" size={14} /></button>
-                </div>
+                {/* Навигация по месяцам убрана: статичный обзор текущего месяца.
+                    Вернуть живые стрелки + JS, когда афиша станет плотной. */}
               </div>
               <div className="cal-grid" role="grid">
                 {(locale === "kk" ? WEEKDAYS_KK : WEEKDAYS_RU).map((d) => (
