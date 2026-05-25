@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { Hall } from "@/lib/rent/types";
 import type { Locale } from "@/lib/i18n";
 import { getLocalizedField } from "@/lib/i18n";
@@ -62,7 +62,6 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
     return cells;
   }, [cursor]);
 
-  const loc = locale === "kk" ? "kk-KZ" : "ru-RU";
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -71,13 +70,19 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
       ? ["Дс", "Сс", "Ср", "Бс", "Жм", "Сб", "Жс"]
       : ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
+  // Локализованные массивы (НЕ Intl: контейнерный ICU при SSR отдаёт английский на /kk).
+  const monthsLong =
+    locale === "kk"
+      ? ["Қаңтар", "Ақпан", "Наурыз", "Сәуір", "Мамыр", "Маусым", "Шілде", "Тамыз", "Қыркүйек", "Қазан", "Қараша", "Желтоқсан"]
+      : ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+
   return (
     <div
       style={{
-        background: "var(--dg-bg-2)",
+        background: "var(--dg-bg)",
         border: "1px solid var(--dg-hair)",
-        borderRadius: "var(--dg-radius)",
-        padding: 24,
+        borderRadius: 16,
+        padding: 28,
       }}
     >
       {/* Controls */}
@@ -96,7 +101,17 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
             value={hallId}
             onChange={(e) => setHallId(e.target.value)}
             aria-label={labels.selectHall}
-            style={{ flex: 1, minWidth: 160 }}
+            style={{
+              flex: 1,
+              minWidth: 180,
+              padding: "10px 14px",
+              background: "var(--dg-bg-2)",
+              color: "var(--dg-text)",
+              border: "1px solid var(--dg-hair-2)",
+              borderRadius: 10,
+              fontSize: 13,
+              cursor: "pointer",
+            }}
           >
             {halls.map((h) => (
               <option key={h.id} value={h.id}>
@@ -112,8 +127,9 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
             style={{
               background: "transparent",
               border: "1px solid var(--dg-hair-2)",
-              borderRadius: 2,
-              padding: 6,
+              borderRadius: 10,
+              width: 38,
+              height: 38,
               cursor: "pointer",
               color: "var(--dg-text)",
               display: "grid",
@@ -130,11 +146,10 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
               fontSize: 13,
               fontWeight: 500,
               letterSpacing: "0.06em",
-              textTransform: "capitalize",
               color: "var(--dg-text)",
             }}
           >
-            {cursor.toLocaleDateString(loc, labels.monthFormat)}
+            {monthsLong[cursor.getMonth()]} {cursor.getFullYear()}
           </div>
           <button
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
@@ -142,8 +157,9 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
             style={{
               background: "transparent",
               border: "1px solid var(--dg-hair-2)",
-              borderRadius: 2,
-              padding: 6,
+              borderRadius: 10,
+              width: 38,
+              height: 38,
               cursor: "pointer",
               color: "var(--dg-text)",
               display: "grid",
@@ -188,23 +204,27 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
           if (!d) return <div key={i} style={{ aspectRatio: "1" }} />;
           const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
           const isPast = d < today;
+          const isToday = d.getTime() === today.getTime();
           const isBusy = busy.has(iso);
+          const isFree = !isPast && !isBusy;
 
-          const bg = isPast
-            ? "transparent"
-            : isBusy
-            ? "rgba(248,113,113,0.12)"
-            : "rgba(52,211,153,0.10)";
-          const color = isPast
-            ? "var(--dg-text-3)"
-            : isBusy
-            ? "#f87171"
-            : "#34d399";
-          const ring = isPast
-            ? "none"
-            : isBusy
-            ? "1px solid rgba(248,113,113,0.3)"
-            : "1px solid rgba(52,211,153,0.25)";
+          // Фирменная семантика: свободно = коралл (доступно к брони), занято = приглушённый серый.
+          let bg = "transparent";
+          let color = "var(--dg-text-3)";
+          let border = "1px solid transparent";
+          const extra: CSSProperties = {};
+          if (isFree) {
+            bg = "rgba(224,122,74,0.10)";
+            color = "#7A3D18";
+            border = "1px solid rgba(224,122,74,0.32)";
+          } else if (isBusy) {
+            bg = "rgba(17,17,17,0.035)";
+            color = "var(--dg-text-3)";
+            border = "1px solid var(--dg-hair)";
+            extra.textDecoration = "line-through";
+            extra.textDecorationThickness = "1px";
+          }
+          if (isToday) border = "1.5px solid #7A3D18";
 
           return (
             <div
@@ -214,12 +234,14 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
                 aspectRatio: "1",
                 display: "grid",
                 placeItems: "center",
-                borderRadius: 3,
-                fontSize: 12,
+                borderRadius: 10,
+                fontSize: 14,
+                fontWeight: isFree ? 600 : 400,
                 background: bg,
                 color,
-                border: ring,
-                transition: "background .15s",
+                border,
+                transition: "background .15s, border-color .15s",
+                ...extra,
               }}
             >
               {d.getDate()}
@@ -244,10 +266,11 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
         <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <span
             style={{
-              width: 10,
-              height: 10,
-              borderRadius: 2,
-              background: "rgba(52,211,153,0.3)",
+              width: 12,
+              height: 12,
+              borderRadius: 4,
+              background: "rgba(224,122,74,0.18)",
+              border: "1px solid rgba(224,122,74,0.4)",
               flexShrink: 0,
             }}
           />
@@ -256,10 +279,11 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
         <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <span
             style={{
-              width: 10,
-              height: 10,
-              borderRadius: 2,
-              background: "rgba(248,113,113,0.3)",
+              width: 12,
+              height: 12,
+              borderRadius: 4,
+              background: "rgba(17,17,17,0.05)",
+              border: "1px solid var(--dg-hair)",
               flexShrink: 0,
             }}
           />
