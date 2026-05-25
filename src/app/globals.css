@@ -1463,6 +1463,38 @@ h1, h2, h3, h4 {
 .dg-home .dg-bchat-foot button:hover:not(:disabled) { background: #ec8a5a; }
 .dg-home .dg-bchat-foot button:disabled { opacity: .5; cursor: default; }
 
+/* Бронь: форма-чат + календарь слотов рядом */
+.dg-home .dg-rent-book { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 940px) { .dg-home .dg-rent-book { grid-template-columns: 1fr; } }
+.dg-home .dg-bchat { max-width: none; }
+
+/* ═════════════ Календарь слотов (доступность залов) ═════════════ */
+.dg-home .dg-slots { background: var(--dg-bg-2); border: 1px solid var(--dg-hair); border-radius: 16px; padding: 20px; }
+.dg-home .dg-slots-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.dg-home .dg-slots-head button { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--dg-hair-2); background: transparent; color: var(--dg-text); display: grid; place-items: center; cursor: pointer; transition: border-color .15s, color .15s; }
+.dg-home .dg-slots-head button:hover:not(:disabled) { border-color: var(--dg-accent); color: var(--dg-accent); }
+.dg-home .dg-slots-head button:disabled { opacity: .35; cursor: default; }
+.dg-home .dg-slots-title { text-align: center; }
+.dg-home .dg-slots-title h3 { font-family: var(--font-head); font-size: 16px; font-weight: 600; color: var(--dg-text); margin: 0; }
+.dg-home .dg-slots-title span { font-size: 12px; color: var(--dg-text-2); letter-spacing: .04em; }
+.dg-home .dg-slots-halls { display: flex; flex-direction: column; gap: 14px; }
+.dg-home .dg-slots-hall { border: 1px solid var(--dg-hair); border-radius: 12px; padding: 12px 14px; }
+.dg-home .dg-slots-hall-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.dg-home .dg-slots-hall-top .name { font-size: 13.5px; font-weight: 500; color: var(--dg-text); }
+.dg-home .dg-slots-hall-top .cap { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--dg-text-3); }
+.dg-home .dg-slots-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.dg-home .dg-slot { font-size: 11.5px; padding: 5px 9px; border-radius: 8px; border: 1px solid transparent; }
+.dg-home .dg-slot.free { background: rgba(224,122,74,0.12); color: var(--dg-accent); border-color: rgba(224,122,74,0.30); }
+.dg-home .dg-slot.pending { background: rgba(234,179,8,0.14); color: #eab308; border-color: rgba(234,179,8,0.3); }
+.dg-home .dg-slot.busy { background: rgba(255,255,255,0.05); color: var(--dg-text-3); text-decoration: line-through; }
+.dg-home .dg-slots-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; font-size: 11px; color: var(--dg-text-2); letter-spacing: .04em; }
+.dg-home .dg-slots-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dg-home .dg-slots-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+.dg-home .dg-slots-legend i.free { background: rgba(224,122,74,0.5); }
+.dg-home .dg-slots-legend i.pending { background: rgba(234,179,8,0.6); }
+.dg-home .dg-slots-legend i.busy { background: rgba(255,255,255,0.18); }
+.dg-home .dg-slots-loading { margin-left: auto; color: var(--dg-text-3); font-size: 16px; }
+
 .dg-home .filters { display: flex; gap: 12px; flex-wrap: wrap; padding-block: 22px; border-bottom: 1px solid var(--dg-hair); align-items: center; }
 .dg-home .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .dg-home .filter-label { font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--dg-text-3); margin-right: 6px; }

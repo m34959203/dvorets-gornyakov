@@ -6,6 +6,7 @@ import type { Hall } from "@/lib/rent/types";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
 import RentBookingChat from "@/components/rent/RentBookingChat";
+import RentSlotsCalendar from "@/components/rent/RentSlotsCalendar";
 
 export const dynamic = "force-dynamic";
 
@@ -203,7 +204,10 @@ export default async function RentPage({
               "Бронирование через AI-помощника: он поможет выбрать зал, дату и время и оформит заявку. Доступность подтверждает администратор."
             )}
           </p>
-          <RentBookingChat locale={locale === "kk" ? "kk" : "ru"} />
+          <div className="dg-rent-book">
+            <RentBookingChat locale={locale === "kk" ? "kk" : "ru"} />
+            <RentSlotsCalendar locale={locale === "kk" ? "kk" : "ru"} />
+          </div>
           <a href="tel:+77106362330" className="section-link" style={{ display: "inline-flex", marginTop: 22 }}>
             {T("Немесе қоңырау шалыңыз", "Или позвоните")}: +7 (71063) 6-23-30
           </a>
