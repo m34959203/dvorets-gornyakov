@@ -63,14 +63,6 @@ export default function ChatBot({ locale, messages: t }: ChatBotProps) {
         text: data.data?.reply || data.error || "Error",
       };
       setChatMessages((prev) => [...prev, botMessage]);
-
-      // TTS playback
-      if ("speechSynthesis" in window) {
-        const utterance = new SpeechSynthesisUtterance(botMessage.text);
-        utterance.lang = locale === "kk" ? "kk-KZ" : "ru-RU";
-        utterance.rate = 0.9;
-        // Don't auto-play, only on demand
-      }
     } catch {
       setChatMessages((prev) => [
         ...prev,
@@ -114,16 +106,6 @@ export default function ChatBot({ locale, messages: t }: ChatBotProps) {
     setIsListening(true);
   };
 
-  const speakText = (text: string) => {
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = locale === "kk" ? "kk-KZ" : "ru-RU";
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
   return (
     <>
       {/* Floating button */}
@@ -131,9 +113,9 @@ export default function ChatBot({ locale, messages: t }: ChatBotProps) {
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all",
-          isOpen ? "bg-gray-600 rotate-90" : "bg-primary hover:bg-primary-dark chatbot-bubble"
+          isOpen ? "bg-gray-600 rotate-90" : "bg-[#E07A4A] hover:bg-[#ec8a5a] chatbot-bubble"
         )}
-        aria-label="Chat"
+        aria-label={locale === "kk" ? "Чат-көмекші" : "Чат-помощник"}
       >
         {isOpen ? (
           <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -150,7 +132,7 @@ export default function ChatBot({ locale, messages: t }: ChatBotProps) {
       {isOpen && (
         <div className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-gray-200 flex flex-col chatbot-bubble">
           {/* Header */}
-          <div className="bg-primary text-white px-4 py-3 rounded-t-xl flex items-center justify-between">
+          <div className="bg-[#E07A4A] text-white px-4 py-3 rounded-t-xl flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -175,22 +157,11 @@ export default function ChatBot({ locale, messages: t }: ChatBotProps) {
                   className={cn(
                     "max-w-[80%] px-3 py-2 rounded-xl text-sm",
                     msg.role === "user"
-                      ? "bg-primary text-white rounded-br-sm"
+                      ? "bg-[#E07A4A] text-white rounded-br-sm"
                       : "bg-gray-100 text-gray-800 rounded-bl-sm"
                   )}
                 >
                   <p className="whitespace-pre-wrap">{msg.text}</p>
-                  {msg.role === "model" && (
-                    <button
-                      onClick={() => speakText(msg.text)}
-                      className="mt-1 text-xs text-gray-400 hover:text-primary"
-                      title={locale === "kk" ? "Тыңдау" : "Прослушать"}
-                    >
-                      <svg className="w-4 h-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                      </svg>
-                    </button>
-                  )}
                 </div>
               </div>
             ))}
@@ -233,10 +204,10 @@ export default function ChatBot({ locale, messages: t }: ChatBotProps) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={t.placeholder}
-                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#E07A4A]"
                 disabled={isLoading}
               />
-              <Button type="submit" size="sm" disabled={!input.trim() || isLoading}>
+              <Button type="submit" size="sm" disabled={!input.trim() || isLoading} className="!bg-[#E07A4A] hover:!bg-[#ec8a5a] focus:!ring-[#E07A4A]">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>

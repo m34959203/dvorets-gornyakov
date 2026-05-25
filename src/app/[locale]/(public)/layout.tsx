@@ -100,8 +100,11 @@ export default async function PublicLayout({
   return (
     <html lang={locale} className={`h-full antialiased ${playfair.variable} ${manrope.variable}`}>
       <body className="min-h-full flex flex-col bg-[color:var(--cream)] text-[color:var(--ink)]">
+        <a href="#main" className="dg-skip-link">
+          {locale === "kk" ? "Мазмұнға өту" : "К содержимому"}
+        </a>
         <Header locale={locale} messages={messages} />
-        <main className="flex-1">{children}</main>
+        <main id="main" className="flex-1">{children}</main>
         <Footer locale={locale} messages={messages} />
         <ChatBot locale={locale} messages={messages.chatbot} />
 

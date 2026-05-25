@@ -28,7 +28,7 @@ export default function DgPageHero({ crumbs, tag, h2Html, lead }: DgPageHeroProp
         </div>
         <div className="section-bar">
           <div className="tag">{tag}</div>
-          <h2 className="h2" dangerouslySetInnerHTML={{ __html: h2Html }} />
+          <h1 className="h2" dangerouslySetInnerHTML={{ __html: h2Html }} />
         </div>
         {lead && <p className="page-lead">{lead}</p>}
       </div>

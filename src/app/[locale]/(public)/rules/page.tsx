@@ -34,20 +34,25 @@ export default async function RulesPage({
   ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">{messages.common.rules}</h1>
+    <div style={{ background: "#0E0E20" }}>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 className="text-3xl font-bold mb-8" style={{ color: "#fff" }}>{messages.common.rules}</h1>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <ol className="space-y-4">
-          {rules.map((rule, i) => (
-            <li key={i} className="flex gap-4">
-              <span className="shrink-0 w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-bold">
-                {i + 1}
-              </span>
-              <span className="text-gray-700 pt-1">{rule}</span>
-            </li>
-          ))}
-        </ol>
+        <div className="rounded-xl p-6" style={{ background: "#15152a", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <ol className="space-y-4">
+            {rules.map((rule, i) => (
+              <li key={i} className="flex gap-4">
+                <span
+                  className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                  style={{ background: "rgba(224,122,74,0.14)", color: "#E07A4A" }}
+                >
+                  {i + 1}
+                </span>
+                <span className="pt-1" style={{ color: "#cbd2dc" }}>{rule}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
       </div>
     </div>
   );

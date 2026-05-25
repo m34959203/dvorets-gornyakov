@@ -25,6 +25,12 @@ export default async function Header({ locale }: HeaderProps) {
     href: localizeHref(n.url, locale),
     label: n.title,
     target: n.target,
+    children: n.children.map((c) => ({
+      id: c.id,
+      href: localizeHref(c.url, locale),
+      label: c.title,
+      target: c.target,
+    })),
   }));
 
   return (
