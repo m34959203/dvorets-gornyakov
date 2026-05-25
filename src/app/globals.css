@@ -1484,15 +1484,15 @@ h1, h2, h3, h4 {
 .dg-home .dg-slots-hall-top .cap { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--dg-text-3); }
 .dg-home .dg-slots-grid { display: flex; flex-wrap: wrap; gap: 6px; }
 .dg-home .dg-slot { font-size: 11.5px; padding: 5px 9px; border-radius: 8px; border: 1px solid transparent; }
-.dg-home .dg-slot.free { background: rgba(224,122,74,0.12); color: var(--dg-accent); border-color: rgba(224,122,74,0.30); }
-.dg-home .dg-slot.pending { background: rgba(234,179,8,0.14); color: #eab308; border-color: rgba(234,179,8,0.3); }
-.dg-home .dg-slot.busy { background: rgba(255,255,255,0.05); color: var(--dg-text-3); text-decoration: line-through; }
+.dg-home .dg-slot.free { background: rgba(52,211,153,0.12); color: #34d399; border-color: rgba(52,211,153,0.32); }
+.dg-home .dg-slot.pending { background: rgba(234,179,8,0.14); color: #eab308; border-color: rgba(234,179,8,0.32); }
+.dg-home .dg-slot.busy { background: rgba(248,113,113,0.12); color: #f87171; border-color: rgba(248,113,113,0.32); text-decoration: line-through; }
 .dg-home .dg-slots-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; font-size: 11px; color: var(--dg-text-2); letter-spacing: .04em; }
 .dg-home .dg-slots-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .dg-home .dg-slots-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
-.dg-home .dg-slots-legend i.free { background: rgba(224,122,74,0.5); }
-.dg-home .dg-slots-legend i.pending { background: rgba(234,179,8,0.6); }
-.dg-home .dg-slots-legend i.busy { background: rgba(255,255,255,0.18); }
+.dg-home .dg-slots-legend i.free { background: #34d399; }
+.dg-home .dg-slots-legend i.pending { background: #eab308; }
+.dg-home .dg-slots-legend i.busy { background: #f87171; }
 .dg-home .dg-slots-loading { margin-left: auto; color: var(--dg-text-3); font-size: 16px; }
 
 .dg-home .filters { display: flex; gap: 12px; flex-wrap: wrap; padding-block: 22px; border-bottom: 1px solid var(--dg-hair); align-items: center; }
