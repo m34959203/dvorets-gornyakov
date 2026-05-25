@@ -21,8 +21,6 @@ interface EventRow {
 
 const MONTHS_KK = ["қаң.", "ақп.", "нау.", "сәу.", "мам.", "мау.", "шіл.", "там.", "қыр.", "қаз.", "қар.", "жел."];
 const MONTHS_RU = ["янв.", "фев.", "мар.", "апр.", "мая", "июн.", "июл.", "авг.", "сен.", "окт.", "ноя.", "дек."];
-const MONTHS_KK_LONG = ["Қаңтар", "Ақпан", "Наурыз", "Сәуір", "Мамыр", "Маусым", "Шілде", "Тамыз", "Қыркүйек", "Қазан", "Қараша", "Желтоқсан"];
-const MONTHS_RU_LONG = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
 const WEEKDAYS_KK = ["Дс", "Сс", "Ср", "Бс", "Жм", "Сб", "Жс"];
 const WEEKDAYS_RU = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
@@ -58,38 +56,11 @@ async function load(locale: Locale) {
   }
   const events = await safe<EventRow>(
     getMany<EventRow>(
-      `SELECT * FROM events WHERE status IN ('upcoming','ongoing') ORDER BY start_date ASC LIMIT 18`
+      `SELECT * FROM events WHERE status IN ('upcoming','ongoing') AND start_date >= NOW() ORDER BY start_date ASC LIMIT 18`
     )
   );
-  return { events: events.length ? events : getDemoEvents(locale) };
-}
-
-function getDemoEvents(locale: Locale): EventRow[] {
-  const base = [
-    { d: "2026-03-12T19:00", t_kk: "Концерт «Көктем әуені»", t_ru: "Концерт «Мелодии весны»", h_kk: "Үлкен зал", h_ru: "Большой зал", type: "concert" },
-    { d: "2026-03-15T18:00", t_kk: "«Тұмар» хореографиялық қойылым", t_ru: "Хореографическая постановка «Тумар»", h_kk: "Үлкен зал", h_ru: "Большой зал", type: "concert" },
-    { d: "2026-03-16T18:00", t_kk: "«Абай жолы» спектаклі", t_ru: "Спектакль «Путь Абая»", h_kk: "Үлкен зал", h_ru: "Большой зал", type: "theater" },
-    { d: "2026-03-17T11:00", t_kk: "Қыш илеу шеберлік сабағы", t_ru: "Мастер-класс по гончарному делу", h_kk: "Студия №3", h_ru: "Студия №3", type: "workshop" },
-    { d: "2026-03-18T17:00", t_kk: "Балалар билері «Жұлдызай»", t_ru: "Детский танец «Жулдызай»", h_kk: "Камералық", h_ru: "Камерный", type: "concert" },
-    { d: "2026-03-19T18:30", t_kk: "Айтыс — Арқа айтысы", t_ru: "Айтыс — состязание акынов", h_kk: "Үлкен зал", h_ru: "Большой зал", type: "concert" },
-    { d: "2026-03-20T14:00", t_kk: "«Менің Сатпаев» сурет көрмесі", t_ru: "Выставка «Мой Сатпаев»", h_kk: "Фойе", h_ru: "Фойе", type: "exhibition" },
-    { d: "2026-03-22T18:00", t_kk: "«Наурыз думан» — қала концерті", t_ru: "Городской концерт «Наурыз»", h_kk: "Үлкен зал", h_ru: "Большой зал", type: "concert" },
-    { d: "2026-03-24T12:00", t_kk: "Балалар театры «Қарлығаш»", t_ru: "Детский театр «Карлыгаш»", h_kk: "Камералық", h_ru: "Камерный", type: "theater" },
-    { d: "2026-03-26T17:00", t_kk: "Жас әртістер байқауы", t_ru: "Конкурс юных артистов", h_kk: "Үлкен зал", h_ru: "Большой зал", type: "concert" },
-    { d: "2026-03-29T19:00", t_kk: "Қазақстан даусы — финал", t_ru: "Голос Казахстана — финал", h_kk: "Үлкен зал", h_ru: "Большой зал", type: "concert" },
-    { d: "2026-04-05T19:00", t_kk: "Көктем фестивалі — гала", t_ru: "Гала-концерт фестиваля «Весна»", h_kk: "Үлкен зал", h_ru: "Большой зал", type: "concert" },
-  ];
-  return base.map((b, i) => ({
-    id: String(i + 1),
-    title_kk: b.t_kk,
-    title_ru: b.t_ru,
-    description_kk: "",
-    description_ru: "",
-    image_url: null,
-    event_type: b.type,
-    start_date: b.d,
-    location: locale === "kk" ? b.h_kk : b.h_ru,
-  }));
+  // Без демо-фолбэка: нет будущих событий → честный empty state, а не показ прошлого.
+  return { events };
 }
 
 export default async function HomePage({
@@ -105,33 +76,11 @@ export default async function HomePage({
   const titleOf = (e: EventRow) =>
     getLocalizedField(e as unknown as Record<string, unknown>, "title", locale);
 
-  // ── Расписание: список ближайших + дни-события для календаря ──
-  const scheduleItems = events.slice(0, 8).map((e) => {
-    const chip = formatDateChip(e.start_date, locale);
-    return { id: e.id, d: parseInt(chip.d, 10), m: chip.m, wd: chip.wd, title: titleOf(e), time: chip.time, hall: e.location };
-  });
-  const eventDays = new Set(events.map((e) => almatyParts(e.start_date).day));
-  const refDate = events.length ? events[0].start_date : new Date().toISOString();
-  const refParts = almatyParts(refDate);
-  const monthIdx = refParts.month;
-  const yearLabel = refParts.year;
-  const monthName = (locale === "kk" ? MONTHS_KK_LONG : MONTHS_RU_LONG)[monthIdx];
-  const startWeekday = ((new Date(yearLabel, monthIdx, 1).getDay() + 6) % 7);
-  const daysInMonth = new Date(yearLabel, monthIdx + 1, 0).getDate();
-  const nowParts = almatyParts(new Date());
-  const todayDay = nowParts.month === monthIdx && nowParts.year === yearLabel ? nowParts.day : -1;
-
-  // Календарные ячейки (6×7)
-  const calCells: Array<{ d: number; dim?: boolean; today?: boolean; event?: boolean }> = [];
-  const prevMonthDays = new Date(yearLabel, monthIdx, 0).getDate();
-  for (let i = startWeekday - 1; i >= 0; i--) calCells.push({ d: prevMonthDays - i, dim: true });
-  for (let d = 1; d <= daysInMonth; d++) calCells.push({ d, today: d === todayDay, event: eventDays.has(d) });
-  let nx = 1;
-  while (calCells.length < 42) calCells.push({ d: nx++, dim: true });
-
   // ── Featured (первое событие) + сетка афиш (следующие 8) ──
+  // Вариант A: главная ведёт постер-галереей, без календаря (он живёт на /events).
   const feature = events[0];
   const featureChip = feature ? formatDateChip(feature.start_date, locale) : null;
+  const featureParts = feature ? almatyParts(feature.start_date) : null;
   const posters = events.slice(1, 9);
 
   // ── Творческие составы ──
@@ -170,12 +119,13 @@ export default async function HomePage({
 
   const posterDate = (e: EventRow) => {
     const c = formatDateChip(e.start_date, locale);
-    return `${parseInt(c.d, 10)} ${(locale === "kk" ? MONTHS_KK : MONTHS_RU)[almatyParts(e.start_date).month]} ${yearLabel}, ${c.time}`;
+    const p = almatyParts(e.start_date);
+    return `${parseInt(c.d, 10)} ${(locale === "kk" ? MONTHS_KK : MONTHS_RU)[p.month]} ${p.year}, ${c.time}`;
   };
 
   return (
     <div className="dg-home">
-      <a href="#schedule" className="dg-skip-link">{T("Мазмұнға өту", "Перейти к содержимому")}</a>
+      <a href="#arman" className="dg-skip-link">{T("Мазмұнға өту", "Перейти к содержимому")}</a>
 
       {/* ═══ Hero ═══ */}
       <section className="hero" id="home">
@@ -188,96 +138,29 @@ export default async function HomePage({
             {T(" қарсы алыңыз — Сәтбаев қаласында", " города Сатпаев")}
           </h1>
         </div>
-        <a href="#schedule" className="hero-scroll" aria-label={T("Төмен айналдыру", "Прокрутить вниз")}>
+        <a href="#arman" className="hero-scroll" aria-label={T("Төмен айналдыру", "Прокрутить вниз")}>
           <div className="hero-mouse" />
           <span>{T("Айналдыру", "Прокрутить")}</span>
         </a>
       </section>
 
-      {/* ═══ Расписание на месяц (тёмная) ═══ */}
-      <section className="section" id="schedule">
-        <div className="dg-wrap">
-          <div className="section-head">
-            <div className="section-bar">
-              <div className="tag">— {T("Айлық бағдарлама", "Расписание на месяц")} —</div>
-              <h2 className="h2">{T("Жақын арадағы оқиғалар", "Ближайшие события")}</h2>
+      {/* ═══ Афиша пуста — честный empty state (без показа прошлого как настоящего) ═══ */}
+      {events.length === 0 && (
+        <section className="section section--light" id="afisha">
+          <div className="dg-wrap">
+            <div className="dg-empty" style={{ textAlign: "center" }}>
+              <DgIcon name="calendar" size={36} stroke={1.1} />
+              <h2 className="h2" style={{ marginTop: 16 }}>{T("Маусым бағдарламасы жақын арада", "Программа сезона скоро")}</h2>
+              <p style={{ marginTop: 12, color: "var(--dg-text-2)" }}>
+                {T("Жаңа іс-шаралар дайындалып жатыр. Толық афишаны қараңыз.", "Готовим новые события. Загляните в полную афишу.")}
+              </p>
+              <Link href={`/${locale}/events`} className="section-link" style={{ marginTop: 20, display: "inline-flex" }}>
+                {T("Афишаны ашу", "Открыть афишу")} <DgIcon name="arrow" size={12} />
+              </Link>
             </div>
-            <Link href={`/${locale}/events`} className="section-link">
-              {T("Барлық афиша", "Вся афиша")} <DgIcon name="arrow" size={12} />
-            </Link>
           </div>
-
-          <div className="sched-grid-2">
-            <div className="sched-panel">
-              <div className="sched-phead">
-                <span className="lab">{T("Айдың афишасы", "Афиша месяца")}</span>
-                <span className="count"><em>{events.length}</em> {T("оқиға", "событий")}</span>
-              </div>
-              {scheduleItems.length > 0 ? (
-                <ul className="sched-list">
-                  {scheduleItems.map((s) => (
-                    <li className="sched-item" key={s.id}>
-                      <Link href={`/${locale}/events/${s.id}`}>
-                        <span className="sched-when">
-                          <span className="d">{s.d}</span>
-                          <span className="m">{s.m}</span>
-                        </span>
-                        <span className="sched-info">
-                          <span className="s-title">{s.title}</span>
-                          <span className="s-meta">
-                            <span>{s.time}</span>
-                            <span className="sep">·</span>
-                            <span>{s.hall}</span>
-                          </span>
-                        </span>
-                        <span className="sched-free">{T("Тегін", "Бесплатно")}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="sched-empty">
-                  <DgIcon name="calendar" size={32} stroke={1.1} />
-                  <p>{T("Жақын арада жоспарланған оқиғалар жоқ", "Ближайших событий пока нет")}</p>
-                  <Link href={`/${locale}/events`} className="section-link">
-                    {T("Бүкіл афишаны қарау", "Смотреть всю афишу")} <DgIcon name="arrow" size={12} />
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* Календарь */}
-            <aside className="cal" aria-label={`${monthName} ${yearLabel}`}>
-              <div className="cal-head">
-                <div>
-                  <div className="cal-month">{monthName}</div>
-                  <div className="cal-year" style={{ marginTop: 4 }}>{yearLabel}</div>
-                </div>
-                {/* Навигация по месяцам убрана: статичный обзор текущего месяца.
-                    Вернуть живые стрелки + JS, когда афиша станет плотной. */}
-              </div>
-              <div className="cal-grid" role="grid">
-                {(locale === "kk" ? WEEKDAYS_KK : WEEKDAYS_RU).map((d) => (
-                  <div key={d} className="cal-dow">{d}</div>
-                ))}
-                {calCells.map((c, i) => (
-                  <div
-                    key={i}
-                    role="gridcell"
-                    className={"cal-cell" + (c.dim ? " dim" : "") + (c.today ? " today" : "") + (c.event ? " event" : "")}
-                  >
-                    {c.d}
-                  </div>
-                ))}
-              </div>
-              <div className="cal-legend">
-                <span><span className="sw" style={{ boxShadow: "inset 0 0 0 1px var(--dg-accent)" }} />{T("Оқиға", "Событие")}</span>
-                <span><span className="sw" style={{ background: "rgba(255,255,255,0.18)" }} />{T("Өтті", "Прошло")}</span>
-              </div>
-            </aside>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ═══ Featured «Арман» (светлая) ═══ */}
       {feature && featureChip && (
@@ -305,7 +188,7 @@ export default async function HomePage({
                   <ul className="feature-meta">
                     <li>
                       <span className="lab"><DgIcon name="calendar" size={14} /> {T("Күні мен уақыты", "Дата и время")}</span>
-                      <span className="val">{parseInt(featureChip.d, 10)} {(locale === "kk" ? MONTHS_KK : MONTHS_RU)[monthIdx]} {yearLabel}, {featureChip.time}</span>
+                      <span className="val">{parseInt(featureChip.d, 10)} {(locale === "kk" ? MONTHS_KK : MONTHS_RU)[featureParts!.month]} {featureParts!.year}, {featureChip.time}</span>
                     </li>
                     <li>
                       <span className="lab"><DgIcon name="pin" size={14} /> {T("Орны", "Место")}</span>

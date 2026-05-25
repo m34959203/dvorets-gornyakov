@@ -102,6 +102,7 @@ async function loadEvents(): Promise<EventRow[]> {
               COALESCE(location, '') AS location
          FROM events
         WHERE status IN ('upcoming', 'ongoing')
+          AND start_date >= NOW()
         ORDER BY start_date ASC
         LIMIT 60`
     );

@@ -7,7 +7,6 @@ import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
 import AvailabilityCalendar from "@/components/rent/AvailabilityCalendar";
 import RentalRequestForm from "@/components/rent/RentalRequestForm";
-import RentFAQ from "@/components/rent/RentFAQ";
 
 export const dynamic = "force-dynamic";
 
@@ -126,7 +125,6 @@ export default async function RentPage({
   const t = messages.rent as unknown as Record<string, unknown>;
 
   const halls = await loadHalls();
-  const faq = (t.faq as { q: string; a: string }[]) ?? [];
 
   return (
     <div className="dg-home">
@@ -218,14 +216,6 @@ export default async function RentPage({
         </section>
       )}
 
-      {/* FAQ */}
-      {faq.length > 0 && (
-        <section className="section section--light">
-          <div className="dg-wrap">
-            <RentFAQ title={String(t.faqTitle)} items={faq} />
-          </div>
-        </section>
-      )}
 
       {/* Request form */}
       <section id="request" className="section">
