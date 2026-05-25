@@ -5,7 +5,6 @@ import { getMany } from "@/lib/db";
 import type { Hall } from "@/lib/rent/types";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
-import AvailabilityCalendar from "@/components/rent/AvailabilityCalendar";
 import RentalRequestForm from "@/components/rent/RentalRequestForm";
 
 export const dynamic = "force-dynamic";
@@ -192,29 +191,6 @@ export default async function RentPage({
           </div>
         </div>
       </section>
-
-      {/* Availability calendar */}
-      {halls.length > 0 && (
-        <section className="section section--light">
-          <div className="dg-wrap">
-            <div className="section-bar" style={{ marginBottom: 36 }}>
-              <div className="tag">{T("— Кесте —", "— Расписание —")}</div>
-              <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Залдардың <strong>бос уақыты</strong>", "Свободное <strong>время залов</strong>") }} />
-            </div>
-            <AvailabilityCalendar
-              halls={halls}
-              locale={locale}
-              labels={{
-                selectHall: String(t.calendarSelectHall),
-                busy: String(t.calendarBusy),
-                free: String(t.calendarFree),
-                onRequest: String(t.calendarOnRequest),
-                monthFormat: { month: "long", year: "numeric" },
-              }}
-            />
-          </div>
-        </section>
-      )}
 
 
       {/* Request form */}
