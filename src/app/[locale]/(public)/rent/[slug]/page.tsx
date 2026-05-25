@@ -189,7 +189,7 @@ export default async function HallPage({
       </section>
 
       {/* Hall facts + calendar */}
-      <section className="section">
+      <section className="section section--light">
         <div className="dg-wrap">
           <div className="hall-detail-grid">
             {/* Left: facts + equipment */}
