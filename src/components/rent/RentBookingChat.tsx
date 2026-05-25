@@ -32,9 +32,21 @@ const COPY = {
   },
 };
 
-export default function RentBookingChat({ locale }: { locale: "kk" | "ru" }) {
+export default function RentBookingChat({
+  locale,
+  hall,
+}: {
+  locale: "kk" | "ru";
+  hall?: { id: "big" | "chamber" | "rehearsal"; name: string };
+}) {
   const t = COPY[locale];
-  const [messages, setMessages] = useState<Msg[]>([{ role: "assistant", text: t.greet }]);
+  // Если зал предвыбран (страница зала) — приветствие пропускает вопрос «какой зал».
+  const greet = hall
+    ? locale === "kk"
+      ? `Сәлеметсіз бе! «${hall.name}» залын (${hall.id}) брондаймыз. Қай күн мен уақытқа?`
+      : `Здравствуйте! Бронируем зал «${hall.name}» (${hall.id}). На какую дату и время?`
+    : t.greet;
+  const [messages, setMessages] = useState<Msg[]>([{ role: "assistant", text: greet }]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [ref, setRef] = useState<string | null>(null);

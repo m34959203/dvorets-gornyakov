@@ -27,8 +27,9 @@ const todayIso = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Almaty
 const RU_MON = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 const KK_MON = ["қаң", "ақп", "нау", "сәу", "мам", "мау", "шіл", "там", "қыр", "қаз", "қар", "жел"];
 
-export default function RentSlotsCalendar({ locale }: { locale: "kk" | "ru" }) {
+export default function RentSlotsCalendar({ locale, onlyHall }: { locale: "kk" | "ru"; onlyHall?: "big" | "chamber" | "rehearsal" }) {
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
+  const halls = onlyHall ? HALLS.filter((h) => h.id === onlyHall) : HALLS;
   const [date, setDate] = useState<string>("");
   const [slots, setSlots] = useState<Slot[]>([]);
   const [loading, setLoading] = useState(false);
@@ -94,7 +95,7 @@ export default function RentSlotsCalendar({ locale }: { locale: "kk" | "ru" }) {
       </div>
 
       <div className="dg-slots-halls">
-        {HALLS.map((h) => (
+        {halls.map((h) => (
           <div className="dg-slots-hall" key={h.id}>
             <div className="dg-slots-hall-top">
               <span className="name">{T(h.kk, h.ru)}</span>
