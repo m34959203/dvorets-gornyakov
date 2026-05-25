@@ -62,6 +62,8 @@ export interface DgEvent {
 interface Props {
   locale: Locale;
   items: DgEvent[];
+  /** Окно месяцев для фильтра: текущий + 2 следующих (длинные локализованные названия). */
+  monthWindow: string[];
 }
 
 function distinct(values: string[]): string[] {
@@ -76,11 +78,12 @@ function distinct(values: string[]): string[] {
   return out;
 }
 
-export default function DgEventsCatalog({ locale, items }: Props) {
+export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
   const ALL = T("Барлығы", "Все");
 
-  const months = useMemo(() => [ALL, ...distinct(items.map((e) => e.monthLong))], [items, ALL]);
+  // Текущий + 2 следующих месяца (скользящее окно), а не то, что попало в данные.
+  const months = useMemo(() => [ALL, ...monthWindow], [monthWindow, ALL]);
   const halls = useMemo(() => [ALL, ...distinct(items.map((e) => e.hall))], [items, ALL]);
   const types = useMemo(() => [ALL, ...distinct(items.map((e) => e.type))], [items, ALL]);
 

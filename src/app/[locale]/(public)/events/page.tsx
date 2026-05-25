@@ -125,6 +125,11 @@ export default async function EventsPage({
   const longMonths = locale === "kk" ? MONTHS_KK_FULL : MONTHS_RU_FULL;
   const typeMap = locale === "kk" ? TYPE_TO_CAT_KK : TYPE_TO_CAT_RU;
 
+  // Фильтр по месяцу: текущий + 2 следующих (Asia/Almaty), а не то, что в данных.
+  const curMonthIdx =
+    Number(new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Almaty", month: "numeric" }).format(new Date())) - 1;
+  const monthWindow = [0, 1, 2].map((o) => longMonths[(curMonthIdx + o) % 12]);
+
   const items: DgEvent[] = events.map((e) => {
     const d = new Date(e.start_date);
     // Asia/Almaty, иначе в UTC-контейнере дата и время съезжают (час «04:00»).
@@ -177,7 +182,7 @@ export default async function EventsPage({
           "Концерты, спектакли, мастер-классы, выставки и конкурсы Дворца горняков. Фильтруйте по месяцу, залу или типу события."
         )}
       />
-      <DgEventsCatalog locale={locale} items={items} />
+      <DgEventsCatalog locale={locale} items={items} monthWindow={monthWindow} />
     </div>
   );
 }
