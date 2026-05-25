@@ -824,8 +824,8 @@ h1, h2, h3, h4 {
   --dg-bg-3:    #F1F1F4;
   --dg-bg-4:    #E5E5EB;
   --dg-text:    #111111;
-  --dg-text-2:  #6B7280;
-  --dg-text-3:  #9CA3AF;
+  --dg-text-2:  #4B5563;  /* WCAG AA на белом (7.6:1) — вторичный текст */
+  --dg-text-3:  #6B7280;  /* WCAG AA на белом (4.95:1) — кикеры/метки, было #9CA3AF (2.5:1, провал) */
   --dg-hair:    rgba(17,17,17,0.10);
   --dg-hair-2:  rgba(17,17,17,0.18);
   --dg-hair-3:  rgba(17,17,17,0.28);
@@ -858,6 +858,34 @@ h1, h2, h3, h4 {
 @keyframes dg-scroll-wheel {
   0%, 100% { transform: translate(-50%, 0);    opacity: 1; }
   50%      { transform: translate(-50%, 10px); opacity: 0; }
+}
+
+/* ═════════════ Top utility bar (партнёрские/гос-ссылки над навигацией) ═════════════ */
+.dg-topbar {
+  background: #0a0d18; border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  font-family: var(--font-body); font-size: 11.5px;
+}
+.dg-topbar-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 20px; min-height: 38px;
+}
+.dg-topbar-label {
+  color: #6B7280; letter-spacing: .18em; text-transform: uppercase;
+  font-weight: 500; white-space: nowrap; flex: none;
+}
+.dg-topbar-links {
+  display: flex; align-items: center; gap: 22px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.dg-topbar-links::-webkit-scrollbar { display: none; }
+.dg-topbar-links a {
+  color: #9CA3AF; letter-spacing: .1em; text-transform: uppercase;
+  white-space: nowrap; transition: color .15s; padding: 10px 0;
+}
+.dg-topbar-links a:hover { color: #E07A4A; }
+@media (max-width: 768px) {
+  .dg-topbar-label { display: none; }
+  .dg-topbar-inner { justify-content: flex-start; }
 }
 
 /* ═════════════ Header ═════════════ */
@@ -976,6 +1004,11 @@ h1, h2, h3, h4 {
   .dg-icon-btn.menu { display: grid; }
   .dg-header-inner { grid-template-columns: 1fr auto; }
 }
+/* Тач-таргеты ≥44px на мобильном (WCAG 2.5.5) */
+@media (max-width: 768px) {
+  .dg-brand { min-height: 44px; }
+  .dg-lang-trigger { min-height: 44px; padding: 10px 12px; }
+}
 
 /* ═════════════ Drawer (mobile nav) ═════════════ */
 .dg-drawer {
@@ -1016,6 +1049,20 @@ h1, h2, h3, h4 {
 .dg-skip-link:focus { top: 16px; outline: 2px solid #fff; outline-offset: 2px; }
 .dg-home :focus-visible, .dg-header :focus-visible, .dg-footer :focus-visible {
   outline: 2px solid var(--dg-accent); outline-offset: 3px; border-radius: 2px;
+}
+
+/* ═════════════ Reduced motion (a11y) ═════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* эквалайзер-лого и brand-wall застывают */
+  .dg-brand-eq span, .dg-home .brand-wall-eq span { animation: none !important; height: 70% !important; }
+  /* индикатор скролла в hero — без бесконечного движения */
+  .hero-mouse, .dg-home .hero-scroll * { animation: none !important; }
 }
 
 /* ═════════════ Hero ═════════════ */
@@ -1191,6 +1238,8 @@ h1, h2, h3, h4 {
 .dg-home .feature-meta .lab svg { color: var(--dg-accent); flex: none; }
 .dg-home .feature-meta .val { color: var(--dg-text); font-weight: 400; }
 .dg-home .feature-meta .val.price { color: var(--dg-accent); font-weight: 500; letter-spacing: .04em; }
+/* На светлой секции яркий коралл на белом проваливает WCAG (2.98:1) — тёмный терракот (6.4:1) */
+.dg-home .section--light .feature-meta .val.price { color: #7a3d18; font-weight: 600; }
 .dg-home .feature-cta { align-self: flex-start; color: var(--dg-accent); border-bottom: 1px solid var(--dg-accent); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; padding-bottom: 4px; font-weight: 500; display: inline-flex; gap: 8px; align-items: center; }
 .dg-home .feature-cta:hover { color: var(--dg-accent-2); border-color: var(--dg-accent-2); }
 .dg-home .feature-side-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--dg-hair-2); background: var(--dg-bg); display: grid; place-items: center; color: var(--dg-text); cursor: pointer; z-index: 2; }

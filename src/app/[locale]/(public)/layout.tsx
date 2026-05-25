@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { getMessages, isValidLocale, type Locale } from "@/lib/i18n";
 import { playfair, manrope } from "@/lib/fonts";
 import Header from "@/components/layout/Header";
+import TopBar from "@/components/layout/TopBar";
 import Footer from "@/components/layout/Footer";
 import ChatBot from "@/components/features/ChatBot";
 import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
@@ -103,6 +104,7 @@ export default async function PublicLayout({
         <a href="#main" className="dg-skip-link">
           {locale === "kk" ? "Мазмұнға өту" : "К содержимому"}
         </a>
+        <TopBar locale={locale} />
         <Header locale={locale} messages={messages} />
         <main id="main" className="flex-1">{children}</main>
         <Footer locale={locale} messages={messages} />

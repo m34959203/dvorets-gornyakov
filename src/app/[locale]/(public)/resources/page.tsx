@@ -1,6 +1,7 @@
 import { isValidLocale, type Locale } from "@/lib/i18n";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
+import { RESOURCE_LINKS, resourceTitle, resourceDesc } from "@/lib/resources";
 
 export default async function ResourcesPage({
   params,
@@ -11,20 +12,11 @@ export default async function ResourcesPage({
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
-  const resources =
-    locale === "kk"
-      ? [
-          { title: "Мәдениет министрлігі", url: "https://www.gov.kz/memleket/entities/mcs", description: "ҚР Мәдениет және спорт министрлігі" },
-          { title: "Ұлттық кітапхана", url: "https://nlrk.kz", description: "Қазақстан Республикасының Ұлттық кітапханасы" },
-          { title: "Білім порталы", url: "https://bilimland.kz", description: "Балаларға арналған білім беру порталы" },
-          { title: "E-gov", url: "https://egov.kz", description: "Электронды үкімет порталы" },
-        ]
-      : [
-          { title: "Министерство культуры", url: "https://www.gov.kz/memleket/entities/mcs", description: "Министерство культуры и спорта РК" },
-          { title: "Национальная библиотека", url: "https://nlrk.kz", description: "Национальная библиотека Республики Казахстан" },
-          { title: "Образовательный портал", url: "https://bilimland.kz", description: "Образовательный портал для детей" },
-          { title: "E-gov", url: "https://egov.kz", description: "Портал электронного правительства" },
-        ];
+  const resources = RESOURCE_LINKS.map((r) => ({
+    title: resourceTitle(r, locale),
+    url: r.url,
+    description: resourceDesc(r, locale),
+  }));
 
   return (
     <div className="dg-home">
