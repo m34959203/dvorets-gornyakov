@@ -135,13 +135,16 @@ export default async function EventsPage({
       year: "numeric",
     }).formatToParts(d);
     const dayNum = dp.find((p) => p.type === "day")?.value ?? "";
-    const monthIdx = Number(dp.find((p) => p.type === "month")?.value ?? "1") - 1;
+    const monthNum = dp.find((p) => p.type === "month")?.value ?? "1";
+    const monthIdx = Number(monthNum) - 1;
     const year = dp.find((p) => p.type === "year")?.value ?? "";
+    const iso = `${year}-${monthNum.padStart(2, "0")}-${dayNum.padStart(2, "0")}`;
     return {
       id: e.id,
       href: `/${locale}/events/${e.id}`,
       title: getLocalizedField(e as unknown as Record<string, unknown>, "title", locale),
       image: eventImage(e.image_url, e.event_type),
+      iso,
       day: dayNum,
       mon: shortMonths[monthIdx],
       monthLong: longMonths[monthIdx],

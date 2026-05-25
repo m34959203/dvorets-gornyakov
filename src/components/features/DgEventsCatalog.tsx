@@ -1,16 +1,52 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import { pluralByLocale } from "@/lib/plural";
 import DgIcon from "@/components/layout/DgIcon";
+
+interface RailDay {
+  iso: string;       // YYYY-MM-DD
+  day: string;       // число
+  dow: string;       // короткий день недели
+  mon: string;       // короткий месяц
+  weekend: boolean;
+  firstOfMonth: boolean;
+}
+
+// 120 дней начиная с «сегодня» по Asia/Almaty. Всё считаем от UTC-полудня
+// ISO-даты, чтобы не зависеть от таймзоны клиента (см. iso событий — тоже Алматы).
+function buildRail(locale: Locale): RailDay[] {
+  const loc = locale === "kk" ? "kk-KZ" : "ru-RU";
+  const dowFmt = new Intl.DateTimeFormat(loc, { timeZone: "UTC", weekday: "short" });
+  const monFmt = new Intl.DateTimeFormat(loc, { timeZone: "UTC", month: "short" });
+  const todayIso = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Almaty" }).format(new Date());
+  const [Y, M, D] = todayIso.split("-").map(Number);
+  const out: RailDay[] = [];
+  for (let i = 0; i < 120; i++) {
+    const d = new Date(Date.UTC(Y, M - 1, D + i, 12));
+    const iso = d.toISOString().slice(0, 10);
+    const wd = d.getUTCDay();
+    const dayNum = String(d.getUTCDate());
+    out.push({
+      iso,
+      day: dayNum,
+      dow: dowFmt.format(d).replace(/\.$/, ""),
+      mon: monFmt.format(d).replace(/\.$/, ""),
+      weekend: wd === 0 || wd === 6,
+      firstOfMonth: d.getUTCDate() === 1 || i === 0,
+    });
+  }
+  return out;
+}
 
 export interface DgEvent {
   id: string;
   href: string;
   title: string;
   image: string;
+  iso: string; // YYYY-MM-DD (Asia/Almaty) — ключ для фильтра по дню
   day: string;
   mon: string; // короткий месяц uppercase (для карточки)
   monthLong: string; // длинный месяц (для фильтра)
@@ -52,17 +88,23 @@ export default function DgEventsCatalog({ locale, items }: Props) {
   const [hall, setHall] = useState(ALL);
   const [type, setType] = useState(ALL);
   const [query, setQuery] = useState("");
+  const [selectedIso, setSelectedIso] = useState<string | null>(null);
+
+  const rail = useMemo(() => buildRail(locale), [locale]);
+  const hasEvent = useMemo(() => new Set(items.map((e) => e.iso)), [items]);
+  const railRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(
     () =>
       items.filter(
         (e) =>
+          (!selectedIso || e.iso === selectedIso) &&
           (month === ALL || e.monthLong === month) &&
           (hall === ALL || e.hall === hall) &&
           (type === ALL || e.type === type) &&
           (!query.trim() || e.title.toLowerCase().includes(query.toLowerCase()))
       ),
-    [items, month, hall, type, query, ALL]
+    [items, selectedIso, month, hall, type, query, ALL]
   );
 
   const reset = () => {
@@ -70,7 +112,12 @@ export default function DgEventsCatalog({ locale, items }: Props) {
     setHall(ALL);
     setType(ALL);
     setQuery("");
+    setSelectedIso(null);
   };
+
+  const pickDay = (iso: string) => setSelectedIso((cur) => (cur === iso ? null : iso));
+  const scrollRail = (dir: -1 | 1) =>
+    railRef.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
 
   const chip = (val: string, active: string, set: (v: string) => void) => (
     <button key={val} className={"filter-chip" + (val === active ? " active" : "")} onClick={() => set(val)}>
@@ -81,6 +128,47 @@ export default function DgEventsCatalog({ locale, items }: Props) {
   return (
     <>
       <div className="dg-wrap">
+        {/* Лента дат */}
+        <div className="dg-daterail">
+          <button
+            type="button"
+            className="dg-daterail-arrow l"
+            onClick={() => scrollRail(-1)}
+            aria-label={T("Артқа", "Назад")}
+          >
+            <DgIcon name="chev-l" size={16} />
+          </button>
+          <div className="dg-daterail-track" ref={railRef} role="group" aria-label={T("Күні бойынша", "По дате")}>
+            {rail.map((d, i) => (
+              <button
+                type="button"
+                key={d.iso}
+                onClick={() => pickDay(d.iso)}
+                aria-pressed={selectedIso === d.iso}
+                className={
+                  "dg-date" +
+                  (selectedIso === d.iso ? " sel" : "") +
+                  (i === 0 ? " today" : "") +
+                  (d.weekend ? " weekend" : "") +
+                  (hasEvent.has(d.iso) ? " has" : "")
+                }
+              >
+                <span className="dow">{d.firstOfMonth ? d.mon : d.dow}</span>
+                <span className="num">{d.day}</span>
+                <span className="mon">{d.firstOfMonth ? "" : d.mon}</span>
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="dg-daterail-arrow r"
+            onClick={() => scrollRail(1)}
+            aria-label={T("Алға", "Вперёд")}
+          >
+            <DgIcon name="chev-r" size={16} />
+          </button>
+        </div>
+
         <div className="filters">
           <div className="filter-group">
             <span className="filter-label">{T("Ай", "Месяц")}</span>

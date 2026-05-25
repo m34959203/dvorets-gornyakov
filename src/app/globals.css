@@ -1373,6 +1373,38 @@ h1, h2, h3, h4 {
 .dg-home .page-lead { max-width: 64ch; font-size: 16px; color: var(--dg-text-2); margin: 22px 0 0; line-height: 1.6; font-weight: 300; }
 
 /* ─── Filters ─── */
+/* ═════════════ Date-rail (лента дат на /events) ═════════════ */
+.dg-home .dg-daterail { position: relative; padding-top: 18px; }
+.dg-home .dg-daterail-track {
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+  padding: 4px 38px; scroll-snap-type: x proximity;
+}
+.dg-home .dg-daterail-track::-webkit-scrollbar { display: none; }
+.dg-home .dg-date {
+  flex: none; scroll-snap-align: start; min-width: 54px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 8px 6px; border: 1px solid var(--dg-hair); border-radius: 12px;
+  background: transparent; color: var(--dg-text); cursor: pointer;
+  transition: border-color .15s, background .15s, transform .15s;
+}
+.dg-home .dg-date:hover { border-color: var(--dg-accent); }
+.dg-home .dg-date .dow { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--dg-text-2); }
+.dg-home .dg-date .num { font-size: 17px; font-weight: 600; line-height: 1.1; }
+.dg-home .dg-date .mon { font-size: 9px; text-transform: uppercase; color: var(--dg-text-3); min-height: 11px; }
+.dg-home .dg-date.weekend .dow { color: var(--dg-accent); }
+.dg-home .dg-date.has:not(.sel) .num { color: var(--dg-accent); }  /* день с событиями */
+.dg-home .dg-date.today { border-color: var(--dg-accent); box-shadow: inset 0 0 0 1px var(--dg-accent); }
+.dg-home .dg-date.sel { background: var(--dg-accent); border-color: var(--dg-accent); color: #fff; transform: scale(1.04); }
+.dg-home .dg-date.sel .dow, .dg-home .dg-date.sel .mon, .dg-home .dg-date.sel .num { color: #fff; }
+.dg-home .dg-daterail-arrow {
+  position: absolute; top: calc(50% + 9px); transform: translateY(-50%); z-index: 2;
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--dg-bg-2); border: 1px solid var(--dg-hair-2); color: var(--dg-text); cursor: pointer;
+}
+.dg-home .dg-daterail-arrow.l { left: 0; }
+.dg-home .dg-daterail-arrow.r { right: 0; }
+.dg-home .dg-daterail-arrow:hover { border-color: var(--dg-accent); color: var(--dg-accent); }
+
 .dg-home .filters { display: flex; gap: 12px; flex-wrap: wrap; padding-block: 22px; border-bottom: 1px solid var(--dg-hair); align-items: center; }
 .dg-home .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .dg-home .filter-label { font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--dg-text-3); margin-right: 6px; }
