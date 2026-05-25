@@ -40,6 +40,7 @@ const DIRS = [
   { id: "music", kk: "Музыка", ru: "Музыка" },
   { id: "art", kk: "Сурет", ru: "Рисование" },
   { id: "theater", kk: "Театр", ru: "Театр" },
+  { id: "craft", kk: "Қолөнер", ru: "Рукоделие" },
   { id: "sport", kk: "Спорт", ru: "Спорт" },
   { id: "general", kk: "Жалпы", ru: "Общее" },
 ];
