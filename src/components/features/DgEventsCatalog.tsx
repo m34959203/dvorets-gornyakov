@@ -15,28 +15,41 @@ interface RailDay {
   firstOfMonth: boolean;
 }
 
-// 120 дней начиная с «сегодня» по Asia/Almaty. Всё считаем от UTC-полудня
-// ISO-даты, чтобы не зависеть от таймзоны клиента (см. iso событий — тоже Алматы).
+// Локализованные массивы — НЕ Intl: в Docker-контейнере урезанный ICU отдаёт
+// английские дни/«M05» вместо kk/ru (поэтому весь проект использует свои массивы).
+const RAIL_DOW = {
+  ru: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+  kk: ["Жс", "Дс", "Сс", "Ср", "Бс", "Жм", "Сб"],
+};
+const RAIL_MON = {
+  ru: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"],
+  kk: ["Қаң", "Ақп", "Нау", "Сәу", "Мам", "Мау", "Шіл", "Там", "Қыр", "Қаз", "Қар", "Жел"],
+};
+
+// Дни от «сегодня» по Asia/Almaty до конца окна «текущий + 2 месяца» (синхрон с чипами).
+// Считаем от UTC-полудня, чтобы не зависеть от TZ клиента и DST.
 function buildRail(locale: Locale): RailDay[] {
-  const loc = locale === "kk" ? "kk-KZ" : "ru-RU";
-  const dowFmt = new Intl.DateTimeFormat(loc, { timeZone: "UTC", weekday: "short" });
-  const monFmt = new Intl.DateTimeFormat(loc, { timeZone: "UTC", month: "short" });
+  const lng = locale === "kk" ? "kk" : "ru";
+  const dow = RAIL_DOW[lng];
+  const mon = RAIL_MON[lng];
   const todayIso = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Almaty" }).format(new Date());
   const [Y, M, D] = todayIso.split("-").map(Number);
+  const DAY = 86400000;
+  const start = Date.UTC(Y, M - 1, D, 12);
+  const end = Date.UTC(Y, M - 1 + 3, 1, 12); // 1-е число месяца, следующего за окном
   const out: RailDay[] = [];
-  for (let i = 0; i < 120; i++) {
-    const d = new Date(Date.UTC(Y, M - 1, D + i, 12));
-    const iso = d.toISOString().slice(0, 10);
-    const wd = d.getUTCDay();
-    const dayNum = String(d.getUTCDate());
+  let first = true;
+  for (let t = start; t < end; t += DAY) {
+    const d = new Date(t);
     out.push({
-      iso,
-      day: dayNum,
-      dow: dowFmt.format(d).replace(/\.$/, ""),
-      mon: monFmt.format(d).replace(/\.$/, ""),
-      weekend: wd === 0 || wd === 6,
-      firstOfMonth: d.getUTCDate() === 1 || i === 0,
+      iso: d.toISOString().slice(0, 10),
+      day: String(d.getUTCDate()),
+      dow: dow[d.getUTCDay()],
+      mon: mon[d.getUTCMonth()],
+      weekend: d.getUTCDay() === 0 || d.getUTCDay() === 6,
+      firstOfMonth: d.getUTCDate() === 1 || first,
     });
+    first = false;
   }
   return out;
 }
@@ -96,6 +109,11 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
   const rail = useMemo(() => buildRail(locale), [locale]);
   const hasEvent = useMemo(() => new Set(items.map((e) => e.iso)), [items]);
   const railRef = useRef<HTMLDivElement>(null);
+  // Индексы первых дней месяцев в ленте (для прокрутки по клику на чип месяца).
+  const monthStarts = useMemo(
+    () => rail.map((r, i) => (r.firstOfMonth ? i : -1)).filter((i) => i >= 0),
+    [rail]
+  );
 
   const filtered = useMemo(
     () =>
@@ -121,6 +139,18 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
   const pickDay = (iso: string) => setSelectedIso((cur) => (cur === iso ? null : iso));
   const scrollRail = (dir: -1 | 1) =>
     railRef.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
+  const scrollRailToIdx = (idx: number) => {
+    const track = railRef.current;
+    const child = track?.children[idx] as HTMLElement | undefined;
+    if (track && child) track.scrollTo({ left: Math.max(0, child.offsetLeft - 40), behavior: "smooth" });
+  };
+
+  // Клик по месяцу: фильтруем + прокручиваем ленту к 1-му числу этого месяца (синхрон).
+  const pickMonth = (m: string) => {
+    setMonth(m);
+    const o = monthWindow.indexOf(m);
+    if (o >= 0 && monthStarts[o] != null) scrollRailToIdx(monthStarts[o]);
+  };
 
   const chip = (val: string, active: string, set: (v: string) => void) => (
     <button key={val} className={"filter-chip" + (val === active ? " active" : "")} onClick={() => set(val)}>
@@ -131,6 +161,7 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
   return (
     <>
       <div className="dg-wrap">
+        <div className="dg-controls">
         {/* Лента дат */}
         <div className="dg-daterail">
           <button
@@ -175,7 +206,7 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
         <div className="filters">
           <div className="filter-group">
             <span className="filter-label">{T("Ай", "Месяц")}</span>
-            {months.map((m) => chip(m, month, setMonth))}
+            {months.map((m) => chip(m, month, pickMonth))}
           </div>
           <div className="filter-search">
             <DgIcon name="search" size={14} />
@@ -210,6 +241,7 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
             ru: ["событие", "события", "событий"],
             kk: "іс-шара",
           })}
+        </div>
         </div>
       </div>
 

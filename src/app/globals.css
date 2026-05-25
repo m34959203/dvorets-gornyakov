@@ -1374,6 +1374,14 @@ h1, h2, h3, h4 {
 .dg-home .page-lead { max-width: 64ch; font-size: 16px; color: var(--dg-text-2); margin: 22px 0 0; line-height: 1.6; font-weight: 300; }
 
 /* ─── Filters ─── */
+/* ═════════════ Панель управления афишей (лента + фильтры) ═════════════ */
+.dg-home .dg-controls {
+  background: var(--dg-bg-2); border: 1px solid var(--dg-hair);
+  border-radius: 14px; padding: 4px 18px 14px; margin-top: 8px;
+}
+.dg-home .dg-controls .filters:last-of-type { border-bottom: 0; padding-bottom: 6px; }
+.dg-home .dg-controls .results-count { padding-bottom: 4px; }
+
 /* ═════════════ Date-rail (лента дат на /events) ═════════════ */
 .dg-home .dg-daterail { position: relative; padding-top: 18px; }
 .dg-home .dg-daterail-track {
