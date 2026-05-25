@@ -5,7 +5,7 @@ import { getMany } from "@/lib/db";
 import type { Hall } from "@/lib/rent/types";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
-import AskAssistantCta from "@/components/rent/AskAssistantCta";
+import RentBookingChat from "@/components/rent/RentBookingChat";
 
 export const dynamic = "force-dynamic";
 
@@ -203,15 +203,10 @@ export default async function RentPage({
               "Бронирование через AI-помощника: он поможет выбрать зал, дату и время и оформит заявку. Доступность подтверждает администратор."
             )}
           </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "center" }}>
-            <AskAssistantCta
-              label={T("Көмекшіден сұрау", "Спросить помощника")}
-              message={T("Зал жалдағым келеді", "Хочу арендовать зал")}
-            />
-            <a href="tel:+77106362330" className="section-link">
-              {T("Қоңырау шалу", "Позвонить")}: +7 (71063) 6-23-30
-            </a>
-          </div>
+          <RentBookingChat locale={locale === "kk" ? "kk" : "ru"} />
+          <a href="tel:+77106362330" className="section-link" style={{ display: "inline-flex", marginTop: 22 }}>
+            {T("Немесе қоңырау шалыңыз", "Или позвоните")}: +7 (71063) 6-23-30
+          </a>
         </div>
       </section>
     </div>
