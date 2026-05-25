@@ -62,7 +62,6 @@ export default async function Footer({ locale }: FooterProps) {
 
   const menuLinks: Array<[string, string]> = [
     [T("Оферта", "Оферта"), `/${locale}/resources`],
-    [T("Мемсатып алу 2026", "Госзакупки 2026"), `/${locale}/resources`],
     [T("Мінез-құлық ережелері", "Правила поведения"), `/${locale}/resources`],
     [T("Құжаттар", "Документы"), `/${locale}/resources`],
     [T("Қолдау қызметі", "Служба поддержки"), `/${locale}/about#contacts`],
