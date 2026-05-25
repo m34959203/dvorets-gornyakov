@@ -3,6 +3,7 @@ import Link from "next/link";
 import { isValidLocale, type Locale } from "@/lib/i18n";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
+import ContactForm from "@/components/features/ContactForm";
 
 
 function getBaseUrl(): string {
@@ -69,6 +70,15 @@ export default async function AboutPage({
     { n: "60+",  l: T("Жыл",       "Лет")          },
     { n: "3",    l: T("Зал",       "Зала")         },
   ];
+
+  const formMessages: Record<string, string> = {
+    name:          T("Аты-жөні", "ФИО"),
+    subject:       T("Тақырып", "Тема"),
+    message:       T("Хабарлама", "Сообщение"),
+    sendSuccess:   T("Хабарлама жіберілді!", "Сообщение отправлено!"),
+    sendError:     T("Жіберу қатесі", "Ошибка отправки"),
+    feedbackTitle: T("Кері байланыс", "Обратная связь"),
+  };
 
   return (
     <div className="dg-home">
@@ -246,6 +256,114 @@ export default async function AboutPage({
               {T("Афишаны ашу", "Открыть афишу")}{" "}
               <DgIcon name="arrow" size={12} />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ Контакты (объединено со страницы /contacts) ═══ */}
+      <section className="section section--light" id="contacts">
+        <div className="dg-wrap">
+          <div className="section-bar">
+            <div className="tag">— {T("Байланыс", "Контакты")} —</div>
+            <h2
+              className="h2"
+              dangerouslySetInnerHTML={{
+                __html: T("<strong>Байланысыңыз</strong> бізбен", "Свяжитесь <strong>с нами</strong>"),
+              }}
+            />
+          </div>
+
+          <div className="contact-grid" style={{ marginTop: 32 }}>
+            {/* Left: contact info */}
+            <div>
+              <div className="contact-list">
+                <div className="contact-row">
+                  <DgIcon name="pin" size={20} />
+                  <div>
+                    <div className="lab">{T("Мекенжай", "Адрес")}</div>
+                    <div className="val">
+                      {T("К.И. Сәтбаев даңғылы, 106", "Проспект К.И. Сатпаева, 106")}
+                      <br />
+                      {T("101300, Сәтбаев қ., Қазақстан", "101300, г. Сатпаев, Казахстан")}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="contact-row">
+                  <DgIcon name="phone" size={20} />
+                  <div>
+                    <div className="lab">{T("Телефон", "Телефон")}</div>
+                    <div className="val">
+                      <a href="tel:+77106362330">+7 (71063) 6-23-30</a>
+                      <span style={{ opacity: 0.55, marginLeft: 8 }}>— {T("қабылдау", "приёмная")}</span>
+                      <br />
+                      <a href="tel:+77106362440">+7 (71063) 6-24-40</a>
+                      <span style={{ opacity: 0.55, marginLeft: 8 }}>— {T("касса", "касса")}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="contact-row">
+                  <DgIcon name="mail" size={20} />
+                  <div>
+                    <div className="lab">Email</div>
+                    <div className="val">
+                      <a href="mailto:info@dvorets-gornyakov.kz">info@dvorets-gornyakov.kz</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="contact-row">
+                  <DgIcon name="clock" size={20} />
+                  <div>
+                    <div className="lab">{T("Жұмыс уақыты", "Часы работы")}</div>
+                    <div className="val">
+                      {T("Дс–Жм: 09:00–18:00", "Пн–Пт: 09:00–18:00")}
+                      <br />
+                      {T("Сн–Жс: 10:00–17:00", "Сб–Вс: 10:00–17:00")}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="dg-foot-socials" style={{ marginTop: 36 }}>
+                <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                  <DgIcon name="fb" size={22} />
+                </a>
+                <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                  <DgIcon name="ig" size={22} />
+                </a>
+                <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                  <DgIcon name="yt" size={22} />
+                </a>
+              </div>
+
+              <div style={{ marginTop: 32 }}>
+                <a
+                  href="https://2gis.kz/satpaev"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="dg-btn dg-btn-ghost"
+                  style={{ display: "inline-flex" }}
+                >
+                  <DgIcon name="pin" size={15} />
+                  {T("2GIS-те ашу", "Открыть в 2GIS")}
+                  <DgIcon name="arrow" size={15} />
+                </a>
+              </div>
+            </div>
+
+            {/* Right: feedback form */}
+            <div>
+              <div className="section-bar" style={{ marginBottom: 28 }}>
+                <div className="tag">{T("— Форма —", "— Форма —")}</div>
+                <h2
+                  className="h2"
+                  dangerouslySetInnerHTML={{ __html: T("Кері байланыс", "Обратная <strong>связь</strong>") }}
+                />
+              </div>
+              <ContactForm locale={locale} messages={formMessages} />
+            </div>
           </div>
         </div>
       </section>

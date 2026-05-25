@@ -65,12 +65,12 @@ export default async function Footer({ locale }: FooterProps) {
     [T("Мемсатып алу 2026", "Госзакупки 2026"), `/${locale}/resources`],
     [T("Мінез-құлық ережелері", "Правила поведения"), `/${locale}/resources`],
     [T("Құжаттар", "Документы"), `/${locale}/resources`],
-    [T("Қолдау қызметі", "Служба поддержки"), `/${locale}/contacts`],
+    [T("Қолдау қызметі", "Служба поддержки"), `/${locale}/about#contacts`],
     [T("Қайтару ережелері", "Правила возврата"), `/${locale}/resources`],
   ];
 
   return (
-    <footer className="dg-footer" id="contacts">
+    <footer className="dg-footer" id="footer-contacts">
       <div className="dg-wrap">
         <div className="dg-footer-top">
           {/* О нас */}
