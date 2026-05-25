@@ -6,7 +6,7 @@ import { parseBody } from "@/lib/validators";
 import { apiError, apiSuccess } from "@/lib/utils";
 
 const patchSchema = z.object({
-  status: z.enum(["pending", "approved", "rejected", "completed"]).optional(),
+  status: z.enum(["pending", "approved", "rejected", "completed", "cancelled"]).optional(),
   notes_admin: z.string().max(2000).optional(),
 });
 
