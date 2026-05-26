@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { toast } from "sonner";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 
@@ -334,6 +335,7 @@ export default function AdminEventsPage() {
       }
       closeDrawer();
       await load();
+      toastSaved(locale);
     } catch {
       setFormErr(locale === "kk" ? "Желі қатесі" : "Сетевая ошибка");
     } finally {
@@ -354,6 +356,7 @@ export default function AdminEventsPage() {
       }
       closeDrawer();
       await load();
+      toastDeleted(locale);
     } catch {
       setFormErr(locale === "kk" ? "Желі қатесі" : "Сетевая ошибка");
     }
@@ -374,6 +377,7 @@ export default function AdminEventsPage() {
         return;
       }
       await load();
+      toastSaved(locale);
     } catch {
       toast.error(locale === "kk" ? "Желі қатесі" : "Сетевая ошибка");
     }

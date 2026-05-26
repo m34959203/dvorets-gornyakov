@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 import { toast } from "sonner";
 
@@ -183,6 +184,7 @@ export default function AdminNavigationPage() {
       }
       closeDrawer();
       load();
+      toastSaved(locale);
     } catch {
       setFormErr("Сетевая ошибка");
     } finally {
@@ -203,6 +205,7 @@ export default function AdminNavigationPage() {
       }
       if (editing?.id === n.id) closeDrawer();
       load();
+      toastDeleted(locale);
     } catch {
       toast.error("Сетевая ошибка");
     }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 import { toast } from "sonner";
 import type { Hall } from "@/lib/rent/types";
@@ -40,6 +41,7 @@ export default function AdminHallsListPage() {
       return;
     }
     load();
+    toastDeleted(locale);
   }
 
   return (

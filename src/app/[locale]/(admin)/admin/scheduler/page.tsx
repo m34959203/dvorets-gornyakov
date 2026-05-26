@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 
 type JobStatus = "pending" | "running" | "done" | "failed" | "";
@@ -102,6 +103,7 @@ export default function SchedulerPage() {
       setDrawerOpen(false);
       setForm({ type: "publish_news", target_id: "", run_at: "" });
       await load();
+      toastSaved(locale);
     } catch {
       setFormErr(T("Желі қатесі", "Сетевая ошибка"));
     } finally {
@@ -112,7 +114,7 @@ export default function SchedulerPage() {
   const onCancel = async (id: string) => {
     if (!(await confirm({ message: T("Жою керек пе?", "Удалить задачу?") }))) return;
     const r = await fetch(`/api/admin/scheduler/${id}`, { method: "DELETE" });
-    if (r.ok) await load();
+    if (r.ok) { await load(); toastDeleted(locale); }
   };
 
   const onRequeue = async (id: string) => {

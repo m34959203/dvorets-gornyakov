@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 import { toast } from "sonner";
 
@@ -376,6 +377,7 @@ export default function AdminClubsPage() {
       }
       closeDrawer();
       load();
+      toastSaved(locale);
     } catch {
       setFormErr("Сетевая ошибка");
     } finally {
@@ -396,6 +398,7 @@ export default function AdminClubsPage() {
       }
       closeDrawer();
       load();
+      toastDeleted(locale);
     } catch {
       toast.error("Сетевая ошибка");
     }
@@ -415,6 +418,7 @@ export default function AdminClubsPage() {
         return;
       }
       load();
+      toastSaved(locale);
     } catch {
       toast.error("Сетевая ошибка");
     }

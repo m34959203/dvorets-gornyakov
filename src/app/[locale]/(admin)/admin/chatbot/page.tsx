@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
@@ -126,6 +127,7 @@ export default function AdminChatbotPage() {
       }
       closeDrawer();
       load();
+      toastSaved(locale);
     } catch {
       setFormErr(locale === "kk" ? "Сақтау қатесі" : "Ошибка сохранения");
     } finally {
@@ -143,6 +145,7 @@ export default function AdminChatbotPage() {
         return;
       }
       load();
+      toastDeleted(locale);
     } catch {
       setErr(locale === "kk" ? "Жою қатесі" : "Ошибка удаления");
     }

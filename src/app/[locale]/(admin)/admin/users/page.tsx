@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 import { toast } from "sonner";
 
@@ -151,6 +152,7 @@ export default function AdminUsersPage() {
       }
       closeDrawer();
       load();
+      toastSaved(locale);
     } finally {
       setSaving(false);
     }
@@ -165,6 +167,7 @@ export default function AdminUsersPage() {
       return;
     }
     load();
+    toastDeleted(locale);
   };
 
   const dateLoc = locale === "kk" ? "kk-KZ" : "ru-RU";

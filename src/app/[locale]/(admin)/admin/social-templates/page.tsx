@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 
 type Platform = "telegram" | "instagram" | "facebook";
@@ -142,6 +143,7 @@ export default function SocialTemplatesPage() {
       }
       setDrawerOpen(false);
       await load();
+      toastSaved(locale);
     } catch {
       setFormErr(T("Желі қатесі", "Сетевая ошибка"));
     } finally {
@@ -156,6 +158,7 @@ export default function SocialTemplatesPage() {
     if (r.ok) {
       setDrawerOpen(false);
       await load();
+      toastDeleted(locale);
     }
   };
 

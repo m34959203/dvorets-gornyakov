@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 import { toast } from "sonner";
 
@@ -97,6 +98,7 @@ export default function AdminEnrollmentsPage() {
     }
     setSelected(null);
     load();
+    toastSaved(locale);
   };
 
   const handleDelete = async () => {
@@ -110,6 +112,7 @@ export default function AdminEnrollmentsPage() {
     }
     setSelected(null);
     load();
+    toastDeleted(locale);
   };
 
   const dateLoc = locale === "kk" ? "kk-KZ" : "ru-RU";
