@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { isValidLocale, type Locale } from "@/lib/i18n";
 
-const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
-const SITE_NAME_RU = "Дворец горняков им. Ш. Дильдебаева";
-
 function getBaseUrl(): string {
   const env = process.env.NEXT_PUBLIC_APP_URL;
   const fallback = env || "https://dvorets-gornyakov.kz";
@@ -17,10 +14,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: lp } = await params;
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
-  const title =
-    locale === "kk"
-      ? `Үйірмелер мен студиялар — ${SITE_NAME_KK}`
-      : `Кружки и студии — ${SITE_NAME_RU}`;
+  // Короткий титл — site name добавит template из (public)/layout.tsx (иначе тройной дубль)
+  const title = locale === "kk" ? "Үйірмелер мен студиялар" : "Кружки и студии";
   const description =
     locale === "kk"
       ? "Балалар мен ересектерге арналған 20-дан астам шығармашылық үйірме: вокал, би, театр, өнер, музыка, қолөнер."
@@ -34,7 +29,7 @@ export async function generateMetadata({
       title,
       description,
       type: "website",
-      images: [],
+      images: [{ url: "/photos/og-cover.jpg", width: 1200, height: 630 }],
     },
     alternates: {
       canonical,

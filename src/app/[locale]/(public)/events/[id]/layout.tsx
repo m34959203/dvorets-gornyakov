@@ -3,9 +3,6 @@ import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getOne } from "@/lib/db";
 import { eventImage } from "@/lib/event-image";
 
-const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
-const SITE_NAME_RU = "Дворец горняков им. Ш. Дильдебаева";
-
 function getBaseUrl(): string {
   const env = process.env.NEXT_PUBLIC_APP_URL;
   const fallback = env || "https://dvorets-gornyakov.kz";
@@ -56,7 +53,7 @@ export async function generateMetadata({
 
   if (!row) {
     return {
-      title: `${locale === "kk" ? "Іс-шара" : "Событие"} — ${locale === "kk" ? SITE_NAME_KK : SITE_NAME_RU}`,
+      title: locale === "kk" ? "Іс-шара" : "Событие",
       alternates: { canonical, languages },
     };
   }
@@ -67,7 +64,7 @@ export async function generateMetadata({
   // иначе перебивает корневой og:image пустотой).
   const images = [eventImage(row.image_url, row.event_type)];
   return {
-    title: `${title} — ${locale === "kk" ? SITE_NAME_KK : SITE_NAME_RU}`,
+    title,
     description,
     openGraph: {
       title,

@@ -9,8 +9,6 @@ import EnrollmentForm from "@/components/features/EnrollmentForm";
 
 export const dynamic = "force-dynamic";
 
-const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
-const SITE_NAME_RU = "Дворец горняков им. Ш. Дильдебаева";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -117,7 +115,7 @@ export async function generateMetadata({
   const description = getLocalizedField(row, "description", locale);
   const images = row.image_url ? [row.image_url] : [];
   return {
-    title: `${name} — ${locale === "kk" ? SITE_NAME_KK : SITE_NAME_RU}`,
+    title: name,
     description,
     openGraph: {
       title: name,

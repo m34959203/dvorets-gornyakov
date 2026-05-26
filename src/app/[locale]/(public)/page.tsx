@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
@@ -7,6 +8,23 @@ import { localizeVenue, type VenuePair } from "@/lib/venue";
 import DgIcon from "@/components/layout/DgIcon";
 
 export const dynamic = "force-dynamic";
+
+// Главной не хватало canonical (метаданные иначе из (public)/layout). Мерджится с title/og слоя.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: lp } = await params;
+  const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const base = (process.env.NEXT_PUBLIC_APP_URL || "https://dvorets-gornyakov.kz").replace(/\/$/, "");
+  return {
+    alternates: {
+      canonical: `${base}/${locale}`,
+      languages: { kk: `${base}/kk`, ru: `${base}/ru` },
+    },
+  };
+}
 
 interface EventRow {
   id: string;

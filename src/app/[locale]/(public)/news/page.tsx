@@ -6,9 +6,6 @@ import DgPageHero from "@/components/layout/DgPageHero";
 
 export const dynamic = "force-dynamic";
 
-const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
-const SITE_NAME_RU = "Дворец горняков им. Ш. Дильдебаева";
-
 const FALLBACK_PHOTOS = [
   "/photos/dvorets-02.webp",
   "/photos/dvorets-06.webp",
@@ -28,10 +25,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: lp } = await params;
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
-  const title =
-    locale === "kk"
-      ? `Жаңалықтар — ${SITE_NAME_KK}`
-      : `Новости — ${SITE_NAME_RU}`;
+  // Короткий титл — site name добавит template из (public)/layout.tsx
+  const title = locale === "kk" ? "Жаңалықтар" : "Новости";
   const description =
     locale === "kk"
       ? "Ш. Ділдебаев атындағы тау-кенші сарайының соңғы жаңалықтары, хабарландырулары мен іс-шаралары."
@@ -45,7 +40,7 @@ export async function generateMetadata({
       title,
       description,
       type: "website",
-      images: [],
+      images: [{ url: "/photos/og-cover.jpg", width: 1200, height: 630 }],
     },
     alternates: {
       canonical,

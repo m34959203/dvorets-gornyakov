@@ -1,4 +1,29 @@
+import type { Metadata } from "next";
 import { isValidLocale, type Locale, getMessages } from "@/lib/i18n";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: lp } = await params;
+  const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const base = (process.env.NEXT_PUBLIC_APP_URL || "https://dvorets-gornyakov.kz").replace(/\/$/, "");
+  const title = locale === "kk" ? "Келу ережелері" : "Правила посещения";
+  const description =
+    locale === "kk"
+      ? "Тау-кеншілер сарайына келу ережелері: жұмыс уақыты, кіру, фото- және бейнетүсіру."
+      : "Правила посещения Дворца горняков: часы работы, вход, фото- и видеосъёмка.";
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${base}/${locale}/rules`,
+      languages: { kk: `${base}/kk/rules`, ru: `${base}/ru/rules` },
+    },
+    openGraph: { title, description, type: "website", images: [{ url: "/photos/og-cover.jpg", width: 1200, height: 630 }] },
+  };
+}
 
 export default async function RulesPage({
   params,

@@ -9,9 +9,6 @@ import DgIcon from "@/components/layout/DgIcon";
 
 export const dynamic = "force-dynamic";
 
-const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
-const SITE_NAME_RU = "Дворец горняков им. Ш. Дильдебаева";
-
 function getBaseUrl(): string {
   const env = process.env.NEXT_PUBLIC_APP_URL;
   const fallback = env || "https://dvorets-gornyakov.kz";
@@ -93,7 +90,7 @@ export async function generateMetadata({
   const description = getLocalizedField(row, "excerpt", locale);
   const images = row.image_url ? [row.image_url] : [];
   return {
-    title: `${title} — ${locale === "kk" ? SITE_NAME_KK : SITE_NAME_RU}`,
+    title,
     description,
     openGraph: {
       title,

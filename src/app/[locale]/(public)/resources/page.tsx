@@ -1,7 +1,32 @@
+import type { Metadata } from "next";
 import { isValidLocale, type Locale } from "@/lib/i18n";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
 import { RESOURCE_LINKS, resourceTitle, resourceDesc } from "@/lib/resources";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: lp } = await params;
+  const locale: Locale = isValidLocale(lp) ? lp : "kk";
+  const base = (process.env.NEXT_PUBLIC_APP_URL || "https://dvorets-gornyakov.kz").replace(/\/$/, "");
+  const title = locale === "kk" ? "Ресурстар" : "Ресурсы";
+  const description =
+    locale === "kk"
+      ? "Мәдениет пен білім саласындағы пайдалы сілтемелер: министрлік, кітапхана, e-gov."
+      : "Полезные ссылки в сфере культуры и образования: министерство, библиотека, e-gov.";
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${base}/${locale}/resources`,
+      languages: { kk: `${base}/kk/resources`, ru: `${base}/ru/resources` },
+    },
+    openGraph: { title, description, type: "website", images: [{ url: "/photos/og-cover.jpg", width: 1200, height: 630 }] },
+  };
+}
 
 export default async function ResourcesPage({
   params,
