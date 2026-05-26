@@ -1,4 +1,6 @@
 import Link from "next/link";
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbJsonLd } from "@/lib/jsonld";
 
 interface Crumb {
   label: string;
@@ -17,6 +19,7 @@ interface DgPageHeroProps {
 export default function DgPageHero({ crumbs, tag, h2Html, lead }: DgPageHeroProps) {
   return (
     <section className="page-hero">
+      <JsonLd data={breadcrumbJsonLd(crumbs)} />
       <div className="dg-wrap">
         <div className="crumbs">
           {crumbs.map((c, i) => (

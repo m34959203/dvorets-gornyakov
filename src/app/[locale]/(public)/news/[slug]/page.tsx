@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getOne } from "@/lib/db";
 import { localizeNewsCategory } from "@/lib/news-category";
+import { newsArticleJsonLd, siteBase } from "@/lib/jsonld";
+import JsonLd from "@/components/JsonLd";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
 
@@ -203,6 +205,15 @@ export default async function NewsArticlePage({
 
   return (
     <div className="dg-home">
+      <JsonLd
+        data={newsArticleJsonLd({
+          locale,
+          headline: title,
+          datePublished: publishedAt,
+          image: imageUrl,
+          url: `${siteBase()}/${locale}/news/${slug}`,
+        })}
+      />
       <DgPageHero
         crumbs={[
           { label: T("Басты бет", "Главная"), href: `/${locale}` },

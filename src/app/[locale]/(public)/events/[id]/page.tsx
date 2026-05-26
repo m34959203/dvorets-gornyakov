@@ -9,6 +9,8 @@ import {
 import { getOne, getMany } from "@/lib/db";
 import { eventImage } from "@/lib/event-image";
 import { localizeVenue, type VenuePair } from "@/lib/venue";
+import { eventJsonLd, siteBase } from "@/lib/jsonld";
+import JsonLd from "@/components/JsonLd";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
 import EventSubscribe from "@/components/features/EventSubscribe";
@@ -237,6 +239,17 @@ export default async function EventDetailPage({
 
   return (
     <div className="dg-home">
+      <JsonLd
+        data={eventJsonLd({
+          locale,
+          name: title,
+          startDate: event.start_date,
+          endDate: event.end_date,
+          location: venue,
+          image: cover,
+          url: `${siteBase()}/${locale}/events/${id}`,
+        })}
+      />
       <DgPageHero
         crumbs={[
           { label: T("Басты бет", "Главная"), href: `/${locale}` },

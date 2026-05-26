@@ -5,6 +5,8 @@ import { getMany } from "@/lib/db";
 import { almatyParts } from "@/lib/utils";
 import { eventImage } from "@/lib/event-image";
 import { localizeVenue, type VenuePair } from "@/lib/venue";
+import { organizationJsonLd } from "@/lib/jsonld";
+import JsonLd from "@/components/JsonLd";
 import DgIcon from "@/components/layout/DgIcon";
 
 export const dynamic = "force-dynamic";
@@ -194,6 +196,7 @@ export default async function HomePage({
 
   return (
     <div className="dg-home">
+      <JsonLd data={organizationJsonLd(locale)} />
       <a href="#afisha" className="dg-skip-link">{T("Мазмұнға өту", "Перейти к содержимому")}</a>
 
       {/* ═══ Hero ═══ */}
