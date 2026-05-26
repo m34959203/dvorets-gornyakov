@@ -105,7 +105,7 @@ export default async function AboutPage({
           <div className="about-grid">
             <div className="about-photo">
               <img
-                src="/photos/dvorets-01.webp"
+                src="/photos/og-cover.jpg"
                 alt={T(
                   "Ш. Ділдебаев атындағы тау-кенші сарайы, Сәтбаев қаласы",
                   "Дворец горняков им. Ш. Дильдебаева, г. Сатпаев"

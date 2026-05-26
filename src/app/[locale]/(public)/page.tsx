@@ -318,7 +318,7 @@ export default async function HomePage({
         <div className="dg-wrap">
           <div className="about-grid">
             <div className="about-photo">
-              <img src="/photos/dvorets-01.webp" alt={T("Тау-кеншілер сарайының ғимараты", "Здание Дворца горняков")} />
+              <img src="/photos/og-cover.jpg" alt={T("Тау-кеншілер сарайының ғимараты", "Здание Дворца горняков")} />
               <div className="about-photo-tag">{T("Сәтбаев · 1974", "Сатпаев · 1974")}</div>
             </div>
 
