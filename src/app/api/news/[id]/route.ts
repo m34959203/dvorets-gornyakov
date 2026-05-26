@@ -12,8 +12,10 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    // id::text — иначе `slug = $1` (varchar) против uuid-параметра даёт
+    // «operator does not exist: character varying = uuid» (42883).
     const row = await getOne(
-      `SELECT * FROM news WHERE id = $1 OR slug = $1`,
+      `SELECT * FROM news WHERE id::text = $1 OR slug = $1`,
       [id]
     );
     if (!row) return apiError("Not found", 404);
