@@ -15,18 +15,20 @@ export default async function AdminLayout({
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
   const messages = getMessages(locale);
 
-  // RBAC guard: только залогиненные admin/editor/instructor
+  // RBAC guard: только залогиненные admin/editor.
+  // instructor убран — на API-уровне роль нигде не разрешена (всё давало 401),
+  // полу-сломанный доступ. Вернуть, когда появится реальный instructor-флоу.
   const user = await getCurrentUser();
-  if (!user || !["admin", "editor", "instructor"].includes(user.role)) {
+  if (!user || !["admin", "editor"].includes(user.role)) {
     redirect(`/${locale}/login?next=/${locale}/admin`);
   }
 
   return (
     <html lang={locale} className="h-full">
       <body className="h-full">
-        <AdminProviders locale={locale}>
+        <AdminProviders locale={locale} role={user.role}>
         <div className="flex h-full">
-          <AdminSidebar locale={locale} messages={messages} />
+          <AdminSidebar locale={locale} messages={messages} role={user.role} />
           <div className="flex-1 overflow-auto">
             <header className="flex items-center justify-between px-6 py-3 border-b border-gray-200 bg-white">
               <div className="text-sm text-gray-600">
