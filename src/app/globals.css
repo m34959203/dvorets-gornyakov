@@ -1118,15 +1118,13 @@ h1, h2, h3, h4 {
   padding-inline: var(--dg-pad-x); display: flex; flex-direction: column; align-items: center;
 }
 .dg-home .hero-h1 {
-  font-size: clamp(22px, 4.8vw, 64px); line-height: 1.18; letter-spacing: 0.06em;
+  font-size: clamp(28px, 4.8vw, 64px); line-height: 1.18; letter-spacing: 0.06em;
   font-weight: 300; text-transform: uppercase; margin: 0;
   max-width: 22ch; text-wrap: balance; color: var(--dg-text);
 }
-/* На узких телефонах длинная KK-строка лезла в 4-5 строк → меньше floor (22px),
-   поджать межбуквенный интервал и высоту строки */
-@media (max-width: 420px) {
-  .dg-home .hero-h1 { letter-spacing: 0.02em; line-height: 1.22; }
-}
+/* KK-заголовок длиннее RU и лез в 4-5 строк на мобильном. Меньший floor (22px)
+   только для KK — /ru остаётся на исходных 28px (без регресса числа строк). */
+.dg-home .hero-h1--kk { font-size: clamp(22px, 4.8vw, 64px); }
 .dg-home .hero-h1 strong { font-weight: 500; color: var(--dg-accent); }
 .dg-home .hero-scroll {
   position: absolute; left: 50%; bottom: 36px; transform: translateX(-50%);

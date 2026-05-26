@@ -132,18 +132,16 @@ export default async function HomePage({
         <img className="hero-photo" src="/hero/hero.jpg" alt="" />
         <div className="hero-vignette" aria-hidden="true" />
         <div className="hero-inner">
-          <h1 className="hero-h1">
+          {/* KK-заголовок длиннее RU → отдельный класс с меньшим floor (см. globals.css),
+              чтобы ужать число строк на мобильном БЕЗ влияния на /ru. */}
+          <h1 className={locale === "kk" ? "hero-h1 hero-h1--kk" : "hero-h1"}>
             {locale === "kk" ? (
               <>
-                {/* <wbr> даёт точки переноса в длинных KK-словах, чтобы заголовок
-                    не уезжал в 4-5 строк и не упирался в индикатор прокрутки */}
-                Сүйікті әртіс<wbr />теріңізді <strong>ең үздік залда</strong> қарсы
-                алыңыз — Сәтбаев қала<wbr />сында
+                Сүйікті әртістеріңізді <strong>ең үздік залда</strong> қарсы алыңыз — Сәтбаев қаласында
               </>
             ) : (
               <>
-                Встречайте своих любимых артистов <strong>в лучшем зале</strong> города
-                Сатпаев
+                Встречайте своих любимых артистов <strong>в лучшем зале</strong> города Сатпаев
               </>
             )}
           </h1>
