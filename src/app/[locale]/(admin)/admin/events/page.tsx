@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { toast } from "sonner";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
 
 type EventStatus = "upcoming" | "ongoing" | "completed" | "cancelled";
 type EventType = "concert" | "exhibition" | "workshop" | "festival" | "competition" | "other";
@@ -102,6 +104,7 @@ function localInputToIso(v: string): string {
 export default function AdminEventsPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
 
   const [statusFilter, setStatusFilter] = useState<"" | EventStatus>("");
   const [typeFilter, setTypeFilter] = useState<"" | EventType>("");
@@ -340,7 +343,7 @@ export default function AdminEventsPage() {
 
   const onDelete = async () => {
     if (!editing) return;
-    const ok = confirm(locale === "kk" ? "Жоюды растайсыз ба?" : "Подтвердите удаление");
+    const ok = await confirm({ message: locale === "kk" ? "Жоюды растайсыз ба?" : "Подтвердите удаление" });
     if (!ok) return;
     try {
       const r = await fetch(`/api/events/${editing.id}`, { method: "DELETE" });
@@ -367,12 +370,12 @@ export default function AdminEventsPage() {
       });
       const body = await r.json().catch(() => ({}));
       if (!r.ok) {
-        alert(body.error || (locale === "kk" ? "Қате" : "Ошибка"));
+        toast.error(body.error || (locale === "kk" ? "Қате" : "Ошибка"));
         return;
       }
       await load();
     } catch {
-      alert(locale === "kk" ? "Желі қатесі" : "Сетевая ошибка");
+      toast.error(locale === "kk" ? "Желі қатесі" : "Сетевая ошибка");
     }
   };
 

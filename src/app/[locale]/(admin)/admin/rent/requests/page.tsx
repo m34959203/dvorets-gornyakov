@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { toast } from "sonner";
 import type { RentalRequestWithHall, RentalStatus } from "@/lib/rent/types";
 
 const STATUSES: RentalStatus[] = ["new", "contacted", "confirmed", "rejected", "completed"];
@@ -66,7 +67,7 @@ export default function AdminRentRequestsPage() {
     });
     const body = await r.json();
     if (!r.ok) {
-      alert(body.error || "Ошибка");
+      toast.error(body.error || "Ошибка");
       return;
     }
     setSelected(null);

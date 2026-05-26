@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
+import { toast } from "sonner";
 
 interface NavItem {
   id: string;
@@ -44,6 +46,7 @@ const EMPTY_FORM: FormState = {
 export default function AdminNavigationPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
 
   const [items, setItems] = useState<NavItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -190,18 +193,18 @@ export default function AdminNavigationPage() {
   const onDelete = async (n: NavItem, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     const msg = locale === "kk" ? "Шынымен жоясыз ба?" : "Удалить пункт меню?";
-    if (!confirm(msg)) return;
+    if (!(await confirm({ message: msg }))) return;
     try {
       const r = await fetch(`/api/admin/navigation/${n.id}`, { method: "DELETE" });
       const body = await r.json();
       if (!r.ok) {
-        alert(body.error || "Ошибка");
+        toast.error(body.error || "Ошибка");
         return;
       }
       if (editing?.id === n.id) closeDrawer();
       load();
     } catch {
-      alert("Сетевая ошибка");
+      toast.error("Сетевая ошибка");
     }
   };
 
@@ -224,12 +227,12 @@ export default function AdminNavigationPage() {
       });
       const body = await r.json();
       if (!r.ok) {
-        alert(body.error || "Ошибка");
+        toast.error(body.error || "Ошибка");
         return;
       }
       load();
     } catch {
-      alert("Сетевая ошибка");
+      toast.error("Сетевая ошибка");
     }
   };
 
@@ -243,12 +246,12 @@ export default function AdminNavigationPage() {
       });
       const body = await r.json();
       if (!r.ok) {
-        alert(body.error || "Ошибка");
+        toast.error(body.error || "Ошибка");
         return;
       }
       load();
     } catch {
-      alert("Сетевая ошибка");
+      toast.error("Сетевая ошибка");
     }
   };
 

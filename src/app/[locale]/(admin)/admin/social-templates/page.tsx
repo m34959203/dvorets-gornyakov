@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
 
 type Platform = "telegram" | "instagram" | "facebook";
 type Kind = "news" | "event";
@@ -25,6 +26,7 @@ const PLACEHOLDERS_EVENT = ["title_ru", "title_kk", "date_ru", "date_kk", "locat
 export default function SocialTemplatesPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
   const [items, setItems] = useState<Template[]>([]);
@@ -149,7 +151,7 @@ export default function SocialTemplatesPage() {
 
   const onDelete = async () => {
     if (!editing) return;
-    if (!confirm(T("Жою керек пе?", "Удалить шаблон?"))) return;
+    if (!(await confirm({ message: T("Жою керек пе?", "Удалить шаблон?") }))) return;
     const r = await fetch(`/api/admin/social-templates/${editing.id}`, { method: "DELETE" });
     if (r.ok) {
       setDrawerOpen(false);

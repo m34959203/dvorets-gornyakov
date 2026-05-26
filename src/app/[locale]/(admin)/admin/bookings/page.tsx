@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
 
 type Status = "pending" | "approved" | "rejected" | "cancelled" | "completed";
 
@@ -47,6 +48,7 @@ const HALL_LABEL: Record<Booking["hall"], { kk: string; ru: string }> = {
 export default function AdminBookingsPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
   const [filter, setFilter] = useState<"" | Status>("pending");
@@ -88,11 +90,14 @@ export default function AdminBookingsPage() {
     if (r.ok) load();
   };
 
-  const cancel = (b: Booking) => {
-    if (window.confirm(T(
-      "Бекітілген броньды бас тарту керек пе? Слот босайды.",
-      "Отменить уже одобренное бронирование? Слот освободится."
-    ))) patch(b.id, { status: "cancelled" });
+  const cancel = async (b: Booking) => {
+    const ok = await confirm({
+      message: T(
+        "Бекітілген броньды бас тарту керек пе? Слот босайды.",
+        "Отменить уже одобренное бронирование? Слот освободится."
+      ),
+    });
+    if (ok) patch(b.id, { status: "cancelled" });
   };
 
   const comment = (b: Booking) => {

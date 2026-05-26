@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { toast } from "sonner";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
 
 type NewsStatus = "draft" | "published" | "archived";
 
@@ -80,6 +82,7 @@ const NEXT_STATUS: Record<NewsStatus, NewsStatus> = {
 export default function AdminNewsPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
 
   const [statusFilter, setStatusFilter] = useState<"" | NewsStatus>("");
   const [items, setItems] = useState<NewsItem[]>([]);
@@ -267,7 +270,7 @@ export default function AdminNewsPage() {
 
   const onDelete = async () => {
     if (!editing) return;
-    const ok = confirm(locale === "kk" ? "Жоюды растайсыз ба?" : "Подтвердите удаление");
+    const ok = await confirm({ message: locale === "kk" ? "Жоюды растайсыз ба?" : "Подтвердите удаление" });
     if (!ok) return;
     try {
       const r = await fetch(`/api/news/${editing.id}`, { method: "DELETE" });
@@ -342,12 +345,12 @@ export default function AdminNewsPage() {
       });
       const body = await r.json().catch(() => ({}));
       if (!r.ok) {
-        alert(body.error || (locale === "kk" ? "Қате" : "Ошибка"));
+        toast.error(body.error || (locale === "kk" ? "Қате" : "Ошибка"));
         return;
       }
       await load();
     } catch {
-      alert(locale === "kk" ? "Желі қатесі" : "Сетевая ошибка");
+      toast.error(locale === "kk" ? "Желі қатесі" : "Сетевая ошибка");
     }
   };
 

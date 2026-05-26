@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
+import { toast } from "sonner";
 
 type Direction = "vocal" | "dance" | "art" | "theater" | "sport" | "general";
 
@@ -89,6 +91,7 @@ function scheduleToText(schedule: Club["schedule"]): string {
 export default function AdminClubsPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
 
   const [items, setItems] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
@@ -383,18 +386,18 @@ export default function AdminClubsPage() {
   const onDelete = async () => {
     if (!editing) return;
     const msg = locale === "kk" ? "Шынымен жоясыз ба?" : "Удалить клуб?";
-    if (!confirm(msg)) return;
+    if (!(await confirm({ message: msg }))) return;
     try {
       const r = await fetch(`/api/clubs/${editing.id}`, { method: "DELETE" });
       const body = await r.json();
       if (!r.ok) {
-        alert(body.error || "Ошибка");
+        toast.error(body.error || "Ошибка");
         return;
       }
       closeDrawer();
       load();
     } catch {
-      alert("Сетевая ошибка");
+      toast.error("Сетевая ошибка");
     }
   };
 
@@ -408,12 +411,12 @@ export default function AdminClubsPage() {
       });
       const body = await r.json();
       if (!r.ok) {
-        alert(body.error || "Ошибка");
+        toast.error(body.error || "Ошибка");
         return;
       }
       load();
     } catch {
-      alert("Сетевая ошибка");
+      toast.error("Сетевая ошибка");
     }
   };
 

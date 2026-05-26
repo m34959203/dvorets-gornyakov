@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
+import { toast } from "sonner";
 
 type Role = "admin" | "editor" | "instructor";
 type RoleFilter = Role | "all";
@@ -37,6 +39,7 @@ const ROLE_LABELS: Record<Role, { ru: string; kk: string }> = {
 export default function AdminUsersPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
 
   const [items, setItems] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -154,11 +157,11 @@ export default function AdminUsersPage() {
   };
 
   const handleDelete = async (u: User) => {
-    if (!confirm(locale === "kk" ? "Жоюды растайсыз ба?" : "Подтвердите удаление")) return;
+    if (!(await confirm({ message: locale === "kk" ? "Жоюды растайсыз ба?" : "Подтвердите удаление" }))) return;
     const r = await fetch(`/api/admin/users/${u.id}`, { method: "DELETE" });
     const body = await r.json().catch(() => ({}));
     if (!r.ok) {
-      alert(body.error || "Ошибка");
+      toast.error(body.error || "Ошибка");
       return;
     }
     load();

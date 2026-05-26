@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
 
 type JobStatus = "pending" | "running" | "done" | "failed" | "";
 type JobType = "publish_news" | "publish_event" | "";
@@ -30,6 +31,7 @@ const STATUS_COLORS: Record<string, string> = {
 export default function SchedulerPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
   const [items, setItems] = useState<Job[]>([]);
@@ -108,7 +110,7 @@ export default function SchedulerPage() {
   };
 
   const onCancel = async (id: string) => {
-    if (!confirm(T("Жою керек пе?", "Удалить задачу?"))) return;
+    if (!(await confirm({ message: T("Жою керек пе?", "Удалить задачу?") }))) return;
     const r = await fetch(`/api/admin/scheduler/${id}`, { method: "DELETE" });
     if (r.ok) await load();
   };

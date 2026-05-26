@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
+import { toast } from "sonner";
 import type { Hall } from "@/lib/rent/types";
 
 export default function AdminHallsListPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
   const [halls, setHalls] = useState<Hall[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string>("");
@@ -29,11 +32,11 @@ export default function AdminHallsListPage() {
   useEffect(() => { load(); }, []);
 
   async function remove(id: string) {
-    if (!confirm("Удалить зал? Это необратимо.")) return;
+    if (!(await confirm({ message: "Удалить зал? Это необратимо." }))) return;
     const r = await fetch(`/api/admin/rent/halls/${id}`, { method: "DELETE" });
     const body = await r.json();
     if (!r.ok) {
-      alert(body.error);
+      toast.error(body.error);
       return;
     }
     load();

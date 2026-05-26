@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { truncate } from "@/lib/utils";
@@ -38,6 +39,7 @@ const EMPTY_FORM: FormState = {
 export default function AdminChatbotPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
 
   const [items, setItems] = useState<KbItem[]>([]);
   const [filter, setFilter] = useState<string>("all");
@@ -132,7 +134,7 @@ export default function AdminChatbotPage() {
   };
 
   const remove = async (item: KbItem) => {
-    if (!confirm(locale === "kk" ? "Жоюды растайсыз ба?" : "Подтвердите удаление")) return;
+    if (!(await confirm({ message: locale === "kk" ? "Жоюды растайсыз ба?" : "Подтвердите удаление" }))) return;
     try {
       const r = await fetch(`/api/admin/chatbot-kb/${item.id}`, { method: "DELETE" });
       const body = await r.json().catch(() => ({}));

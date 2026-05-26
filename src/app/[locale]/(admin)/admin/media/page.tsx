@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
 
 type MediaType = "all" | "image" | "video" | "other";
 
@@ -31,6 +32,7 @@ const LIMIT = 24;
 export default function AdminMediaPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
 
   const [items, setItems] = useState<MediaItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -203,7 +205,7 @@ export default function AdminMediaPage() {
   const onDelete = async () => {
     if (!active) return;
     const msg = locale === "kk" ? "Файлды жоясыз ба?" : "Удалить файл?";
-    if (!confirm(msg)) return;
+    if (!(await confirm({ message: msg }))) return;
     try {
       const r = await fetch(`/api/admin/media/${active.id}`, { method: "DELETE" });
       const body = await r.json();

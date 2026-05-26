@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
+import { toast } from "sonner";
 
 type Position = "hero" | "sidebar" | "footer" | "other";
 
@@ -48,6 +50,7 @@ const EMPTY_FORM: FormState = {
 export default function AdminBannersPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
 
   const [items, setItems] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
@@ -184,18 +187,18 @@ export default function AdminBannersPage() {
   const onDelete = async (b: Banner, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     const msg = locale === "kk" ? "Шынымен жоясыз ба?" : "Удалить баннер?";
-    if (!confirm(msg)) return;
+    if (!(await confirm({ message: msg }))) return;
     try {
       const r = await fetch(`/api/banners/${b.id}`, { method: "DELETE" });
       const body = await r.json();
       if (!r.ok) {
-        alert(body.error || "Ошибка");
+        toast.error(body.error || "Ошибка");
         return;
       }
       if (editing?.id === b.id) closeDrawer();
       load();
     } catch {
-      alert("Сетевая ошибка");
+      toast.error("Сетевая ошибка");
     }
   };
 
@@ -209,12 +212,12 @@ export default function AdminBannersPage() {
       });
       const body = await r.json();
       if (!r.ok) {
-        alert(body.error || "Ошибка");
+        toast.error(body.error || "Ошибка");
         return;
       }
       load();
     } catch {
-      alert("Сетевая ошибка");
+      toast.error("Сетевая ошибка");
     }
   };
 
@@ -229,12 +232,12 @@ export default function AdminBannersPage() {
       });
       const body = await r.json();
       if (!r.ok) {
-        alert(body.error || "Ошибка");
+        toast.error(body.error || "Ошибка");
         return;
       }
       load();
     } catch {
-      alert("Сетевая ошибка");
+      toast.error("Сетевая ошибка");
     }
   };
 

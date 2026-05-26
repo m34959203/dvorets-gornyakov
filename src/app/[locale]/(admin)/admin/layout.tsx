@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getMessages, isValidLocale, type Locale } from "@/lib/i18n";
 import AdminSidebar from "@/components/layout/AdminSidebar";
+import AdminProviders from "@/components/admin/AdminProviders";
 import { getCurrentUser } from "@/lib/auth";
 
 export default async function AdminLayout({
@@ -23,6 +24,7 @@ export default async function AdminLayout({
   return (
     <html lang={locale} className="h-full">
       <body className="h-full">
+        <AdminProviders locale={locale}>
         <div className="flex h-full">
           <AdminSidebar locale={locale} messages={messages} />
           <div className="flex-1 overflow-auto">
@@ -46,6 +48,7 @@ export default async function AdminLayout({
             <div className="p-6 lg:p-8">{children}</div>
           </div>
         </div>
+        </AdminProviders>
       </body>
     </html>
   );

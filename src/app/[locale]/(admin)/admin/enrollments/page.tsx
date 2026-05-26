@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
+import { toast } from "sonner";
 
 type EnrollmentStatus = "pending" | "approved" | "rejected";
 
@@ -43,6 +45,7 @@ const ACTION_LABELS: Record<EnrollmentStatus, { kk: string; ru: string }> = {
 export default function AdminEnrollmentsPage() {
   const params = useParams();
   const locale: Locale = isValidLocale(params.locale as string) ? (params.locale as Locale) : "kk";
+  const confirm = useConfirm();
 
   const [status, setStatus] = useState<"" | EnrollmentStatus>("");
   const [items, setItems] = useState<Enrollment[]>([]);
@@ -89,7 +92,7 @@ export default function AdminEnrollmentsPage() {
     });
     const body = await r.json().catch(() => ({}));
     if (!r.ok) {
-      alert(body.error || "Ошибка");
+      toast.error(body.error || "Ошибка");
       return;
     }
     setSelected(null);
@@ -98,11 +101,11 @@ export default function AdminEnrollmentsPage() {
 
   const handleDelete = async () => {
     if (!selected) return;
-    if (!confirm(locale === "kk" ? "Жоюды растайсыз ба?" : "Подтвердите удаление")) return;
+    if (!(await confirm({ message: locale === "kk" ? "Жоюды растайсыз ба?" : "Подтвердите удаление" }))) return;
     const r = await fetch(`/api/admin/enrollments/${selected.id}`, { method: "DELETE" });
     const body = await r.json().catch(() => ({}));
     if (!r.ok) {
-      alert(body.error || "Ошибка");
+      toast.error(body.error || "Ошибка");
       return;
     }
     setSelected(null);
