@@ -90,7 +90,7 @@ INSERT INTO halls (slug, name_kk, name_ru, description_kk, description_ru,
     '["Профессиональный звук", "Сценический свет", "LED-экран", "3 гримёрки", "Wi-Fi", "Кондиционер"]'::jsonb,
     0,
     0,
-    '[{"url":"/photos/dvorets-07.webp","alt_ru":"Большой зал, сцена","alt_kk":"Үлкен зал, сахна"}]'::jsonb,
+    '[{"url":"/photos/dvorets-08.webp","alt_ru":"Интерьер большого концертного зала на 650 мест","alt_kk":"650 орындық үлкен концерт залының интерьері"}]'::jsonb,
     10
 ),
 (
@@ -104,7 +104,7 @@ INSERT INTO halls (slug, name_kk, name_ru, description_kk, description_ru,
     '["Акустическая система", "Проектор", "Экран", "Wi-Fi", "Сцена"]'::jsonb,
     0,
     0,
-    '[{"url":"/photos/dvorets-12.webp","alt_ru":"Камерный зал","alt_kk":"Камералық зал"}]'::jsonb,
+    '[{"url":"/photos/dvorets-10.webp","alt_ru":"Камерный зал на 120 мест с проекционным экраном","alt_kk":"Проекциялық экраны бар 120 орындық камералық зал"}]'::jsonb,
     20
 ),
 (
@@ -118,6 +118,6 @@ INSERT INTO halls (slug, name_kk, name_ru, description_kk, description_ru,
     '["Зеркала", "Станок", "Пианино", "Аудио-система", "Раздевалка"]'::jsonb,
     0,
     0,
-    '[{"url":"/photos/dvorets-11.webp","alt_ru":"Репетиционный зал","alt_kk":"Жаттығу залы"}]'::jsonb,
+    '[{"url":"/photos/dvorets-12.webp","alt_ru":"Репетиционный зал с зеркалами и балетным станком","alt_kk":"Айналары мен балет станогі бар жаттығу залы"}]'::jsonb,
     30
 );
