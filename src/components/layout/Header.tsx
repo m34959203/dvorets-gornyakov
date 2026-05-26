@@ -37,7 +37,7 @@ export default async function Header({ locale }: HeaderProps) {
     <header className="dg-header">
       <div className="dg-wrap dg-header-inner">
         {/* Бренд */}
-        <Link href={`/${locale}`} className="dg-brand" aria-label="Дворец горняков · главная">
+        <Link href={`/${locale}`} className="dg-brand" aria-label={locale === "kk" ? "Тау-кеншілер сарайы · басты бет" : "Дворец горняков · главная"}>
           <div className="dg-brand-eq" aria-hidden="true">
             <span /><span /><span /><span /><span /><span />
           </div>

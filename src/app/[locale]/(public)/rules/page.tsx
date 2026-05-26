@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { isValidLocale, type Locale, getMessages } from "@/lib/i18n";
+import { isValidLocale, type Locale } from "@/lib/i18n";
+import DgPageHero from "@/components/layout/DgPageHero";
 
 export async function generateMetadata({
   params,
@@ -32,7 +33,7 @@ export default async function RulesPage({
 }) {
   const { locale: localeParam } = await params;
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
-  const messages = getMessages(locale);
+  const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
   const rules = locale === "kk" ? [
     "Сарайға кіру тегін (арнайы іс-шараларды қоспағанда).",
@@ -59,26 +60,31 @@ export default async function RulesPage({
   ];
 
   return (
-    <div style={{ background: "#0E0E20", minHeight: "calc(100vh - 84px)" }}>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-bold mb-8" style={{ color: "#fff" }}>{messages.common.rules}</h1>
-
-        <div className="rounded-xl p-6" style={{ background: "#15152a", border: "1px solid rgba(255,255,255,0.08)" }}>
-          <ol className="space-y-4">
+    <div className="dg-home">
+      <DgPageHero
+        crumbs={[
+          { label: T("Басты бет", "Главная"), href: `/${locale}` },
+          { label: T("Келу ережелері", "Правила посещения") },
+        ]}
+        tag={T("— Ережелер —", "— Правила —")}
+        h2Html={T("Сарайға <strong>келу ережелері</strong>", "Правила <strong>посещения</strong> Дворца")}
+        lead={T(
+          "Барлық қонақтарға ыңғайлы болуы үшін қарапайым ережелерді сақтауыңызды сұраймыз.",
+          "Чтобы всем гостям было комфортно, просим соблюдать несколько простых правил."
+        )}
+      />
+      <section className="section section--light">
+        <div className="dg-wrap">
+          <ol className="rules-list">
             {rules.map((rule, i) => (
-              <li key={i} className="flex gap-4">
-                <span
-                  className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-                  style={{ background: "rgba(224,122,74,0.14)", color: "#E07A4A" }}
-                >
-                  {i + 1}
-                </span>
-                <span className="pt-1" style={{ color: "#cbd2dc" }}>{rule}</span>
+              <li key={i}>
+                <span className="num">{i + 1}</span>
+                <span>{rule}</span>
               </li>
             ))}
           </ol>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

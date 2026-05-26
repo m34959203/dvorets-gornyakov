@@ -1639,6 +1639,12 @@ h1, h2, h3, h4 {
 .dg-home .contact-map { border-radius: var(--dg-radius); overflow: hidden; border: 1px solid var(--dg-hair); min-height: 340px; background: var(--dg-bg-2); }
 .dg-home .contact-map iframe { width: 100%; height: 100%; min-height: 340px; border: 0; display: block; filter: grayscale(0.25) contrast(1.05); }
 
+/* Список правил (/rules) */
+.dg-home .rules-list { display: grid; gap: 16px; max-width: 780px; padding: 0; margin: 0; list-style: none; }
+.dg-home .rules-list li { display: flex; gap: 16px; align-items: flex-start; }
+.dg-home .rules-list .num { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 14px; background: rgba(224,122,74,0.14); color: var(--dg-accent); }
+.dg-home .rules-list li > span:last-child { padding-top: 5px; color: var(--dg-text-2); line-height: 1.6; }
+
 /* ─── Detail pages (events/[id], clubs/[id], news/[slug]) ─── */
 .dg-home .detail-title { font-size: clamp(28px, 4vw, 48px); font-weight: 300; text-transform: uppercase; letter-spacing: .02em; line-height: 1.12; color: var(--dg-text); margin: 0; text-wrap: balance; }
 .dg-home .detail-title strong { color: var(--dg-accent); font-weight: 500; }
