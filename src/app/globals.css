@@ -1160,7 +1160,10 @@ h1, h2, h3, h4 {
 .dg-home .section-link {
   font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--dg-accent); display: inline-flex; align-items: center; gap: 8px;
-  border-bottom: 1px solid currentColor; padding-bottom: 4px; font-weight: 500; white-space: nowrap;
+  border-bottom: 1px solid currentColor; padding-bottom: 4px; font-weight: 500;
+  /* nowrap тянул длинную KK-ссылку «Немесе қоңырау шалыңыз: +7…» за вьюпорт на /kk/rent.
+     Разрешаем перенос: flex-item ужимается ниже max-content и текст переносится по словам. */
+  max-width: 100%; flex-wrap: wrap;
 }
 .dg-home .section-link:hover { color: var(--dg-accent-2); }
 .dg-home .section--light .section-link:hover { color: var(--dg-accent-d); }
