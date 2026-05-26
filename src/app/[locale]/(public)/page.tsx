@@ -3,6 +3,7 @@ import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
 import { almatyParts } from "@/lib/utils";
 import { eventImage } from "@/lib/event-image";
+import { localizeVenue, type VenuePair } from "@/lib/venue";
 import DgIcon from "@/components/layout/DgIcon";
 
 export const dynamic = "force-dynamic";
@@ -52,8 +53,12 @@ async function load(locale: Locale) {
       `SELECT * FROM events WHERE status IN ('upcoming','ongoing') AND start_date >= NOW() ORDER BY start_date ASC LIMIT 18`
     )
   );
+  // events.location — свободный текст, локализуем по парам из halls (см. lib/venue.ts)
+  const hallPairs = await safe<VenuePair>(
+    getMany<VenuePair>(`SELECT name_kk AS kk, name_ru AS ru FROM halls`)
+  );
   // Без демо-фолбэка: нет будущих событий → честный empty state, а не показ прошлого.
-  return { events };
+  return { events, hallPairs };
 }
 
 export default async function HomePage({
@@ -65,7 +70,7 @@ export default async function HomePage({
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
-  const { events } = await load(locale);
+  const { events, hallPairs } = await load(locale);
   const titleOf = (e: EventRow) =>
     getLocalizedField(e as unknown as Record<string, unknown>, "title", locale);
 
@@ -197,7 +202,7 @@ export default async function HomePage({
                     </li>
                     <li>
                       <span className="lab"><DgIcon name="pin" size={14} /> {T("Орны", "Место")}</span>
-                      <span className="val">{feature.location}</span>
+                      <span className="val">{localizeVenue(feature.location, locale, hallPairs)}</span>
                     </li>
                     <li>
                       <span className="lab"><DgIcon name="coin" size={14} /> {T("Бағасы", "Стоимость")}</span>

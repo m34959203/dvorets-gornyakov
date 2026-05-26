@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
 import { eventImage } from "@/lib/event-image";
+import { localizeVenue, type VenuePair } from "@/lib/venue";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgEventsCatalog, { type DgEvent } from "@/components/features/DgEventsCatalog";
 
@@ -112,6 +113,15 @@ async function loadEvents(): Promise<EventRow[]> {
   }
 }
 
+// Пары kk↔ru для локализации events.location (свободный текст, не FK на halls).
+async function loadHallPairs(): Promise<VenuePair[]> {
+  try {
+    return await getMany<VenuePair>(`SELECT name_kk AS kk, name_ru AS ru FROM halls`);
+  } catch {
+    return [];
+  }
+}
+
 export default async function EventsPage({
   params,
 }: {
@@ -121,7 +131,7 @@ export default async function EventsPage({
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
-  const events = await loadEvents();
+  const [events, hallPairs] = await Promise.all([loadEvents(), loadHallPairs()]);
   const shortMonths = locale === "kk" ? SHORT_KK : SHORT_RU;
   const longMonths = locale === "kk" ? MONTHS_KK_FULL : MONTHS_RU_FULL;
   const typeMap = locale === "kk" ? TYPE_TO_CAT_KK : TYPE_TO_CAT_RU;
@@ -160,7 +170,7 @@ export default async function EventsPage({
         minute: "2-digit",
         timeZone: "Asia/Almaty",
       }),
-      hall: e.location,
+      hall: localizeVenue(e.location, locale, hallPairs),
       type: typeMap[e.event_type] ?? typeMap.other,
       free: true,
       price: T("Тегін", "Бесплатно"),

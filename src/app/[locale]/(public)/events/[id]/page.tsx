@@ -6,8 +6,9 @@ import {
   getMessages,
   getLocalizedField,
 } from "@/lib/i18n";
-import { getOne } from "@/lib/db";
+import { getOne, getMany } from "@/lib/db";
 import { eventImage } from "@/lib/event-image";
+import { localizeVenue, type VenuePair } from "@/lib/venue";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
 import EventSubscribe from "@/components/features/EventSubscribe";
@@ -208,6 +209,12 @@ export default async function EventDetailPage({
     notFound();
   }
 
+  // events.location — свободный текст, локализуем по парам из halls (см. lib/venue.ts)
+  const hallPairs = await getMany<VenuePair>(
+    `SELECT name_kk AS kk, name_ru AS ru FROM halls`
+  ).catch(() => [] as VenuePair[]);
+  const venue = localizeVenue(event.location, locale, hallPairs);
+
   const title = getLocalizedField(
     event as unknown as Record<string, unknown>,
     "title",
@@ -267,7 +274,7 @@ export default async function EventDetailPage({
                       <DgIcon name="pin" size={16} />
                       {T("Орын / зал", "Место / зал")}
                     </span>
-                    <span className="val">{event.location}</span>
+                    <span className="val">{venue}</span>
                   </li>
                 )}
                 <li>
