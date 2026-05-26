@@ -10,7 +10,9 @@ import { getOne, getMany } from "@/lib/db";
 import { eventImage } from "@/lib/event-image";
 import { localizeVenue, type VenuePair } from "@/lib/venue";
 import { eventJsonLd, siteBase } from "@/lib/jsonld";
+import { buildEventIcs, icsDataUri } from "@/lib/ics";
 import JsonLd from "@/components/JsonLd";
+import ShareRow from "@/components/features/ShareRow";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
 import EventSubscribe from "@/components/features/EventSubscribe";
@@ -236,6 +238,25 @@ export default async function EventDetailPage({
     : null;
   const shortDate = formatShortDate(event.start_date, locale);
   const cover = eventImage(event.image_url, event.event_type);
+  const shareUrl = `${siteBase()}/${locale}/events/${id}`;
+  const ics = buildEventIcs({
+    uid: event.id,
+    title,
+    start: event.start_date,
+    end: event.end_date,
+    location: venue,
+    description,
+    url: shareUrl,
+  });
+
+  // Похожие события — 3 ближайших, кроме текущего
+  const related = await getMany<EventRow>(
+    `SELECT id, title_kk, title_ru, image_url, event_type, start_date
+       FROM events
+      WHERE status IN ('upcoming','ongoing') AND start_date >= NOW() AND id <> $1
+      ORDER BY start_date ASC LIMIT 3`,
+    [event.id]
+  ).catch(() => [] as EventRow[]);
 
   return (
     <div className="dg-home">
@@ -321,8 +342,44 @@ export default async function EventDetailPage({
                   subscribeSuccess: t.subscribeSuccess,
                 }}
               />
+              <a
+                className="dg-btn dg-btn-ghost"
+                href={icsDataUri(ics)}
+                download={`event-${id}.ics`}
+                style={{ marginTop: 18, display: "inline-flex" }}
+              >
+                <DgIcon name="calendar" size={15} /> {T("Күнтізбеге қосу", "Добавить в календарь")}
+              </a>
+              <ShareRow url={shareUrl} title={title} locale={locale} />
             </aside>
           </div>
+
+          {/* Похожие события */}
+          {related.length > 0 && (
+            <div style={{ marginTop: 64 }}>
+              <div className="section-bar" style={{ marginBottom: 28 }}>
+                <div className="tag">— {T("Тағы да", "Ещё события")} —</div>
+                <h2 className="h2">{T("Жақын арадағы іс-шаралар", "Ближайшие мероприятия")}</h2>
+              </div>
+              <div className="posters">
+                {related.map((e) => {
+                  const rt = getLocalizedField(e as unknown as Record<string, unknown>, "title", locale);
+                  return (
+                    <article className="poster" key={e.id}>
+                      <div className="poster-media">
+                        <img src={eventImage(e.image_url, e.event_type)} alt={rt} loading="lazy" />
+                      </div>
+                      <h3 className="poster-title">{rt}</h3>
+                      <p className="poster-meta" style={{ marginTop: 6 }}>{formatShortDate(e.start_date, locale)}</p>
+                      <a href={`/${locale}/events/${e.id}`} className="poster-cta">
+                        {T("Толығырақ", "Подробнее")} <DgIcon name="arrow" size={11} />
+                      </a>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </div>

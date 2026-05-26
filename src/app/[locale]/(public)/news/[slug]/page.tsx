@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
-import { getOne } from "@/lib/db";
+import { getOne, getMany } from "@/lib/db";
 import { localizeNewsCategory } from "@/lib/news-category";
 import { newsArticleJsonLd, siteBase } from "@/lib/jsonld";
 import JsonLd from "@/components/JsonLd";
+import ShareRow from "@/components/features/ShareRow";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
 
@@ -199,6 +200,15 @@ export default async function NewsArticlePage({
   const tagLine = [categoryLabel, dateLabel].filter(Boolean).join(" · ");
 
   const imageUrl = dbRow?.image_url ?? "/photos/dvorets-06.webp";
+  const shareUrl = `${siteBase()}/${locale}/news/${slug}`;
+
+  // Другие новости — 3 свежих, кроме текущей
+  const others = await getMany<{ slug: string; title_kk: string; title_ru: string; image_url: string | null; published_at: string | null }>(
+    `SELECT slug, title_kk, title_ru, image_url, published_at
+       FROM news WHERE status='published' AND slug <> $1
+      ORDER BY published_at DESC NULLS LAST LIMIT 3`,
+    [slug]
+  ).catch(() => [] as Array<{ slug: string; title_kk: string; title_ru: string; image_url: string | null; published_at: string | null }>);
 
   // Detect HTML content (produced by rich-text editor) vs plain text
   const isHtml = content.trimStart().startsWith("<");
@@ -273,7 +283,36 @@ export default async function NewsArticlePage({
                 ))
               )}
             </div>
+            <ShareRow url={shareUrl} title={title} locale={locale} />
           </article>
+
+          {/* Другие новости */}
+          {others.length > 0 && (
+            <div style={{ marginTop: 64 }}>
+              <div className="section-bar" style={{ marginBottom: 28 }}>
+                <div className="tag">— {T("Тағы да", "Ещё")} —</div>
+                <h2 className="h2">{T("Басқа жаңалықтар", "Другие новости")}</h2>
+              </div>
+              <div className="news-grid">
+                {others.map((n) => {
+                  const ot = getLocalizedField(n as unknown as Record<string, unknown>, "title", locale);
+                  return (
+                    <Link key={n.slug} href={`/${locale}/news/${n.slug}`} className="news-item">
+                      <div className="news-media">
+                        <img src={n.image_url ?? "/photos/dvorets-06.webp"} alt={ot} loading="lazy" />
+                      </div>
+                      {n.published_at && (
+                        <p className="news-date">
+                          {new Date(n.published_at).toLocaleDateString(locale === "kk" ? "kk-KZ" : "ru-RU", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Almaty" })}
+                        </p>
+                      )}
+                      <h3 className="news-title">{ot}</h3>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Back link */}
           <div style={{ marginTop: 48 }}>
