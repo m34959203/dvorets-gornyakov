@@ -24,13 +24,6 @@ const MONTHS_RU = ["янв.", "фев.", "мар.", "апр.", "мая", "июн
 const WEEKDAYS_KK = ["Дс", "Сс", "Ср", "Бс", "Жм", "Сб", "Жс"];
 const WEEKDAYS_RU = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
-const COLL_PHOTOS = [
-  "/photos/dvorets-07.webp", "/photos/dvorets-11.webp", "/photos/dvorets-05.webp",
-  "/photos/dvorets-09-1.webp", "/photos/dvorets-04.webp", "/photos/dvorets-03.webp",
-  "/photos/dvorets-13.webp", "/photos/dvorets-08.webp", "/photos/dvorets-10.webp",
-  "/photos/dvorets-06.webp", "/photos/dvorets-02.webp", "/photos/dvorets-12.webp",
-];
-
 function formatDateChip(dateIso: string, locale: Locale) {
   const d = new Date(dateIso);
   const p = almatyParts(d);
@@ -84,19 +77,21 @@ export default async function HomePage({
   const posters = events.slice(1, 9);
 
   // ── Творческие составы ──
-  const collectives: Array<{ name: string; since: string }> = [
-    { name: T("«Арман» халық ансамблі", "Народный ансамбль «Арман»"), since: T("1975 ж.", "С 1975 г.") },
-    { name: T("Хореография", "Хореография"), since: T("1980 ж.", "С 1980 г.") },
-    { name: T("Вокал студиясы", "Вокальная студия"), since: T("1985 ж.", "С 1985 г.") },
-    { name: T("Театр студиясы", "Театральная студия"), since: T("1978 ж.", "С 1978 г.") },
-    { name: T("Қобыз ансамблі", "Кобыз ансамбль"), since: T("1990 ж.", "С 1990 г.") },
-    { name: T("Домбыра ансамблі", "Домбра ансамбль"), since: T("1976 ж.", "С 1976 г.") },
-    { name: T("Халық хоры", "Народный хор"), since: T("1974 ж.", "С 1974 г.") },
-    { name: T("Эстрада студиясы", "Эстрадная студия"), since: T("2000 ж.", "С 2000 г.") },
-    { name: T("Бал билері", "Бальные танцы"), since: T("1995 ж.", "С 1995 г.") },
-    { name: T("Заманауи би", "Современный танец"), since: T("2005 ж.", "С 2005 г.") },
-    { name: T("Көркем сөз студиясы", "Студия художественного слова"), since: T("1982 ж.", "С 1982 г.") },
-    { name: T("Балалар фольклоры", "Детский фольклорный"), since: T("1998 ж.", "С 1998 г.") },
+  // photo — тематическая привязка к набору AI-изображений (НЕ round-robin):
+  // 07 концерт · 11 танцы · 05 вокал · 09-1 театр · 04 домбра/конкурс · 03 Наурыз/фольклор
+  const collectives: Array<{ name: string; since: string; photo: string }> = [
+    { name: T("«Арман» халық ансамблі", "Народный ансамбль «Арман»"), since: T("1975 ж.", "С 1975 г."), photo: "/photos/dvorets-07.webp" },
+    { name: T("Хореография", "Хореография"), since: T("1980 ж.", "С 1980 г."), photo: "/photos/dvorets-11.webp" },
+    { name: T("Вокал студиясы", "Вокальная студия"), since: T("1985 ж.", "С 1985 г."), photo: "/photos/dvorets-05.webp" },
+    { name: T("Театр студиясы", "Театральная студия"), since: T("1978 ж.", "С 1978 г."), photo: "/photos/dvorets-09-1.webp" },
+    { name: T("Қобыз ансамблі", "Кобыз ансамбль"), since: T("1990 ж.", "С 1990 г."), photo: "/photos/dvorets-04.webp" },
+    { name: T("Домбыра ансамблі", "Домбра ансамбль"), since: T("1976 ж.", "С 1976 г."), photo: "/photos/dvorets-03.webp" },
+    { name: T("Халық хоры", "Народный хор"), since: T("1974 ж.", "С 1974 г."), photo: "/photos/dvorets-05.webp" },
+    { name: T("Эстрада студиясы", "Эстрадная студия"), since: T("2000 ж.", "С 2000 г."), photo: "/photos/dvorets-07.webp" },
+    { name: T("Бал билері", "Бальные танцы"), since: T("1995 ж.", "С 1995 г."), photo: "/photos/dvorets-11.webp" },
+    { name: T("Заманауи би", "Современный танец"), since: T("2005 ж.", "С 2005 г."), photo: "/photos/dvorets-11.webp" },
+    { name: T("Көркем сөз студиясы", "Студия художественного слова"), since: T("1982 ж.", "С 1982 г."), photo: "/photos/dvorets-09-1.webp" },
+    { name: T("Балалар фольклоры", "Детский фольклорный"), since: T("1998 ж.", "С 1998 г."), photo: "/photos/dvorets-03.webp" },
   ];
 
   const circles = [
@@ -262,10 +257,10 @@ export default async function HomePage({
         <div className="dg-wrap">
           <div className="coll-strip-wrap">
             <div className="coll-strip">
-              {collectives.map((c, i) => (
+              {collectives.map((c) => (
                 <Link href={`/${locale}/clubs`} className="coll-card" key={c.name}>
                   <div className="coll-card-media">
-                    <img src={COLL_PHOTOS[i % COLL_PHOTOS.length]} alt={c.name} />
+                    <img src={c.photo} alt={c.name} />
                   </div>
                   <div className="name">{c.name}</div>
                   <div className="since">{c.since}</div>
