@@ -1125,6 +1125,12 @@ h1, h2, h3, h4 {
 /* KK-заголовок длиннее RU и лез в 4-5 строк на мобильном. Меньший floor (22px)
    только для KK — /ru остаётся на исходных 28px (без регресса числа строк). */
 .dg-home .hero-h1--kk { font-size: clamp(22px, 4.8vw, 64px); }
+/* Бизнес-CTA в hero (афиша + аренда), центрируются под заголовком */
+.dg-home .hero-cta { display: flex; gap: 14px; margin-top: 36px; flex-wrap: wrap; justify-content: center; }
+@media (max-width: 420px) {
+  .dg-home .hero-cta { width: 100%; }
+  .dg-home .hero-cta .dg-btn { flex: 1 1 auto; justify-content: center; }
+}
 .dg-home .hero-h1 strong { font-weight: 500; color: var(--dg-accent); }
 .dg-home .hero-scroll {
   position: absolute; left: 50%; bottom: 36px; transform: translateX(-50%);
@@ -1629,6 +1635,9 @@ h1, h2, h3, h4 {
 .dg-home .contact-row .lab { font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--dg-text-3); }
 .dg-home .contact-row .val { color: var(--dg-text); margin-top: 4px; }
 .dg-home .contact-row .val a:hover { color: var(--dg-accent); }
+/* Карта в блоке контактов на главной */
+.dg-home .contact-map { border-radius: var(--dg-radius); overflow: hidden; border: 1px solid var(--dg-hair); min-height: 340px; background: var(--dg-bg-2); }
+.dg-home .contact-map iframe { width: 100%; height: 100%; min-height: 340px; border: 0; display: block; filter: grayscale(0.25) contrast(1.05); }
 
 /* ─── Detail pages (events/[id], clubs/[id], news/[slug]) ─── */
 .dg-home .detail-title { font-size: clamp(28px, 4vw, 48px); font-weight: 300; text-transform: uppercase; letter-spacing: .02em; line-height: 1.12; color: var(--dg-text); margin: 0; text-wrap: balance; }

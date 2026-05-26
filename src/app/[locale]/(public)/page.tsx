@@ -20,10 +20,37 @@ interface EventRow {
   location: string;
 }
 
+interface NewsRow {
+  id: string;
+  slug: string;
+  title_kk: string;
+  title_ru: string;
+  excerpt_kk: string;
+  excerpt_ru: string;
+  image_url: string | null;
+  published_at: string | null;
+}
+
+interface HallRow {
+  slug: string;
+  name_kk: string;
+  name_ru: string;
+  capacity: number;
+  description_kk: string;
+  description_ru: string;
+}
+
 const MONTHS_KK = ["қаң.", "ақп.", "нау.", "сәу.", "мам.", "мау.", "шіл.", "там.", "қыр.", "қаз.", "қар.", "жел."];
 const MONTHS_RU = ["янв.", "фев.", "мар.", "апр.", "мая", "июн.", "июл.", "авг.", "сен.", "окт.", "ноя.", "дек."];
 const WEEKDAYS_KK = ["Дс", "Сс", "Ср", "Бс", "Жм", "Сб", "Жс"];
 const WEEKDAYS_RU = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+
+// Залы → тематическая обложка (см. sql/023, halls.photos): grand=08, chamber=10, rehearsal=12.
+const HALL_PHOTO: Record<string, string> = {
+  grand: "/photos/dvorets-08.webp",
+  chamber: "/photos/dvorets-10.webp",
+  rehearsal: "/photos/dvorets-12.webp",
+};
 
 function formatDateChip(dateIso: string, locale: Locale) {
   const d = new Date(dateIso);
@@ -40,6 +67,16 @@ function formatDateChip(dateIso: string, locale: Locale) {
   };
 }
 
+function formatNewsDate(iso: string | null, locale: Locale): string {
+  if (!iso) return "";
+  return new Date(iso).toLocaleDateString(locale === "kk" ? "kk-KZ" : "ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Almaty",
+  });
+}
+
 async function load(locale: Locale) {
   async function safe<T>(q: Promise<T[]>): Promise<T[]> {
     try {
@@ -50,15 +87,31 @@ async function load(locale: Locale) {
   }
   const events = await safe<EventRow>(
     getMany<EventRow>(
-      `SELECT * FROM events WHERE status IN ('upcoming','ongoing') AND start_date >= NOW() ORDER BY start_date ASC LIMIT 18`
+      `SELECT * FROM events WHERE status IN ('upcoming','ongoing') AND start_date >= NOW() ORDER BY start_date ASC LIMIT 12`
     )
   );
   // events.location — свободный текст, локализуем по парам из halls (см. lib/venue.ts)
   const hallPairs = await safe<VenuePair>(
     getMany<VenuePair>(`SELECT name_kk AS kk, name_ru AS ru FROM halls`)
   );
+  const news = await safe<NewsRow>(
+    getMany<NewsRow>(
+      `SELECT id, slug, title_kk, title_ru,
+              COALESCE(excerpt_kk,'') AS excerpt_kk, COALESCE(excerpt_ru,'') AS excerpt_ru,
+              image_url, published_at
+         FROM news WHERE status='published'
+        ORDER BY published_at DESC NULLS LAST LIMIT 3`
+    )
+  );
+  const halls = await safe<HallRow>(
+    getMany<HallRow>(
+      `SELECT slug, name_kk, name_ru, capacity,
+              COALESCE(description_kk,'') AS description_kk, COALESCE(description_ru,'') AS description_ru
+         FROM halls WHERE is_active = true ORDER BY sort_order LIMIT 3`
+    )
+  );
   // Без демо-фолбэка: нет будущих событий → честный empty state, а не показ прошлого.
-  return { events, hallPairs };
+  return { events, hallPairs, news, halls };
 }
 
 export default async function HomePage({
@@ -70,20 +123,18 @@ export default async function HomePage({
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
-  const { events, hallPairs } = await load(locale);
+  const { events, hallPairs, news, halls } = await load(locale);
   const titleOf = (e: EventRow) =>
     getLocalizedField(e as unknown as Record<string, unknown>, "title", locale);
 
-  // ── Featured (первое событие) + сетка афиш (следующие 8) ──
-  // Вариант A: главная ведёт постер-галереей, без календаря (он живёт на /events).
+  // ── Афиша: featured (главное событие) + 3 ближайших (полная афиша — на /events) ──
   const feature = events[0];
   const featureChip = feature ? formatDateChip(feature.start_date, locale) : null;
   const featureParts = feature ? almatyParts(feature.start_date) : null;
-  const posters = events.slice(1, 9);
+  const posters = events.slice(1, 4);
 
-  // ── Творческие составы ──
-  // photo — тематическая привязка к набору AI-изображений (НЕ round-robin):
-  // 07 концерт · 11 танцы · 05 вокал · 09-1 театр · 04 домбра/конкурс · 03 Наурыз/фольклор
+  // ── Творческие составы: на главной 6 из 22 (полный список на /clubs) ──
+  // photo — тематическая привязка к набору AI-изображений (НЕ round-robin).
   const collectives: Array<{ name: string; since: string; photo: string }> = [
     { name: T("«Арман» халық ансамблі", "Народный ансамбль «Арман»"), since: T("1975 ж.", "С 1975 г."), photo: "/photos/dvorets-07.webp" },
     { name: T("Хореография", "Хореография"), since: T("1980 ж.", "С 1980 г."), photo: "/photos/dvorets-11.webp" },
@@ -91,12 +142,6 @@ export default async function HomePage({
     { name: T("Театр студиясы", "Театральная студия"), since: T("1978 ж.", "С 1978 г."), photo: "/photos/dvorets-09-1.webp" },
     { name: T("Қобыз ансамблі", "Кобыз ансамбль"), since: T("1990 ж.", "С 1990 г."), photo: "/photos/dvorets-04.webp" },
     { name: T("Домбыра ансамблі", "Домбра ансамбль"), since: T("1976 ж.", "С 1976 г."), photo: "/photos/dvorets-03.webp" },
-    { name: T("Халық хоры", "Народный хор"), since: T("1974 ж.", "С 1974 г."), photo: "/photos/dvorets-05.webp" },
-    { name: T("Эстрада студиясы", "Эстрадная студия"), since: T("2000 ж.", "С 2000 г."), photo: "/photos/dvorets-07.webp" },
-    { name: T("Бал билері", "Бальные танцы"), since: T("1995 ж.", "С 1995 г."), photo: "/photos/dvorets-11.webp" },
-    { name: T("Заманауи би", "Современный танец"), since: T("2005 ж.", "С 2005 г."), photo: "/photos/dvorets-11.webp" },
-    { name: T("Көркем сөз студиясы", "Студия художественного слова"), since: T("1982 ж.", "С 1982 г."), photo: "/photos/dvorets-09-1.webp" },
-    { name: T("Балалар фольклоры", "Детский фольклорный"), since: T("1998 ж.", "С 1998 г."), photo: "/photos/dvorets-03.webp" },
   ];
 
   const circles = [
@@ -123,9 +168,15 @@ export default async function HomePage({
     return `${parseInt(c.d, 10)} ${(locale === "kk" ? MONTHS_KK : MONTHS_RU)[p.month]} ${p.year}, ${c.time}`;
   };
 
+  // Google Maps embed по адресу (без API-ключа). CSP в проде не ограничивает frame-src.
+  const mapSrc =
+    "https://maps.google.com/maps?q=" +
+    encodeURIComponent("Сатпаев, проспект К.И. Сатпаева 106") +
+    "&z=16&output=embed";
+
   return (
     <div className="dg-home">
-      <a href="#arman" className="dg-skip-link">{T("Мазмұнға өту", "Перейти к содержимому")}</a>
+      <a href="#afisha" className="dg-skip-link">{T("Мазмұнға өту", "Перейти к содержимому")}</a>
 
       {/* ═══ Hero ═══ */}
       <section className="hero" id="home">
@@ -145,8 +196,16 @@ export default async function HomePage({
               </>
             )}
           </h1>
+          <div className="hero-cta">
+            <Link href={`/${locale}/events`} className="dg-btn">
+              <DgIcon name="calendar" size={16} /> {T("Афиша", "Афиша")}
+            </Link>
+            <Link href={`/${locale}/rent`} className="dg-btn dg-btn-ghost">
+              <DgIcon name="pin" size={16} /> {T("Зал жалға алу", "Аренда залов")}
+            </Link>
+          </div>
         </div>
-        <a href="#arman" className="hero-scroll" aria-label={T("Төмен айналдыру", "Прокрутить вниз")}>
+        <a href="#afisha" className="hero-scroll" aria-label={T("Төмен айналдыру", "Прокрутить вниз")}>
           <div className="hero-mouse" />
           <span>{T("Айналдыру", "Прокрутить")}</span>
         </a>
@@ -170,22 +229,21 @@ export default async function HomePage({
         </section>
       )}
 
-      {/* ═══ Featured «Арман» (светлая) ═══ */}
+      {/* ═══ Главное событие — featured (светлая) ═══ */}
       {feature && featureChip && (
-        <section className="section section--light" id="arman">
+        <section className="section section--light" id="afisha">
           <div className="dg-wrap">
             <div className="section-head">
               <div className="section-bar">
-                <div className="tag">— {T("Халық ансамблі", "Народный ансамбль")} —</div>
-                <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Алдағы <strong>«Арман»</strong> іс-шаралары", "Предстоящие мероприятия <strong>«Арман»</strong>") }} />
+                <div className="tag">— {T("Басты оқиға", "Главное событие")} —</div>
+                <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Маусымның <strong>басты</strong> оқиғасы", "Главное <strong>событие</strong> сезона") }} />
               </div>
               <Link href={`/${locale}/events`} className="section-link">
-                {T("Барлық афиша", "Все афиши")} <DgIcon name="arrow" size={12} />
+                {T("Барлық афиша", "Вся афиша")} <DgIcon name="arrow" size={12} />
               </Link>
             </div>
 
             <div className="feature-wrap">
-              <button className="feature-side-arrow l" aria-label={T("Артқа", "Назад")}><DgIcon name="chev-l" size={18} /></button>
               <div className="feature">
                 <div className="feature-media">
                   <img src={eventImage(feature.image_url, feature.event_type)} alt={titleOf(feature)} />
@@ -212,23 +270,22 @@ export default async function HomePage({
                   </Link>
                 </div>
               </div>
-              <button className="feature-side-arrow r" aria-label={T("Алға", "Вперёд")}><DgIcon name="chev-r" size={18} /></button>
             </div>
           </div>
         </section>
       )}
 
-      {/* ═══ Сетка афиш (светлая) ═══ */}
+      {/* ═══ Афиша — ближайшие события (светлая) ═══ */}
       {posters.length > 0 && (
-        <section className="section section--light" id="afisha">
+        <section className="section section--light" id="upcoming">
           <div className="dg-wrap">
             <div className="section-head">
               <div className="section-bar">
                 <div className="tag">— {T("Афиша", "Афиша")} —</div>
-                <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("<strong>Тау-кеншілер сарайының</strong> концерт залындағы іс-шаралар", "Предстоящие мероприятия в концертном зале <strong>Дворца горняков</strong>") }} />
+                <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Жақын арадағы <strong>іс-шаралар</strong>", "Ближайшие <strong>мероприятия</strong>") }} />
               </div>
               <Link href={`/${locale}/events`} className="section-link">
-                {T("Барлық афиша", "Все афиши")} <DgIcon name="arrow" size={12} />
+                {T("Барлық афиша", "Вся афиша")} <DgIcon name="arrow" size={12} />
               </Link>
             </div>
 
@@ -253,7 +310,7 @@ export default async function HomePage({
         </section>
       )}
 
-      {/* ═══ Творческие составы (светлая) ═══ */}
+      {/* ═══ Творческие составы — 6 из 22 (светлая) ═══ */}
       <section className="section section--light" id="creative">
         <div className="dg-wrap">
           <div className="section-head">
@@ -281,13 +338,6 @@ export default async function HomePage({
               ))}
             </div>
           </div>
-          <div className="coll-progress">
-            <div className="coll-count" dangerouslySetInnerHTML={{ __html: T("<strong>12</strong> / <strong>22</strong> көрсетілді", "Показано <strong>12</strong> из <strong>22</strong>") }} />
-            <div className="sched-arrows">
-              <button className="arrow-btn" aria-label={T("Артқа", "Назад")}><DgIcon name="chev-l" size={16} /></button>
-              <button className="arrow-btn" aria-label={T("Алға", "Вперёд")}><DgIcon name="chev-r" size={16} /></button>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -312,14 +362,51 @@ export default async function HomePage({
               </Link>
             ))}
           </div>
-
-          <div className="circles-cta">
-            <Link href={`/${locale}/clubs`} className="section-link">
-              {T("Барлық үйірме", "Все кружки")} <DgIcon name="arrow" size={12} />
-            </Link>
-          </div>
         </div>
       </section>
+
+      {/* ═══ Аренда залов — teaser (светлая) ═══ */}
+      {halls.length > 0 && (
+        <section className="section section--light" id="rent">
+          <div className="dg-wrap">
+            <div className="section-head">
+              <div className="section-bar">
+                <div className="tag">— {T("Залдарды жалға алу", "Аренда залов")} —</div>
+                <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Іс-шараңызға арналған <strong>залдар</strong>", "Залы для <strong>вашего события</strong>") }} />
+              </div>
+              <Link href={`/${locale}/rent`} className="section-link">
+                {T("Барлық зал", "Все залы")} <DgIcon name="arrow" size={12} />
+              </Link>
+            </div>
+
+            <div className="halls-grid">
+              {halls.map((h) => {
+                const name = getLocalizedField(h as unknown as Record<string, unknown>, "name", locale);
+                const desc = getLocalizedField(h as unknown as Record<string, unknown>, "description", locale);
+                return (
+                  <Link key={h.slug} href={`/${locale}/rent/${h.slug}`} className="hall">
+                    <div className="hall-media">
+                      <img src={HALL_PHOTO[h.slug] ?? "/photos/dvorets-08.webp"} alt={name} loading="lazy" />
+                    </div>
+                    <div className="hall-body">
+                      <h3 className="hall-title">{name}</h3>
+                      <div className="hall-seats">
+                        <DgIcon name="users" size={14} /> {h.capacity} {T("орын", "мест")}
+                      </div>
+                      {desc && <p className="hall-desc">{desc}</p>}
+                      <div className="hall-foot">
+                        <span className="section-link">
+                          {T("Толығырақ", "Подробнее")} <DgIcon name="arrow" size={12} />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ═══ О дворце (светлая) ═══ */}
       <section className="section section--light" id="about">
@@ -362,16 +449,98 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* ═══ Brand wall (тёмная) ═══ */}
-      <section className="brand-wall" aria-label="Дворец горняков · Сатпаев">
-        <img className="hero-photo" src="/hero/hero.jpg" alt="" />
-        <div className="hero-vignette" aria-hidden="true" />
-        <div className="brand-wall-inner">
-          <div className="brand-wall-eq" aria-hidden="true">
-            <span /><span /><span /><span /><span /><span /><span /><span />
+      {/* ═══ Новости (светлая) — только если есть опубликованные ═══ */}
+      {news.length > 0 && (
+        <section className="section section--light" id="news">
+          <div className="dg-wrap">
+            <div className="section-head">
+              <div className="section-bar">
+                <div className="tag">— {T("Жаңалықтар", "Новости")} —</div>
+                <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Сарайдың <strong>соңғы</strong> жаңалықтары", "Последние <strong>новости</strong> Дворца") }} />
+              </div>
+              <Link href={`/${locale}/news`} className="section-link">
+                {T("Барлық жаңалық", "Все новости")} <DgIcon name="arrow" size={12} />
+              </Link>
+            </div>
+
+            <div className="news-grid">
+              {news.map((n) => {
+                const title = getLocalizedField(n as unknown as Record<string, unknown>, "title", locale);
+                const excerpt = getLocalizedField(n as unknown as Record<string, unknown>, "excerpt", locale);
+                return (
+                  <Link key={n.id} href={`/${locale}/news/${n.slug}`} className="news-item">
+                    <div className="news-media">
+                      <img src={n.image_url ?? "/photos/dvorets-01.webp"} alt={title} loading="lazy" />
+                    </div>
+                    <p className="news-date">{formatNewsDate(n.published_at, locale)}</p>
+                    <h3 className="news-title">{title}</h3>
+                    {excerpt && <p className="news-excerpt">{excerpt}</p>}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-          <h2 className="brand-wall-name">Dvorets Gornyakov</h2>
-          <div className="brand-wall-sub">{T("Сәтбаев · Тау-кеншілер сарайы", "Сатпаев · Дворец горняков")}</div>
+        </section>
+      )}
+
+      {/* ═══ Контакты + карта (тёмная, закрывающая) ═══ */}
+      <section className="section" id="contacts">
+        <div className="dg-wrap">
+          <div className="section-head">
+            <div className="section-bar">
+              <div className="tag">— {T("Байланыс", "Контакты")} —</div>
+              <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Бізді <strong>қалай табуға</strong> болады", "Как нас <strong>найти</strong>") }} />
+            </div>
+            <Link href={`/${locale}/about#contacts`} className="section-link">
+              {T("Толық байланыс", "Все контакты")} <DgIcon name="arrow" size={12} />
+            </Link>
+          </div>
+
+          <div className="contact-grid" style={{ marginTop: 32 }}>
+            <div className="contact-list">
+              <div className="contact-row">
+                <DgIcon name="pin" size={20} />
+                <div>
+                  <div className="lab">{T("Мекенжай", "Адрес")}</div>
+                  <div className="val">
+                    {T("К.И. Сәтбаев даңғылы, 106", "Проспект К.И. Сатпаева, 106")}
+                    <br />
+                    {T("101300, Сәтбаев қ., Қазақстан", "101300, г. Сатпаев, Казахстан")}
+                  </div>
+                </div>
+              </div>
+              <div className="contact-row">
+                <DgIcon name="phone" size={20} />
+                <div>
+                  <div className="lab">{T("Телефон", "Телефон")}</div>
+                  <div className="val">
+                    <a href="tel:+77106362330">+7 (71063) 6-23-30</a>
+                    <span style={{ opacity: 0.55, marginLeft: 8 }}>— {T("қабылдау", "приёмная")}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="contact-row">
+                <DgIcon name="clock" size={20} />
+                <div>
+                  <div className="lab">{T("Жұмыс уақыты", "Часы работы")}</div>
+                  <div className="val">
+                    {T("Дс–Жм: 09:00–18:00", "Пн–Пт: 09:00–18:00")}
+                    <br />
+                    {T("Сн–Жс: 10:00–17:00", "Сб–Вс: 10:00–17:00")}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="contact-map">
+              <iframe
+                src={mapSrc}
+                title={T("Картадағы орналасуы", "Расположение на карте")}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          </div>
         </div>
       </section>
     </div>
