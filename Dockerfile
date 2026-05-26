@@ -14,6 +14,11 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+# NEXT_PUBLIC_* пекутся на этапе build. URL приходит build-arg'ом из docker-compose
+# (значение — живой публичный URL). Выставляем в ENV ДО build, чтобы Next взял его,
+# а не fallback. Дефолт — канонический домен, чтобы no-arg build не дал localhost.
+ARG NEXT_PUBLIC_APP_URL=https://dvorets-gornyakov.kz
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 RUN npm run build
 
 # Production image

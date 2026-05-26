@@ -1,6 +1,10 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        # Запекается в og:image/metadataBase. Берётся из host .env (живой публичный URL).
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://dvorets-gornyakov.kz}
     restart: unless-stopped
     ports:
       - "3000:3000"
