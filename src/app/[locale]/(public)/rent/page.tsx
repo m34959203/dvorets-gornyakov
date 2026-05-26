@@ -90,7 +90,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    openGraph: { title, description },
+    openGraph: { title, description, type: "website", images: [{ url: "/photos/og-cover.jpg", width: 1200, height: 630 }] },
     alternates: {
       canonical: `${baseUrl}/${locale}/rent`,
       languages: { kk: `${baseUrl}/kk/rent`, ru: `${baseUrl}/ru/rent` },

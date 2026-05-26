@@ -51,7 +51,7 @@ export default function HeaderClient({ locale, navItems }: HeaderClientProps) {
 
   return (
     <>
-      <nav className="dg-nav" aria-label="Основная навигация" ref={navRef}>
+      <nav className="dg-nav" aria-label={locale === "kk" ? "Негізгі навигация" : "Основная навигация"} ref={navRef}>
         {navItems.map((n) =>
           n.children && n.children.length > 0 ? (
             <div className="dg-nav-dd" key={n.id}>
@@ -133,7 +133,7 @@ export default function HeaderClient({ locale, navItems }: HeaderClientProps) {
         <button
           className="dg-icon-btn menu"
           onClick={() => setDrawer((d) => !d)}
-          aria-label="Меню"
+          aria-label={locale === "kk" ? "Мәзір" : "Меню"}
           aria-expanded={drawer}
         >
           <DgIcon name={drawer ? "close" : "menu"} size={18} />

@@ -363,7 +363,7 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
               {filtered.map((e) => (
                 <article className="poster" key={e.id}>
                   <div className="poster-media">
-                    <img src={e.image} alt={e.title} />
+                    <img src={e.image} alt={e.title} loading="lazy" />
                     {e.tag && <div className="poster-tag">{e.tag}</div>}
                   </div>
                   <h3 className="poster-title">{e.title}</h3>
