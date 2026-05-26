@@ -1017,6 +1017,16 @@ h1, h2, h3, h4 {
 @media (max-width: 768px) {
   .dg-brand { min-height: 44px; }
   .dg-lang-trigger { min-height: 44px; padding: 10px 12px; }
+  .dg-icon-btn { width: 44px; height: 44px; }
+}
+/* Узкие телефоны (Android 360): бренд nowrap + header-right не влезали в 320px →
+   горизонтальный скролл всего документа и бургер за вьюпортом. Ужимаем gap/паддинги. */
+@media (max-width: 420px) {
+  .dg-header-inner { gap: 10px; }
+  .dg-header-right { gap: 6px; }
+  .dg-lang-trigger { padding: 10px 6px; letter-spacing: .08em; gap: 4px; }
+  .dg-brand { gap: 10px; }
+  .dg-brand-name { font-size: 12px; letter-spacing: .08em; }
 }
 
 /* ═════════════ Drawer (mobile nav) ═════════════ */
@@ -1342,6 +1352,8 @@ h1, h2, h3, h4 {
 
 /* ═════════════ Footer ═════════════ */
 .dg-footer { background: var(--dg-bg); border-top: 1px solid var(--dg-hair); padding-block: 60px 28px; color: var(--dg-text); font-family: var(--dg-font); font-weight: 300; }
+/* Резерв под плавающий chat-FAB (48px + отступ): иначе перекрывал нижние ссылки футера */
+@media (max-width: 768px) { .dg-footer { padding-bottom: 76px; } }
 .dg-footer-top { display: grid; grid-template-columns: 1.4fr 1fr 1.2fr 1fr; gap: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--dg-hair); }
 @media (max-width: 960px) { .dg-footer-top { grid-template-columns: 1fr 1fr; gap: 32px; } }
 @media (max-width: 520px) { .dg-footer-top { grid-template-columns: 1fr; } }
@@ -1386,6 +1398,12 @@ h1, h2, h3, h4 {
 .dg-home .dg-view {
   display: inline-flex; gap: 2px; background: var(--dg-bg-3);
   border: 1px solid var(--dg-hair); border-radius: 999px; padding: 3px; margin: 10px 0 2px;
+  max-width: 100%; overflow-x: auto; scrollbar-width: none;
+}
+.dg-home .dg-view::-webkit-scrollbar { display: none; }
+/* На ≤360 «Список·Сетка·Лента» (343px) вылезал за вьюпорт → ужимаем кнопки */
+@media (max-width: 420px) {
+  .dg-home .dg-view-btn { padding: 8px 10px; letter-spacing: .06em; }
 }
 .dg-home .dg-view-btn {
   background: transparent; border: 0; color: var(--dg-text-2); cursor: pointer;

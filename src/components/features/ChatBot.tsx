@@ -132,7 +132,7 @@ export default function ChatBot({ locale, messages: t }: ChatBotProps) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all",
+          "fixed bottom-4 right-4 w-12 h-12 sm:bottom-6 sm:right-6 sm:w-14 sm:h-14 z-50 rounded-full shadow-lg flex items-center justify-center transition-all",
           isOpen ? "bg-gray-600 rotate-90" : "bg-[#E07A4A] hover:bg-[#ec8a5a] chatbot-bubble"
         )}
         aria-label={locale === "kk" ? "Чат-көмекші" : "Чат-помощник"}
