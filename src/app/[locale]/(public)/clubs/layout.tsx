@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { isValidLocale, type Locale } from "@/lib/i18n";
 
 const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
-const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
+const SITE_NAME_RU = "Дворец горняков им. Ш. Дильдебаева";
 
 function getBaseUrl(): string {
   const env = process.env.NEXT_PUBLIC_APP_URL;

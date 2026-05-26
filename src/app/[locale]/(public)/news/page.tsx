@@ -7,7 +7,7 @@ import DgPageHero from "@/components/layout/DgPageHero";
 export const dynamic = "force-dynamic";
 
 const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
-const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
+const SITE_NAME_RU = "Дворец горняков им. Ш. Дильдебаева";
 
 const FALLBACK_PHOTOS = [
   "/photos/dvorets-02.webp",
@@ -35,7 +35,7 @@ export async function generateMetadata({
   const description =
     locale === "kk"
       ? "Ш. Ділдебаев атындағы тау-кенші сарайының соңғы жаңалықтары, хабарландырулары мен іс-шаралары."
-      : "Последние новости, анонсы и события Дворца горняков им. Ш. Дільдебаева.";
+      : "Последние новости, анонсы и события Дворца горняков им. Ш. Дильдебаева.";
   const baseUrl = getBaseUrl();
   const canonical = `${baseUrl}/${locale}/news`;
   return {

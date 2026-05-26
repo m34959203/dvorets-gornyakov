@@ -10,7 +10,7 @@ import EnrollmentForm from "@/components/features/EnrollmentForm";
 export const dynamic = "force-dynamic";
 
 const SITE_NAME_KK = "Ш. Ділдебаев атындағы тау-кенші сарайы";
-const SITE_NAME_RU = "Дворец горняков им. Ш. Дільдебаева";
+const SITE_NAME_RU = "Дворец горняков им. Ш. Дильдебаева";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

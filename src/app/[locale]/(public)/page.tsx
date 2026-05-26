@@ -293,7 +293,7 @@ export default async function HomePage({
               {posters.map((e) => (
                 <article className="poster" key={e.id}>
                   <div className="poster-media">
-                    <img src={eventImage(e.image_url, e.event_type)} alt={titleOf(e)} />
+                    <img src={eventImage(e.image_url, e.event_type)} alt={titleOf(e)} loading="lazy" />
                   </div>
                   <h3 className="poster-title">{titleOf(e)}</h3>
                   <ul className="poster-meta">
@@ -330,7 +330,7 @@ export default async function HomePage({
               {collectives.map((c) => (
                 <Link href={`/${locale}/clubs`} className="coll-card" key={c.name}>
                   <div className="coll-card-media">
-                    <img src={c.photo} alt={c.name} />
+                    <img src={c.photo} alt={c.name} loading="lazy" />
                   </div>
                   <div className="name">{c.name}</div>
                   <div className="since">{c.since}</div>
@@ -413,7 +413,7 @@ export default async function HomePage({
         <div className="dg-wrap">
           <div className="about-grid">
             <div className="about-photo">
-              <img src="/photos/og-cover.jpg" alt={T("Тау-кеншілер сарайының ғимараты", "Здание Дворца горняков")} />
+              <img src="/photos/og-cover.jpg" alt={T("Тау-кеншілер сарайының ғимараты", "Здание Дворца горняков")} loading="lazy" />
               <div className="about-photo-tag">{T("Сәтбаев · 1974", "Сатпаев · 1974")}</div>
             </div>
 
@@ -423,7 +423,7 @@ export default async function HomePage({
                 <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Ұлытаудың <strong>басты</strong> мәдени үйі", "<strong>Главный</strong> культурный дом Улытау") }} />
               </div>
               <p style={{ marginTop: 28 }}>
-                <strong>{T("Ш. Дільдебаев атындағы Тау-кеншілер сарайы", "Дворец горняков им. Ш. Дильдебаева")}</strong>
+                <strong>{T("Ш. Ділдебаев атындағы Тау-кеншілер сарайы", "Дворец горняков им. Ш. Дильдебаева")}</strong>
                 {T(
                   " — Ұлытау өңірінің басты мәдени институты. 1974 жылы «Байқоңыр» кинотеатры ретінде ашылды. 2000 жылы күрделі жөндеуден кейін Тау-кеншілер сарайы болып аталды. 2019 жылдан бері — Ұлытау облысы мәдениет басқармасының КГКП.",
                   " — главный культурный институт Улытауского региона. Открыт в 1974 году как кинотеатр «Байконыр». В 2000-м после капитального ремонта переименован во Дворец горняков. С 2019-го — КГКП управления культуры области Улытау."
