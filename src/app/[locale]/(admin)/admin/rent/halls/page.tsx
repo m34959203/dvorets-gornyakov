@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import AdminOnly from "@/components/admin/AdminOnly";
 import { toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 import { toast } from "sonner";
@@ -93,9 +94,9 @@ export default function AdminHallsListPage() {
                           className="mr-3 text-primary hover:underline">
                       {locale === "kk" ? "Өңдеу" : "Править"}
                     </Link>
-                    <button onClick={() => remove(h.id)} className="text-red-600 hover:underline">
+<AdminOnly>                    <button onClick={() => remove(h.id)} className="text-red-600 hover:underline">
                       {locale === "kk" ? "Жою" : "Удалить"}
-                    </button>
+                    </button></AdminOnly>
                   </td>
                 </tr>
               ))

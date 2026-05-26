@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import AdminOnly from "@/components/admin/AdminOnly";
 import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 
@@ -232,12 +233,12 @@ export default function SchedulerPage() {
                       </button>
                     )}
                     {(j.status === "pending" || j.status === "failed") && (
-                      <button
+<AdminOnly>                      <button
                         onClick={() => onCancel(j.id)}
                         className="rounded-md bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100"
                       >
                         {T("Жою", "Удалить")}
-                      </button>
+                      </button></AdminOnly>
                     )}
                   </td>
                 </tr>

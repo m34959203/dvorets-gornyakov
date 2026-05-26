@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import AdminOnly from "@/components/admin/AdminOnly";
 import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 import { toast } from "sonner";
@@ -296,12 +297,12 @@ export default function AdminEnrollmentsPage() {
             </div>
 
             <div className="mt-6 border-t border-gray-100 pt-4">
-              <button
+<AdminOnly>              <button
                 onClick={handleDelete}
                 className="rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
               >
                 {locale === "kk" ? "Жою" : "Удалить"}
-              </button>
+              </button></AdminOnly>
             </div>
           </div>
         </div>

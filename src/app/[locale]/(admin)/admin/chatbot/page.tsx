@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import AdminOnly from "@/components/admin/AdminOnly";
 import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 import Button from "@/components/ui/Button";
@@ -227,12 +228,12 @@ export default function AdminChatbotPage() {
                       >
                         {locale === "kk" ? "Өңдеу" : "Изменить"}
                       </button>
-                      <button
+<AdminOnly>                      <button
                         onClick={() => remove(it)}
                         className="text-sm text-red-600 hover:underline"
                       >
                         {locale === "kk" ? "Жою" : "Удалить"}
-                      </button>
+                      </button></AdminOnly>
                     </div>
                   </td>
                 </tr>

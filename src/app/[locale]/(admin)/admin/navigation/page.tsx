@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import AdminOnly from "@/components/admin/AdminOnly";
 import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 import { toast } from "sonner";
@@ -501,13 +502,13 @@ export default function AdminNavigationPage() {
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <div>
                 {editing && (
-                  <button
+<AdminOnly>                  <button
                     type="button"
                     onClick={() => onDelete(editing)}
                     className="rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
                   >
                     {locale === "kk" ? "Жою" : "Удалить"}
-                  </button>
+                  </button></AdminOnly>
                 )}
               </div>
               <div className="flex gap-2">

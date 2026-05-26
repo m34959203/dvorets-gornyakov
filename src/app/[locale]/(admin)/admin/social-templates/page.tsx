@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { isValidLocale, type Locale } from "@/lib/i18n";
+import AdminOnly from "@/components/admin/AdminOnly";
 import { toastSaved, toastDeleted } from "@/lib/admin-toast";
 import { useConfirm } from "@/components/admin/ConfirmProvider";
 
@@ -367,13 +368,13 @@ export default function SocialTemplatesPage() {
             <div className="flex items-center justify-between gap-2 pt-2">
               <div>
                 {editing && (
-                  <button
+<AdminOnly>                  <button
                     type="button"
                     onClick={onDelete}
                     className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
                   >
                     {T("Жою", "Удалить")}
-                  </button>
+                  </button></AdminOnly>
                 )}
               </div>
               <div className="flex items-center gap-2">
