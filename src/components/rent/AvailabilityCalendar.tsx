@@ -35,18 +35,28 @@ export default function AvailabilityCalendar({ halls, locale, labels }: Props) {
 
   useEffect(() => {
     if (!hallId) return;
-    setLoading(true);
-    fetch(`/api/rent/availability?hall_id=${hallId}&month=${monthStr}`)
-      .then((r) => r.json())
-      .then((res) => {
+    let active = true;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const r = await fetch(`/api/rent/availability?hall_id=${hallId}&month=${monthStr}`);
+        const res = await r.json();
+        if (!active) return;
         const set = new Set<string>();
         if (res.data?.busy) {
           for (const b of res.data.busy as { day: string }[]) set.add(b.day);
         }
         setBusy(set);
-      })
-      .catch(() => setBusy(new Set()))
-      .finally(() => setLoading(false));
+      } catch {
+        if (active) setBusy(new Set());
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
   }, [hallId, monthStr]);
 
   const days = useMemo(() => {

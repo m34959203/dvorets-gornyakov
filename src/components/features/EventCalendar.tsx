@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Calendar from "@/components/ui/Calendar";
 import EventCard from "@/components/features/EventCard";
 import type { Locale } from "@/lib/i18n";
@@ -24,7 +24,6 @@ interface EventCalendarProps {
 
 export default function EventCalendar({ locale, initialEvents }: EventCalendarProps) {
   const [events] = useState<CalendarEvent[]>(initialEvents);
-  const [selectedEvents, setSelectedEvents] = useState<CalendarEvent[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("all");
 
@@ -39,20 +38,14 @@ export default function EventCalendar({ locale, initialEvents }: EventCalendarPr
     type: e.event_type,
   }));
 
-  useEffect(() => {
-    if (!selectedDate) {
-      setSelectedEvents(filteredEvents.slice(0, 5));
-    }
-  }, [filteredEvents, selectedDate]);
+  const displayedEvents = selectedDate
+    ? filteredEvents.filter(
+        (e) => new Date(e.start_date).toISOString().split("T")[0] === selectedDate
+      )
+    : filteredEvents.slice(0, 5);
 
   const handleDayClick = (date: Date) => {
-    const dateStr = date.toISOString().split("T")[0];
-    setSelectedDate(dateStr);
-    const dayEvents = filteredEvents.filter((e) => {
-      const eventDate = new Date(e.start_date).toISOString().split("T")[0];
-      return eventDate === dateStr;
-    });
-    setSelectedEvents(dayEvents);
+    setSelectedDate(date.toISOString().split("T")[0]);
   };
 
   const types = [
@@ -95,13 +88,13 @@ export default function EventCalendar({ locale, initialEvents }: EventCalendarPr
             ? new Date(selectedDate + "T00:00:00").toLocaleDateString(locale === "kk" ? "kk-KZ" : "ru-RU", { day: "numeric", month: "long", year: "numeric" })
             : locale === "kk" ? "Алдағы іс-шаралар" : "Предстоящие мероприятия"}
         </h3>
-        {selectedEvents.length === 0 ? (
+        {displayedEvents.length === 0 ? (
           <p className="text-gray-500 text-center py-8">
             {locale === "kk" ? "Іс-шаралар жоқ" : "Мероприятий нет"}
           </p>
         ) : (
           <div className="space-y-3">
-            {selectedEvents.map((event) => (
+            {displayedEvents.map((event) => (
               <EventCard key={event.id} event={event} locale={locale} />
             ))}
           </div>

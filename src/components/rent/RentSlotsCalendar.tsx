@@ -30,20 +30,29 @@ const KK_MON = ["қаң", "ақп", "нау", "сәу", "мам", "мау", "ш�
 export default function RentSlotsCalendar({ locale, onlyHall }: { locale: "kk" | "ru"; onlyHall?: "big" | "chamber" | "rehearsal" }) {
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
   const halls = onlyHall ? HALLS.filter((h) => h.id === onlyHall) : HALLS;
-  const [date, setDate] = useState<string>("");
+  const [date, setDate] = useState<string>(() => todayIso());
   const [slots, setSlots] = useState<Slot[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => setDate(todayIso()), []);
-
   useEffect(() => {
     if (!date) return;
-    setLoading(true);
-    fetch(`/api/rent/slots?date=${date}`)
-      .then((r) => r.json())
-      .then((d) => setSlots(d.data?.slots ?? []))
-      .catch(() => setSlots([]))
-      .finally(() => setLoading(false));
+    let active = true;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const r = await fetch(`/api/rent/slots?date=${date}`);
+        const d = await r.json();
+        if (active) setSlots(d.data?.slots ?? []);
+      } catch {
+        if (active) setSlots([]);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
   }, [date]);
 
   const byHall = useMemo(() => {

@@ -121,6 +121,14 @@ function distinct(values: string[]): string[] {
   return out;
 }
 
+function Chip({ val, active, onSelect }: { val: string; active: string; onSelect: (v: string) => void }) {
+  return (
+    <button className={"filter-chip" + (val === active ? " active" : "")} onClick={() => onSelect(val)}>
+      {val}
+    </button>
+  );
+}
+
 export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
   const ALL = T("Барлығы", "Все");
@@ -195,12 +203,6 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
     { id: "grid", kk: "Ай торы", ru: "Сетка месяца" },
     { id: "rail", kk: "Күндер", ru: "Лента дат" },
   ];
-
-  const chip = (val: string, active: string, set: (v: string) => void) => (
-    <button key={val} className={"filter-chip" + (val === active ? " active" : "")} onClick={() => set(val)}>
-      {val}
-    </button>
-  );
 
   return (
     <>
@@ -309,7 +311,9 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
         <div className="filters">
           <div className="filter-group">
             <span className="filter-label">{T("Ай", "Месяц")}</span>
-            {months.map((m) => chip(m, month, pickMonth))}
+            {months.map((m) => (
+              <Chip key={m} val={m} active={month} onSelect={pickMonth} />
+            ))}
           </div>
           <div className="filter-search">
             <DgIcon name="search" size={14} />
@@ -326,7 +330,9 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
           <div className="filters">
             <div className="filter-group">
               <span className="filter-label">{T("Зал", "Зал")}</span>
-              {halls.map((h) => chip(h, hall, setHall))}
+              {halls.map((h) => (
+                <Chip key={h} val={h} active={hall} onSelect={setHall} />
+              ))}
             </div>
           </div>
         )}
@@ -334,7 +340,9 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
           <div className="filters">
             <div className="filter-group">
               <span className="filter-label">{T("Түрі", "Тип")}</span>
-              {types.map((tp) => chip(tp, type, setType))}
+              {types.map((tp) => (
+                <Chip key={tp} val={tp} active={type} onSelect={setType} />
+              ))}
             </div>
           </div>
         )}

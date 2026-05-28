@@ -24,12 +24,12 @@ export function isValidLocale(locale: string): locale is Locale {
   return locales.includes(locale as Locale);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getLocalizedField(
-  item: any,
+export function getLocalizedField<T extends object>(
+  item: T,
   field: string,
   locale: Locale
 ): string {
+  const row = item as unknown as Record<string, unknown>;
   const key = `${field}_${locale}`;
-  return (item[key] as string) || (item[`${field}_kk`] as string) || "";
+  return (row[key] as string) || (row[`${field}_kk`] as string) || "";
 }

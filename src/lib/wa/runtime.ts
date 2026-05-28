@@ -79,6 +79,8 @@ export async function connect(): Promise<void> {
   r.lastError = undefined;
 
   try {
+    // useDbAuthState — функция Baileys (auth state), а не React-хук; правило ложно срабатывает на "use"-префикс.
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { state, saveCreds } = await useDbAuthState();
 
     // Версия WA: пробуем актуальную, иначе фолбэк (см. инцидент Baileys 405).
