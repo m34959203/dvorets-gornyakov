@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Locale } from "@/lib/i18n";
 
 interface Hall {
@@ -21,7 +22,7 @@ export default function HallCard({ hall, locale }: HallCardProps) {
   return (
     <article className="hall-card">
       <div className="hall-media">
-        <img src={hall.image} alt={hall.name} loading="lazy" />
+        <Image src={hall.image} alt={hall.name} fill sizes="(max-width: 768px) 100vw, 33vw" />
       </div>
       <div className="hall-body">
         <h3 className="hall-title">{hall.name}</h3>

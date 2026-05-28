@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { isValidLocale, type Locale } from "@/lib/i18n";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
@@ -104,12 +105,14 @@ export default async function AboutPage({
         <div className="dg-wrap">
           <div className="about-grid">
             <div className="about-photo">
-              <img
+              <Image
                 src="/photos/og-cover.jpg"
                 alt={T(
                   "Ш. Ділдебаев атындағы тау-кенші сарайы, Сәтбаев қаласы",
                   "Дворец горняков им. Ш. Дильдебаева, г. Сатпаев"
                 )}
+                fill
+                sizes="(max-width: 768px) 100vw, 45vw"
               />
               <div className="about-photo-tag">{T("Сәтбаев · 1974", "Сатпаев · 1974")}</div>
             </div>

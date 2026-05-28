@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
 import { almatyParts } from "@/lib/utils";
@@ -97,7 +98,7 @@ function formatNewsDate(iso: string | null, locale: Locale): string {
   });
 }
 
-async function load(locale: Locale) {
+async function load() {
   async function safe<T>(q: Promise<T[]>): Promise<T[]> {
     try {
       return await q;
@@ -143,7 +144,7 @@ export default async function HomePage({
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
-  const { events, hallPairs, news, halls } = await load(locale);
+  const { events, hallPairs, news, halls } = await load();
   const titleOf = (e: EventRow) =>
     getLocalizedField(e as unknown as Record<string, unknown>, "title", locale);
 
@@ -201,7 +202,7 @@ export default async function HomePage({
 
       {/* ═══ Hero ═══ */}
       <section className="hero" id="home">
-        <img className="hero-photo" src="/hero/hero.jpg" alt="" />
+        <Image className="hero-photo" src="/hero/hero.jpg" alt="" fill priority sizes="100vw" />
         <div className="hero-vignette" aria-hidden="true" />
         <div className="hero-inner">
           {/* KK-заголовок длиннее RU → отдельный класс с меньшим floor (см. globals.css),
@@ -267,7 +268,7 @@ export default async function HomePage({
             <div className="feature-wrap">
               <div className="feature">
                 <div className="feature-media">
-                  <img src={eventImage(feature.image_url, feature.event_type)} alt={titleOf(feature)} />
+                  <Image src={eventImage(feature.image_url, feature.event_type)} alt={titleOf(feature)} fill sizes="(max-width: 768px) 100vw, 50vw" />
                 </div>
                 <div className="feature-body">
                   <div className="feature-eyebrow">{T("«Арман» халық ансамблі", "Народный ансамбль «Арман»")}</div>
@@ -314,7 +315,7 @@ export default async function HomePage({
               {posters.map((e) => (
                 <article className="poster" key={e.id}>
                   <div className="poster-media">
-                    <img src={eventImage(e.image_url, e.event_type)} alt={titleOf(e)} loading="lazy" />
+                    <Image src={eventImage(e.image_url, e.event_type)} alt={titleOf(e)} fill sizes="(max-width: 768px) 50vw, 25vw" />
                   </div>
                   <h3 className="poster-title">{titleOf(e)}</h3>
                   <ul className="poster-meta">
@@ -351,7 +352,7 @@ export default async function HomePage({
               {collectives.map((c) => (
                 <Link href={`/${locale}/clubs`} className="coll-card" key={c.name}>
                   <div className="coll-card-media">
-                    <img src={c.photo} alt={c.name} loading="lazy" />
+                    <Image src={c.photo} alt={c.name} fill sizes="(max-width: 768px) 50vw, 25vw" />
                   </div>
                   <div className="name">{c.name}</div>
                   <div className="since">{c.since}</div>
@@ -407,7 +408,7 @@ export default async function HomePage({
                 return (
                   <Link key={h.slug} href={`/${locale}/rent/${h.slug}`} className="hall">
                     <div className="hall-media">
-                      <img src={HALL_PHOTO[h.slug] ?? "/photos/dvorets-08.webp"} alt={name} loading="lazy" />
+                      <Image src={HALL_PHOTO[h.slug] ?? "/photos/dvorets-08.webp"} alt={name} fill sizes="(max-width: 768px) 100vw, 33vw" />
                     </div>
                     <div className="hall-body">
                       <h3 className="hall-title">{name}</h3>
@@ -434,7 +435,7 @@ export default async function HomePage({
         <div className="dg-wrap">
           <div className="about-grid">
             <div className="about-photo">
-              <img src="/photos/og-cover.jpg" alt={T("Тау-кеншілер сарайының ғимараты", "Здание Дворца горняков")} loading="lazy" />
+              <Image src="/photos/og-cover.jpg" alt={T("Тау-кеншілер сарайының ғимараты", "Здание Дворца горняков")} fill sizes="(max-width: 768px) 100vw, 45vw" />
               <div className="about-photo-tag">{T("Сәтбаев · 1974", "Сатпаев · 1974")}</div>
             </div>
 
@@ -491,7 +492,7 @@ export default async function HomePage({
                 return (
                   <Link key={n.id} href={`/${locale}/news/${n.slug}`} className="news-item">
                     <div className="news-media">
-                      <img src={n.image_url ?? "/photos/dvorets-01.webp"} alt={title} loading="lazy" />
+                      <Image src={n.image_url ?? "/photos/dvorets-01.webp"} alt={title} fill sizes="(max-width: 768px) 50vw, 25vw" />
                     </div>
                     <p className="news-date">{formatNewsDate(n.published_at, locale)}</p>
                     <h3 className="news-title">{title}</h3>

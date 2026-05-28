@@ -541,7 +541,7 @@ h1, h2, h3, h4 {
   flex-direction: column;
 }
 .club-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-.club-media { aspect-ratio: 4/3; overflow: hidden; }
+.club-media { position: relative; aspect-ratio: 4/3; overflow: hidden; }
 .club-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
 .club-card:hover .club-media img { transform: scale(1.05); }
 .club-body { padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
@@ -563,7 +563,7 @@ h1, h2, h3, h4 {
   transition: transform .2s, box-shadow .2s;
 }
 .hall-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.hall-media { aspect-ratio: 16/10; overflow: hidden; }
+.hall-media { position: relative; aspect-ratio: 16/10; overflow: hidden; }
 .hall-media img { width: 100%; height: 100%; object-fit: cover; }
 .hall-body { padding: 24px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
 .hall-title { font-family: var(--font-head); font-size: 24px; color: var(--text); font-weight: 700; letter-spacing: -0.025em; }
@@ -596,7 +596,7 @@ h1, h2, h3, h4 {
   flex-direction: column;
 }
 .news-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-.news-media { aspect-ratio: 16/10; overflow: hidden; }
+.news-media { position: relative; aspect-ratio: 16/10; overflow: hidden; }
 .news-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
 .news-card:hover .news-media img { transform: scale(1.05); }
 .news-body { padding: 22px 24px 24px; display: flex; flex-direction: column; gap: 12px; flex: 1; }

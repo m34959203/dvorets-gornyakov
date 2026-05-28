@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getOne, getMany } from "@/lib/db";
@@ -239,7 +240,7 @@ export default async function NewsArticlePage({
           <article style={{ maxWidth: "72ch" }}>
             {/* Cover image */}
             <div className="detail-cover" style={{ marginBottom: 36 }}>
-              <img src={imageUrl} alt={title} />
+              <Image src={imageUrl} alt={title} fill sizes="(max-width: 900px) 100vw, 720px" />
             </div>
 
             {/* Category badge + date meta */}
@@ -299,7 +300,7 @@ export default async function NewsArticlePage({
                   return (
                     <Link key={n.slug} href={`/${locale}/news/${n.slug}`} className="news-item">
                       <div className="news-media">
-                        <img src={n.image_url ?? "/photos/dvorets-06.webp"} alt={ot} loading="lazy" />
+                        <Image src={n.image_url ?? "/photos/dvorets-06.webp"} alt={ot} fill sizes="(max-width: 768px) 50vw, 25vw" />
                       </div>
                       {n.published_at && (
                         <p className="news-date">

@@ -76,7 +76,7 @@ export default function SchedulerPage() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, typeFilter]);
+  }, [statusFilter, typeFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     load();

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
   isValidLocale,
@@ -367,7 +368,7 @@ export default async function EventDetailPage({
                   return (
                     <article className="poster" key={e.id}>
                       <div className="poster-media">
-                        <img src={eventImage(e.image_url, e.event_type)} alt={rt} loading="lazy" />
+                        <Image src={eventImage(e.image_url, e.event_type)} alt={rt} fill sizes="(max-width: 768px) 50vw, 25vw" />
                       </div>
                       <h3 className="poster-title">{rt}</h3>
                       <p className="poster-meta" style={{ marginTop: 6 }}>{formatShortDate(e.start_date, locale)}</p>

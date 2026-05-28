@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Locale } from "@/lib/i18n";
 import { getLocalizedField } from "@/lib/i18n";
 import { eventImage } from "@/lib/event-image";
@@ -63,7 +64,7 @@ export default function EventCard({ event, locale }: EventCardProps) {
   return (
     <Link href={`/${locale}/events/${event.id}`} className="event-card no-underline">
       <div className="event-media">
-        <img src={img} alt={title} loading="lazy" />
+        <Image src={img} alt={title} fill sizes="(max-width: 768px) 100vw, 33vw" />
         <span className="event-badge">{categoryLabel}</span>
         <div className="event-date-chip">
           <div className="d">{day}</div>

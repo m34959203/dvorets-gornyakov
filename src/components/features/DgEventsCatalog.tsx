@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { Locale } from "@/lib/i18n";
 import { pluralByLocale } from "@/lib/plural";
 import DgIcon from "@/components/layout/DgIcon";
@@ -371,7 +372,7 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
               {filtered.map((e) => (
                 <article className="poster" key={e.id}>
                   <div className="poster-media">
-                    <img src={e.image} alt={e.title} loading="lazy" />
+                    <Image src={e.image} alt={e.title} fill sizes="(max-width: 768px) 50vw, 25vw" />
                     {e.tag && <div className="poster-tag">{e.tag}</div>}
                   </div>
                   <h3 className="poster-title">{e.title}</h3>

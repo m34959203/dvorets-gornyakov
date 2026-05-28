@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
 import DgPageHero from "@/components/layout/DgPageHero";
@@ -188,7 +189,7 @@ export default async function NewsPage({
                   className="news-item"
                 >
                   <div className="news-media">
-                    <img src={imgSrc} alt={title} loading="lazy" />
+                    <Image src={imgSrc} alt={title} fill sizes="(max-width: 768px) 50vw, 25vw" />
                   </div>
                   <p className="news-date">{dateStr}</p>
                   <h3 className="news-title">{title}</h3>

@@ -141,6 +141,7 @@ ym(${yaId}, "init", {clickmap:true,trackLinks:true,accurateTrackBounce:true,webv
             </Script>
             <noscript>
               <div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`https://mc.yandex.ru/watch/${yaId}`}
                   style={{ position: "absolute", left: "-9999px" }}

@@ -1,6 +1,7 @@
 "use client";
 
 import Slider from "@/components/ui/Slider";
+import Image from "next/image";
 import type { Locale } from "@/lib/i18n";
 
 interface Banner {
@@ -60,17 +61,21 @@ export default function BannerSlider({ banners, locale, heroTitle, heroSubtitle 
         <div key={banner.id} className="relative w-full h-full">
           {banner.link_url ? (
             <a href={banner.link_url} className="block w-full h-full">
-              <img
+              <Image
                 src={banner.image_url}
                 alt={banner.title}
-                className="w-full h-full object-cover"
+                fill
+                sizes="100vw"
+                className="object-cover"
               />
             </a>
           ) : (
-            <img
+            <Image
               src={banner.image_url}
               alt={banner.title}
-              className="w-full h-full object-cover"
+              fill
+              sizes="100vw"
+              className="object-cover"
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
