@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { isValidLocale, type Locale, getLocalizedField, getMessages } from "@/lib/i18n";
 import { getOne } from "@/lib/db";
@@ -172,17 +173,19 @@ export default async function HallPage({
         <div className="dg-wrap">
           <div
             style={{
+              position: "relative",
               borderRadius: "var(--dg-radius)",
               overflow: "hidden",
               aspectRatio: "16/7",
               background: "var(--dg-bg-2)",
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={coverUrl}
               alt={name}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              fill
+              sizes="(max-width: 1100px) 100vw, 1040px"
+              style={{ objectFit: "cover" }}
             />
           </div>
         </div>
@@ -283,18 +286,24 @@ export default async function HallPage({
                   }}
                 >
                   {hall.photos.slice(1).map((p, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <div
                       key={i}
-                      src={p.url}
-                      alt={(locale === "kk" ? p.alt_kk : p.alt_ru) || name}
                       style={{
+                        position: "relative",
                         aspectRatio: "4/3",
                         width: "100%",
-                        objectFit: "cover",
                         borderRadius: "var(--dg-radius)",
+                        overflow: "hidden",
                       }}
-                    />
+                    >
+                      <Image
+                        src={p.url}
+                        alt={(locale === "kk" ? p.alt_kk : p.alt_ru) || name}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 200px"
+                        style={{ objectFit: "cover" }}
+                      />
+                    </div>
                   ))}
                 </div>
               )}

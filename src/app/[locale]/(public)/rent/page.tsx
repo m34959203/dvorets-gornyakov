@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
 import type { Hall } from "@/lib/rent/types";
@@ -163,8 +164,7 @@ export default async function RentPage({
               return (
                 <Link key={h.id} href={`/${locale}/rent/${h.slug}`} className="hall">
                   <div className="hall-media">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={cover} alt={alt} />
+                    <Image src={cover} alt={alt} fill sizes="(max-width: 768px) 100vw, 33vw" />
                   </div>
                   <div className="hall-body">
                     <h3 className="hall-title">{name}</h3>

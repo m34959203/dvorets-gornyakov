@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Hall } from "@/lib/rent/types";
 import type { Locale } from "@/lib/i18n";
 import { getLocalizedField } from "@/lib/i18n";
@@ -34,8 +35,7 @@ export default function HallCard({ hall, locale, labels }: Props) {
   return (
     <Link href={`/${locale}/rent/${hall.slug}`} className="hall">
       <div className="hall-media">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={cover} alt={alt} />
+        <Image src={cover} alt={alt} fill sizes="(max-width: 768px) 100vw, 33vw" />
       </div>
       <div className="hall-body">
         <h3 className="hall-title">{name}</h3>

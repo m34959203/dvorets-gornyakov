@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getOne } from "@/lib/db";
@@ -189,8 +190,7 @@ export default async function ClubDetailPage({
             {/* ── MAIN ── */}
             <div>
               <div className="detail-cover">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={cover} alt={name} />
+                <Image src={cover} alt={name} fill sizes="(max-width: 900px) 100vw, 720px" />
               </div>
 
               <ul className="feature-meta" style={{ marginTop: 28 }}>

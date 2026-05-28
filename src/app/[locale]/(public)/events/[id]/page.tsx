@@ -288,8 +288,7 @@ export default async function EventDetailPage({
             {/* ── Main column ─────────────────────────────────────── */}
             <main>
               <div className="detail-cover">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={cover} alt={title} />
+                <Image src={cover} alt={title} fill sizes="(max-width: 900px) 100vw, 720px" />
               </div>
 
               <ul className="feature-meta" style={{ marginTop: 28 }}>
