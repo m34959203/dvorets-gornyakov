@@ -36,4 +36,4 @@ npm run dev
 - [API Specification](./API.md)
 - [Database Schema](./DATABASE.md)
 - [Deployment Guide](./DEPLOYMENT.md)
-- [Contributing Guidelines](./CONTRIBUTING.md)
+- [Contributing](../CONTRIBUTING.md)
