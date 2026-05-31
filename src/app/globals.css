@@ -1639,6 +1639,49 @@ h1, h2, h3, h4 {
 .dg-home .contact-map { border-radius: var(--dg-radius); overflow: hidden; border: 1px solid var(--dg-hair); min-height: 340px; background: var(--dg-bg-2); }
 .dg-home .contact-map iframe { width: 100%; height: 100%; min-height: 340px; border: 0; display: block; filter: grayscale(0.25) contrast(1.05); }
 
+/* 2GIS map deep-link panel (used on /contacts when embedded widget недоступен) */
+.dg-home .contact-map-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  text-decoration: none;
+  color: var(--dg-text);
+  background:
+    radial-gradient(120% 90% at 70% 15%, rgba(212, 168, 67, 0.10), transparent 60%),
+    repeating-linear-gradient(0deg, var(--dg-hair) 0 1px, transparent 1px 38px),
+    repeating-linear-gradient(90deg, var(--dg-hair) 0 1px, transparent 1px 38px),
+    var(--dg-bg-2);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.dg-home .contact-map-card:hover { border-color: var(--dg-accent); transform: translateY(-2px); }
+.dg-home .contact-map-pin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  color: var(--dg-accent);
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+}
+.dg-home .contact-map-meta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 24px;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.55), transparent);
+}
+.dg-home .contact-map-addr { font-size: 13.5px; color: var(--dg-text); opacity: 0.9; }
+.dg-home .contact-map-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dg-accent);
+}
+
 /* Шаринг детальных страниц (ShareRow) */
 .dg-home .share-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--dg-hair); }
 .dg-home .share-label { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--dg-text-3); }

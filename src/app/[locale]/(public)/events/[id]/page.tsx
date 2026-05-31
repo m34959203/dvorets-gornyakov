@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-url";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
@@ -10,7 +11,7 @@ import {
 import { getOne, getMany } from "@/lib/db";
 import { eventImage } from "@/lib/event-image";
 import { localizeVenue, type VenuePair } from "@/lib/venue";
-import { eventJsonLd, siteBase } from "@/lib/jsonld";
+import { eventJsonLd } from "@/lib/jsonld";
 import { buildEventIcs, icsDataUri } from "@/lib/ics";
 import JsonLd from "@/components/JsonLd";
 import ShareRow from "@/components/features/ShareRow";
@@ -124,10 +125,6 @@ const TYPE_LABELS: Record<string, Record<Locale, string>> = {
   other: { kk: "Басқа", ru: "Другое" },
 };
 
-function getBaseUrl(): string {
-  const env = process.env.NEXT_PUBLIC_APP_URL;
-  return (env || "https://dvorets-gornyakov.kz").replace(/\/$/, "");
-}
 
 /** Asia/Almaty-aware full date+time label */
 function formatAlmaty(iso: string, locale: Locale): string {
@@ -173,7 +170,7 @@ export async function generateMetadata({
       locale
     ) || title;
   const cover = eventImage(event.image_url, event.event_type);
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getSiteBaseUrl();
   const canonical = `${baseUrl}/${locale}/events/${id}`;
   const ogImage = cover.startsWith("http") ? cover : `${baseUrl}${cover}`;
 
@@ -239,7 +236,7 @@ export default async function EventDetailPage({
     : null;
   const shortDate = formatShortDate(event.start_date, locale);
   const cover = eventImage(event.image_url, event.event_type);
-  const shareUrl = `${siteBase()}/${locale}/events/${id}`;
+  const shareUrl = `${await getSiteBaseUrl()}/${locale}/events/${id}`;
   const ics = buildEventIcs({
     uid: event.id,
     title,
@@ -269,7 +266,7 @@ export default async function EventDetailPage({
           endDate: event.end_date,
           location: venue,
           image: cover,
-          url: `${siteBase()}/${locale}/events/${id}`,
+          url: shareUrl,
         })}
       />
       <DgPageHero

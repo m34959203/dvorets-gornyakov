@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-url";
 import Link from "next/link";
 import Image from "next/image";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
@@ -20,7 +21,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: lp } = await params;
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
-  const base = (process.env.NEXT_PUBLIC_APP_URL || "https://dvorets-gornyakov.kz").replace(/\/$/, "");
+  const base = await getSiteBaseUrl();
   return {
     alternates: {
       canonical: `${base}/${locale}`,

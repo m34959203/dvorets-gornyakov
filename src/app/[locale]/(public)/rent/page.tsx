@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-url";
 import Link from "next/link";
 import Image from "next/image";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
@@ -71,9 +72,6 @@ const DEMO_HALLS: Hall[] = [
   },
 ];
 
-function getBaseUrl(): string {
-  return (process.env.NEXT_PUBLIC_APP_URL ?? "https://dvorets-gornyakov.kz").replace(/\/$/, "");
-}
 
 export async function generateMetadata({
   params,
@@ -87,7 +85,7 @@ export async function generateMetadata({
     locale === "kk"
       ? "Сәтбаевта концерт, камералық және жаттығу залдарын жалдау. Онлайн өтінім."
       : "Аренда концертного, камерного и репетиционного залов в г. Сатпаев. Онлайн заявка.";
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getSiteBaseUrl();
   return {
     title,
     description,

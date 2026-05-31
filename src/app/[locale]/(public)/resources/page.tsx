@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-url";
+
+export const dynamic = "force-dynamic";
 import { isValidLocale, type Locale } from "@/lib/i18n";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
@@ -11,7 +14,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: lp } = await params;
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
-  const base = (process.env.NEXT_PUBLIC_APP_URL || "https://dvorets-gornyakov.kz").replace(/\/$/, "");
+  const base = await getSiteBaseUrl();
   const title = locale === "kk" ? "Ресурстар" : "Ресурсы";
   const description =
     locale === "kk"

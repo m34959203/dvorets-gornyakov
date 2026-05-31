@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-url";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
@@ -14,11 +15,6 @@ export const dynamic = "force-dynamic";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function getBaseUrl(): string {
-  const env = process.env.NEXT_PUBLIC_APP_URL;
-  const fallback = env || "https://dvorets-gornyakov.kz";
-  return fallback.replace(/\/$/, "");
-}
 
 type ScheduleItem = { day: string; time: string };
 
@@ -101,7 +97,7 @@ export async function generateMetadata({
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
   const row = await loadClubMeta(id);
 
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getSiteBaseUrl();
   const canonical = `${baseUrl}/${locale}/clubs/${id}`;
   const languages = {
     kk: `${baseUrl}/kk/clubs/${id}`,
@@ -115,8 +111,12 @@ export async function generateMetadata({
   const name = getLocalizedField(row, "name", locale);
   const description = getLocalizedField(row, "description", locale);
   const images = row.image_url ? [row.image_url] : [];
+  // clubs/layout.tsx задаёт строковый title → ломает наследование title.template
+  // из (public)/layout для деталки. Поэтому собираем бренд-суффикс явно (absolute).
+  const brand =
+    locale === "kk" ? "Тау-кеншілер сарайы · Сәтбаев" : "Дворец горняков · Сатпаев";
   return {
-    title: name,
+    title: { absolute: `${name} · ${brand}` },
     description,
     openGraph: {
       title: name,

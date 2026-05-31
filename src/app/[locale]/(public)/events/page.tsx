@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-url";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getMany } from "@/lib/db";
 import { eventImage } from "@/lib/event-image";
@@ -31,11 +32,6 @@ const TYPE_TO_CAT_RU: Record<string, string> = {
   other: "Прочее",
 };
 
-function getBaseUrl(): string {
-  const env = process.env.NEXT_PUBLIC_APP_URL;
-  const fallback = env || "https://dvorets-gornyakov.kz";
-  return fallback.replace(/\/$/, "");
-}
 
 export async function generateMetadata({
   params,
@@ -50,7 +46,7 @@ export async function generateMetadata({
     locale === "kk"
       ? "Концерттер, спектакльдер, шеберханалар мен фестивальдер афишасы — Сәтбаев қаласы."
       : "Афиша концертов, спектаклей, мастер-классов и фестивалей — г. Сатпаев.";
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getSiteBaseUrl();
   const canonical = `${baseUrl}/${locale}/events`;
   return {
     title,

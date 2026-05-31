@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-url";
 import Link from "next/link";
 import Image from "next/image";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
@@ -13,11 +14,6 @@ const FALLBACK_PHOTOS = [
   "/photos/dvorets-13.webp",
 ];
 
-function getBaseUrl(): string {
-  const env = process.env.NEXT_PUBLIC_APP_URL;
-  const fallback = env || "https://dvorets-gornyakov.kz";
-  return fallback.replace(/\/$/, "");
-}
 
 export async function generateMetadata({
   params,
@@ -32,7 +28,7 @@ export async function generateMetadata({
     locale === "kk"
       ? "Ш. Ділдебаев атындағы тау-кенші сарайының соңғы жаңалықтары, хабарландырулары мен іс-шаралары."
       : "Последние новости, анонсы и события Дворца горняков им. Ш. Дильдебаева.";
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getSiteBaseUrl();
   const canonical = `${baseUrl}/${locale}/news`;
   return {
     title,

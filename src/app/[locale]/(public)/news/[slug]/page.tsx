@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-url";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { isValidLocale, type Locale, getLocalizedField } from "@/lib/i18n";
 import { getOne, getMany } from "@/lib/db";
 import { localizeNewsCategory } from "@/lib/news-category";
-import { newsArticleJsonLd, siteBase } from "@/lib/jsonld";
+import { newsArticleJsonLd } from "@/lib/jsonld";
 import JsonLd from "@/components/JsonLd";
 import ShareRow from "@/components/features/ShareRow";
 import DgPageHero from "@/components/layout/DgPageHero";
@@ -13,11 +14,6 @@ import DgIcon from "@/components/layout/DgIcon";
 
 export const dynamic = "force-dynamic";
 
-function getBaseUrl(): string {
-  const env = process.env.NEXT_PUBLIC_APP_URL;
-  const fallback = env || "https://dvorets-gornyakov.kz";
-  return fallback.replace(/\/$/, "");
-}
 
 type NewsRow = {
   slug: string;
@@ -79,7 +75,7 @@ export async function generateMetadata({
   const locale: Locale = isValidLocale(lp) ? lp : "kk";
   const row = await loadNewsMeta(slug);
 
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getSiteBaseUrl();
   const canonical = `${baseUrl}/${locale}/news/${slug}`;
   const languages = {
     kk: `${baseUrl}/kk/news/${slug}`,
@@ -201,7 +197,7 @@ export default async function NewsArticlePage({
   const tagLine = [categoryLabel, dateLabel].filter(Boolean).join(" · ");
 
   const imageUrl = dbRow?.image_url ?? "/photos/dvorets-06.webp";
-  const shareUrl = `${siteBase()}/${locale}/news/${slug}`;
+  const shareUrl = `${await getSiteBaseUrl()}/${locale}/news/${slug}`;
 
   // Другие новости — 3 свежих, кроме текущей
   const others = await getMany<{ slug: string; title_kk: string; title_ru: string; image_url: string | null; published_at: string | null }>(
@@ -222,7 +218,7 @@ export default async function NewsArticlePage({
           headline: title,
           datePublished: publishedAt,
           image: imageUrl,
-          url: `${siteBase()}/${locale}/news/${slug}`,
+          url: shareUrl,
         })}
       />
       <DgPageHero

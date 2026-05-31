@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-url";
 import { isValidLocale, type Locale } from "@/lib/i18n";
 
-function getBaseUrl(): string {
-  const env = process.env.NEXT_PUBLIC_APP_URL;
-  const fallback = env || "https://dvorets-gornyakov.kz";
-  return fallback.replace(/\/$/, "");
-}
 
 export async function generateMetadata({
   params,
@@ -20,7 +16,7 @@ export async function generateMetadata({
     locale === "kk"
       ? "Балалар мен ересектерге арналған 20-дан астам шығармашылық үйірме: вокал, би, театр, өнер, музыка, қолөнер."
       : "Более 20 творческих кружков для детей и взрослых: вокал, танцы, театр, искусство, музыка, рукоделие.";
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getSiteBaseUrl();
   const canonical = `${baseUrl}/${locale}/clubs`;
   return {
     title,

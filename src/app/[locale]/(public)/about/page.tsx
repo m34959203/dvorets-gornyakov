@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-url";
+
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import Image from "next/image";
 import { isValidLocale, type Locale } from "@/lib/i18n";
@@ -7,11 +10,6 @@ import DgIcon from "@/components/layout/DgIcon";
 import ContactForm from "@/components/features/ContactForm";
 
 
-function getBaseUrl(): string {
-  const env = process.env.NEXT_PUBLIC_APP_URL;
-  const fallback = env || "https://dvorets-gornyakov.kz";
-  return fallback.replace(/\/$/, "");
-}
 
 export async function generateMetadata({
   params,
@@ -25,7 +23,7 @@ export async function generateMetadata({
     locale === "kk"
       ? "Ш. Ділдебаев атындағы тау-кенші сарайының тарихы, миссиясы және жетекшілігі — Сәтбаев қаласындағы мәдени орталық (1974/2000)."
       : "История, миссия и руководство Дворца горняков им. Ш. Дильдебаева — культурного центра города Сатпаев (1974/2000).";
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getSiteBaseUrl();
   const canonical = `${baseUrl}/${locale}/about`;
   return {
     title,
