@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Дворец горняков — выходит на цифровую сцену</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Cormorant:ital,wght@0,500;0,600;1,500;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --stage-900:#0a0a18; --stage-800:#0E0E20; --stage-700:#15152a; --stage-600:#1c1c34;
+  --terra:#E07A4A; --terra-deep:#b85d33; --terra-deeper:#934A20; --terra-darkest:#7A3D18;
+  --ochre:#d4a843; --ochre-soft:#e6c170;
+  --emerald:#0d7377;
+  --cream:#f7f1e6; --cream-2:#ece2cd;
+  --cream-mute:rgba(247,241,230,0.70); --cream-faint:rgba(247,241,230,0.40);
+  --cream-body:#e9ddc8;
+  --line-light:rgba(247,241,230,0.14);
+  --font:'Manrope', system-ui, -apple-system, sans-serif;
+  --serif:'Cormorant', Georgia, serif;
+  --mono:'JetBrains Mono', ui-monospace, monospace;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--stage-900)}
+body{font-family:var(--font);color:var(--cream);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+/* ===== STAGE BACKGROUND ===== */
+.stage-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(140% 120% at 50% 40%, transparent 55%, rgba(0,0,0,0.5)),
+    radial-gradient(120% 80% at 50% -10%, rgba(224,122,74,0.16), transparent 60%),
+    radial-gradient(90% 60% at 50% 0%, rgba(212,168,67,0.07), transparent 60%),
+    linear-gradient(180deg,#15152a 0%,#0E0E20 48%,#0a0a18 100%);
+}
+.stage-bg::after{content:"";position:absolute;inset:0;opacity:0.04;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.spot{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(2px 2px at 20% 30%, rgba(247,241,230,0.05), transparent),
+    radial-gradient(2px 2px at 70% 60%, rgba(247,241,230,0.04), transparent),
+    radial-gradient(1.5px 1.5px at 45% 80%, rgba(212,168,67,0.05), transparent),
+    linear-gradient(115deg, transparent 40%, rgba(224,122,74,0.05) 50%, transparent 60%);
+}
+
+/* ===== PROGRESS / COUNTER ===== */
+.progress{position:fixed;top:0;left:0;height:3px;z-index:50;width:0%;
+  background:linear-gradient(90deg,var(--terra),var(--ochre));transition:width .5s cubic-bezier(.2,.7,.2,1);
+  box-shadow:0 0 12px rgba(224,122,74,0.5)}
+.counter{position:fixed;bottom:26px;right:30px;z-index:50;font-family:var(--mono);font-size:13px;
+  letter-spacing:.12em;color:var(--cream-mute)}
+.counter b{color:var(--terra);font-weight:600}
+.dots{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:9px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line-light);transition:.3s;cursor:pointer}
+.dots i.on{background:var(--terra);transform:scale(1.25);box-shadow:0 0 10px rgba(224,122,74,0.6)}
+
+/* ===== SLIDES ===== */
+.deck{position:fixed;inset:0;z-index:2}
+.slide{position:absolute;inset:0;display:grid;place-items:center;
+  padding:clamp(40px,5vw,80px);opacity:0;visibility:hidden;transition:opacity .5s ease, visibility .5s}
+.slide.active{opacity:1;visibility:visible}
+.wrap{max-width:1180px;width:100%;margin-inline:auto}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);
+  gap:clamp(32px,4vw,64px);align-items:center}
+/* mirrored layout: screenshot left, text right */
+.grid.mirror{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.grid.mirror>.copy{order:2}
+.grid.mirror>.shot{order:1}
+
+/* ===== TEXT BLOCKS ===== */
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--terra);margin-bottom:22px;display:inline-block;
+  clip-path:inset(0 100% 0 0);transition:clip-path .6s ease}
+.reveal.in .kicker{clip-path:inset(0 0 0 0)}
+h2{font-family:var(--font);font-weight:800;text-transform:uppercase;letter-spacing:-0.02em;
+  font-size:clamp(30px,4.3vw,58px);line-height:1.02;margin-bottom:6px}
+h2 .ac{color:var(--terra)}
+h2 em{display:block;font-family:var(--serif);font-style:italic;font-weight:500;text-transform:none;
+  letter-spacing:0;color:var(--cream-2);font-size:clamp(24px,3vw,40px);margin-top:6px;line-height:1.05}
+.lead{font-size:clamp(15px,1.25vw,18px);line-height:1.6;color:var(--cream-body);max-width:46ch;margin-top:22px;font-weight:400}
+.points{list-style:none;margin-top:28px;display:grid;gap:14px}
+.points li{position:relative;padding-left:26px;font-size:clamp(14px,1.1vw,16px);color:var(--cream-2);line-height:1.45}
+.points li::before{content:"";position:absolute;left:0;top:.5em;width:9px;height:9px;
+  background:var(--m,var(--terra));transform:rotate(45deg);box-shadow:0 0 10px rgba(224,122,74,0.4)}
+.points li b{color:var(--cream);font-weight:600}
+
+/* per-word reveal */
+.w{display:inline-block;white-space:nowrap;opacity:0;transform:translateY(110%)}
+.reveal.in .w{opacity:1;transform:none;transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1)}
+.lead .w,.points li .w{transform:translateY(40%)}
+
+/* ===== FRAME ===== */
+.frame{position:relative;border-radius:14px;overflow:hidden;background:var(--stage-700);cursor:zoom-in;
+  box-shadow:0 30px 70px rgba(0,0,0,0.55), 0 0 0 1px var(--line-light);
+  transition:transform .25s ease, box-shadow .25s ease}
+.frame::before{content:"";position:absolute;top:0;left:0;right:0;height:40%;pointer-events:none;z-index:3;
+  background:linear-gradient(180deg, rgba(224,122,74,0.5), transparent 16%)}
+.frame.adm::before{background:linear-gradient(180deg, rgba(224,122,74,0.4), transparent 14%)}
+.frame.adm{box-shadow:0 30px 70px rgba(0,0,0,0.5), 0 0 0 1px var(--line-light), inset 0 0 40px rgba(0,0,0,0.15)}
+.frame img{width:100%;display:block;object-fit:cover;object-position:top}
+.frame:hover{transform:translateY(-6px);
+  box-shadow:0 24px 50px rgba(224,122,74,0.18), 0 0 0 1.5px var(--terra)}
+.cnr{position:absolute;width:18px;height:18px;z-index:4;pointer-events:none}
+.cnr.tl{top:9px;left:9px;border-top:1.5px solid var(--terra);border-left:1.5px solid var(--terra)}
+.cnr.tr{top:9px;right:9px;border-top:1.5px solid var(--terra);border-right:1.5px solid var(--terra)}
+.cnr.bl{bottom:9px;left:9px;border-bottom:1.5px solid var(--terra);border-left:1.5px solid var(--terra)}
+.cnr.br{bottom:9px;right:9px;border-bottom:1.5px solid var(--terra);border-right:1.5px solid var(--terra)}
+.tag{position:absolute;bottom:11px;left:11px;z-index:4;pointer-events:none;
+  background:rgba(10,10,24,0.78);font-family:var(--mono);font-size:12px;letter-spacing:.03em;
+  color:var(--cream);padding:5px 10px;border-radius:6px;border:1px solid var(--line-light)}
+.frame.reveal{opacity:0;transform:translateY(24px) scale(.98);filter:blur(6px)}
+.frame.reveal.in{opacity:1;transform:none;filter:none;transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1), filter .7s ease}
+
+/* duo frames */
+.frame-duo{position:relative;padding-bottom:48px;padding-right:42px}
+.frame-duo .big{width:88%}
+.frame-duo .small{position:absolute;bottom:0;right:0;width:46%;z-index:6;
+  box-shadow:0 24px 50px rgba(0,0,0,0.6), 0 0 0 1.5px var(--terra)}
+
+/* ===== COVER (Type A) ===== */
+.cover{display:grid;place-items:center;text-align:center;position:relative}
+.eyebrow{font-family:var(--mono);font-size:clamp(10px,1vw,12.5px);letter-spacing:.22em;
+  text-transform:uppercase;color:var(--cream-faint);margin-bottom:34px;max-width:90vw;line-height:1.7}
+.h1{font-family:var(--font);font-weight:800;text-transform:uppercase;letter-spacing:-0.02em;
+  font-size:clamp(48px,9vw,128px);line-height:.95;perspective:600px}
+.word{white-space:nowrap;display:inline-block;margin-inline:.18em}
+.g{display:inline-block;opacity:0;transform:translateY(40%) rotateX(-70deg);transform-origin:bottom}
+.reveal.in .g{opacity:1;transform:none;transition:opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1)}
+.cover-sub{font-family:var(--serif);font-style:italic;font-weight:500;
+  font-size:clamp(24px,3.4vw,44px);color:var(--cream-mute);margin-top:18px}
+.stats{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(28px,5vw,72px);margin-top:54px}
+.stat{display:flex;flex-direction:column;align-items:center;gap:8px}
+.stat .num{font-family:var(--font);font-weight:800;font-size:clamp(40px,5vw,72px);line-height:1;
+  background:linear-gradient(135deg,#e6c170,#d4a843 55%,#b85d33);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .lab{font-family:var(--mono);font-size:clamp(9px,.85vw,11px);letter-spacing:.16em;
+  text-transform:uppercase;color:var(--cream-mute)}
+.cover-veil{position:absolute;inset:0;z-index:-1;opacity:.06;
+  -webkit-mask-image:radial-gradient(70% 60% at 50% 50%, #000, transparent 75%);
+          mask-image:radial-gradient(70% 60% at 50% 50%, #000, transparent 75%)}
+.cover-veil img{width:100%;height:100%;object-fit:cover}
+
+/* equalizer brandmark */
+.eq{display:inline-flex;align-items:flex-end;gap:4px;height:26px}
+.eq i{width:5px;border-radius:2px;background:linear-gradient(180deg,var(--ochre),var(--terra))}
+.eq i:nth-child(1){height:40%}.eq i:nth-child(2){height:100%}
+.eq i:nth-child(3){height:60%}.eq i:nth-child(4){height:80%}
+/* dosed emerald glint in the brandmark equalizer */
+.eq i:nth-child(3){background:linear-gradient(180deg,#1f9a9e,var(--emerald))}
+.cover .eq,.final .eq{margin-top:38px}
+
+/* ornament caesura */
+.caesura{display:flex;align-items:center;justify-content:center;gap:14px;margin:26px auto;
+  width:min(340px,60vw);transform:scaleX(0);transform-origin:center}
+.reveal.in .caesura,.final.active .caesura{transform:scaleX(1);transition:transform .6s ease .2s}
+.caesura .ln{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--ochre),transparent)}
+.caesura .di{width:9px;height:9px;background:var(--ochre);transform:rotate(45deg);flex:none;
+  box-shadow:0 0 10px rgba(212,168,67,0.5)}
+.caesura .di.star{width:12px;height:12px}
+
+/* ===== TYPE D SPLIT (bilingual) ===== */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,4vw,56px);align-items:start;position:relative}
+.split::before{content:"";position:absolute;left:50%;top:-6%;height:112%;width:1px;
+  background:linear-gradient(180deg,transparent,var(--ochre),transparent);opacity:.4}
+.langtag{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;
+  display:inline-block;padding:6px 14px;border-radius:20px;margin-bottom:18px;font-weight:500}
+.langtag.kz{color:var(--ochre);border:1px solid rgba(212,168,67,0.45)}
+.langtag.ru{color:#3aa6aa;border:1px solid rgba(13,115,119,0.6)}
+.split-foot{grid-column:1/-1;text-align:center;margin-top:34px}
+.glyphs{font-family:var(--font);font-weight:700;font-size:clamp(32px,5vw,64px);letter-spacing:.06em;
+  color:var(--ochre);line-height:1}
+.glyphs-sub{font-family:var(--font);font-weight:400;font-size:clamp(13px,1.2vw,16px);
+  color:var(--cream-mute);margin-top:14px;letter-spacing:.04em}
+
+/* ===== TYPE E TECH ===== */
+.tech-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(18px,2vw,28px);margin-top:40px}
+.badge{position:relative;background:var(--stage-700);border:1px solid var(--line-light);border-radius:14px;
+  padding:30px 28px;overflow:hidden}
+.badge::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--terra),var(--ochre))}
+.badge .bm{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cream-mute)}
+.badge .bg{font-size:clamp(28px,3.2vw,42px);font-weight:800;color:var(--ochre);margin:10px 0 6px;
+  font-family:var(--font);display:flex;align-items:center;gap:12px}
+.badge .bd{font-size:14px;color:var(--cream-2);line-height:1.45}
+/* emerald-accented tech badge (second accent, dosed) */
+.badge.em::before{background:linear-gradient(90deg,var(--emerald),#1f9a9e)}
+.badge.em .bg{color:#2bb0b4}
+.tech-grid.reveal .badge{opacity:0;transform:translateY(24px)}
+.tech-grid.reveal.in .badge{opacity:1;transform:none;transition:opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1)}
+.tech-grid.reveal.in .badge:nth-child(2){transition-delay:.08s}
+.tech-grid.reveal.in .badge:nth-child(3){transition-delay:.16s}
+.tech-grid.reveal.in .badge:nth-child(4){transition-delay:.24s}
+
+/* ===== FINAL (Type F) ===== */
+.final{display:grid;place-items:center;text-align:center;position:relative}
+.final h2{margin-bottom:0}
+.final .climax{font-family:var(--serif);font-style:italic;font-weight:600;text-transform:none;
+  display:block;color:var(--terra);font-size:clamp(34px,5.5vw,74px);line-height:1;margin-top:4px;letter-spacing:0}
+.final .tot{color:var(--cream-body);max-width:54ch;margin:24px auto 0;font-size:clamp(15px,1.2vw,17px);line-height:1.6}
+.final-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(22px,4vw,54px);margin-top:30px}
+.final-stats .fs{display:flex;flex-direction:column;align-items:center;gap:5px}
+.final-stats .fn{font-family:var(--font);font-weight:800;font-size:clamp(24px,2.6vw,38px);
+  background:linear-gradient(135deg,#e6c170,#d4a843 55%,#b85d33);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.final-stats .fl{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ochre)}
+.addr{font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(18px,2vw,26px);
+  color:var(--cream-2);margin-top:34px}
+.signature{font-family:var(--mono);font-size:clamp(9.5px,.9vw,11.5px);letter-spacing:.16em;
+  text-transform:uppercase;color:var(--cream-mute);margin-top:16px;line-height:1.8}
+.signature .d{color:var(--terra)}
+.final-gallery{position:absolute;right:-2%;top:50%;transform:translateY(-50%);z-index:-1;
+  display:grid;gap:14px;opacity:.5;width:34%;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 60%);mask-image:linear-gradient(90deg,transparent,#000 60%)}
+.final-gallery img{width:100%;border-radius:10px;box-shadow:0 20px 50px rgba(0,0,0,0.5)}
+
+/* ===== LIGHTBOX ===== */
+.lightbox{position:fixed;inset:0;z-index:9999;display:none;place-items:center;
+  background:rgba(8,8,18,0.94);backdrop-filter:blur(8px)}
+.lightbox.open{display:grid}
+.lightbox img{max-width:94vw;max-height:92vh;border-radius:10px;
+  box-shadow:0 0 60px rgba(224,122,74,0.3), 0 0 0 1px var(--terra);
+  transform:scale(.92);filter:blur(6px);opacity:0;transition:transform .25s ease, filter .25s ease, opacity .25s}
+.lightbox.open img{transform:none;filter:none;opacity:1}
+.lb-close{position:fixed;top:24px;right:28px;z-index:10000;width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--line-light);background:rgba(10,10,24,0.7);color:var(--cream);font-size:20px;
+  cursor:pointer;display:grid;place-items:center;transition:.2s}
+.lb-close:hover{border-color:var(--terra);color:var(--terra);transform:rotate(90deg)}
+.lb-cap{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:10000;
+  font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--cream-mute)}
+
+/* hint */
+.hint{position:fixed;bottom:26px;left:30px;z-index:50;font-family:var(--mono);font-size:11px;
+  letter-spacing:.1em;color:var(--cream-faint)}
+
+@media (max-width:860px){
+  .grid,.grid.mirror,.split,.tech-grid{grid-template-columns:1fr;gap:28px}
+  .grid.mirror>.copy{order:1}.grid.mirror>.shot{order:2}
+  .split::before{display:none}
+  .frame-duo{padding-bottom:0;padding-right:0}
+  .frame-duo .big{width:100%}
+  .frame-duo .small{position:relative;width:70%;margin:-30px 0 0 auto}
+  .final-gallery{display:none}
+  .dots{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .g,.w,.frame.reveal,.tech-grid.reveal .badge,.caesura,.kicker{transition:opacity .3s ease !important}
+  .g,.w{transform:none !important}
+  .frame.reveal{transform:none !important;filter:none !important}
+  .caesura{transform:none !important}
+  .kicker{clip-path:none !important}
+}
+</style>
+</head>
+<body>
+
+<div class="stage-bg"></div>
+<div class="spot"></div>
+<div class="progress" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- 01 COVER -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap cover">
+      <div class="cover-veil"><img src="../screenshots/user/home-top.webp" alt="" aria-hidden="true" loading="lazy"></div>
+      <p class="eyebrow">КГКП · Центр культуры и творчества им. Ш. Дильдебаева · Сатпаев · Ұлытау</p>
+      <h1 class="h1" id="coverH1"></h1>
+      <p class="cover-sub">выходит на цифровую сцену</p>
+      <div class="stats">
+        <div class="stat"><span class="num" data-count="60" data-suffix="+">0</span><span class="lab">лет на сцене</span></div>
+        <div class="stat"><span class="num" data-count="22">0</span><span class="lab">коллектива</span></div>
+        <div class="stat"><span class="num" data-count="758">0</span><span class="lab">участников</span></div>
+        <div class="stat"><span class="num" data-count="3">0</span><span class="lab">зала</span></div>
+      </div>
+      <div class="eq"><i></i><i></i><i></i><i></i></div>
+    </div>
+  </section>
+
+  <!-- 02 ГЛАВНАЯ -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap grid">
+      <div>
+        <span class="kicker">02 · Главная</span>
+        <h2><span class="rw">Сцена, которая</span> <span class="ac rw">зовёт</span><em><span class="rw">постер-галерея вместо ленты</span></em></h2>
+        <p class="lead"><span class="rw">Первый экран встречает живой афишей-порталом: крупные постеры событий, акценты сезона и прямой путь к билетам и записи — без лишних кликов.</span></p>
+        <ul class="points">
+          <li><span class="rw"><b>Постер-галерея</b> ближайших событий на первом экране</span></li>
+          <li><span class="rw">Быстрые переходы: афиша, кружки, аренда, новости</span></li>
+          <li><span class="rw">Тёплый chiaroscuro-стиль — наследие в современной подаче</span></li>
+        </ul>
+      </div>
+      <div class="frame reveal" data-d="1" data-full="../screenshots/user/home.webp">
+        <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+        <img src="../screenshots/user/home-top.webp" alt="Главная страница сайта Дворца горняков — постер-галерея событий" loading="lazy">
+        <span class="tag">home / Главная</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 АФИША + КАЛЕНДАРЬ -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap grid mirror">
+      <div class="copy">
+        <span class="kicker">03 · Афиша и календарь</span>
+        <h2><span class="rw">Три взгляда на</span> <span class="ac rw">репертуар</span><em><span class="rw">Список · Сетка месяца · Лента дат</span></em></h2>
+        <p class="lead"><span class="rw">Один переключатель — три способа смотреть афишу. Фильтры по месяцу, залу и типу события, подсветка дат и выгрузка в личный календарь одним нажатием.</span></p>
+        <ul class="points">
+          <li><span class="rw"><b>Список · Сетка месяца · Лента дат</b> — живой переключатель</span></li>
+          <li><span class="rw">Фильтры: месяц, зал, тип события</span></li>
+          <li><span class="rw">Экспорт <b>.ics</b> — событие сразу в телефоне</span></li>
+          <li><span class="rw"><b>24 события</b> в демонстрационном сезоне</span></li>
+        </ul>
+      </div>
+      <div class="frame shot reveal" data-d="1" data-full="../screenshots/user/events.webp">
+        <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+        <img src="../screenshots/user/events-top.webp" alt="Афиша мероприятий с переключателем режимов просмотра" loading="lazy">
+        <span class="tag">events / Афиша</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 КРУЖКИ -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap grid">
+      <div>
+        <span class="kicker">04 · Кружки и студии</span>
+        <h2><span class="ac rw">22 коллектива</span> <span class="rw">в один клик</span><em><span class="rw">каталог и онлайн-запись ребёнка</span></em></h2>
+        <p class="lead"><span class="rw">Все творческие направления Дворца — в едином каталоге. Родитель открывает карточку студии, читает расписание и записывает ребёнка онлайн, не приходя лично.</span></p>
+        <ul class="points">
+          <li><span class="rw"><b>Каталог направлений</b> с фото и описанием</span></li>
+          <li><span class="rw">Карточка студии: педагог, расписание, возраст</span></li>
+          <li><span class="rw"><b>Онлайн-запись</b> ребёнка прямо со страницы</span></li>
+        </ul>
+      </div>
+      <div class="frame-duo">
+        <div class="frame big reveal" data-d="1" data-full="../screenshots/user/clubs.webp">
+          <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+          <img src="../screenshots/user/clubs-top.webp" alt="Каталог кружков и студий" loading="lazy">
+          <span class="tag">clubs / Кружки</span>
+        </div>
+        <div class="frame small reveal" data-d="2" data-full="../screenshots/user/club-detail.webp">
+          <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+          <img src="../screenshots/user/club-detail-top.webp" alt="Карточка студии с онлайн-записью" loading="lazy">
+          <span class="tag">club / Студия</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 НОВОСТИ -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap grid">
+      <div>
+        <span class="kicker">05 · Новости</span>
+        <h2><span class="rw">Хроника</span> <span class="ac rw">сцены</span><em><span class="rw">всё, чем живёт Дворец</span></em></h2>
+        <p class="lead"><span class="rw">Лента новостей и анонсов рассказывает о жизни учреждения. Любую публикацию легко переслать, а событие — добавить в свой календарь.</span></p>
+        <ul class="points">
+          <li><span class="rw"><b>Лента новостей</b> и анонсов с фото</span></li>
+          <li><span class="rw">Кнопка <b>«Поделиться»</b> — репост в один тап</span></li>
+          <li><span class="rw">Экспорт события в календарь через <b>.ics</b></span></li>
+        </ul>
+      </div>
+      <div class="frame-duo">
+        <div class="frame big reveal" data-d="1" data-full="../screenshots/user/news.webp">
+          <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+          <img src="../screenshots/user/news-top.webp" alt="Лента новостей Дворца горняков" loading="lazy">
+          <span class="tag">news / Новости</span>
+        </div>
+        <div class="frame small reveal" data-d="2" data-full="../screenshots/user/news-detail.webp">
+          <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+          <img src="../screenshots/user/news-detail-top.webp" alt="Страница новости с кнопкой поделиться" loading="lazy">
+          <span class="tag">news / Статья</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 АРЕНДА (EMERALD) -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap grid">
+      <div>
+        <span class="kicker" style="color:var(--emerald)">06 · Аренда залов</span>
+        <h2 style="--ac:var(--emerald)"><span class="rw" style="color:#1f9a9e">Три зала.</span> <span class="rw" style="color:#1f9a9e">Бронь онлайн</span><em><span class="rw">заявка без единого звонка</span></em></h2>
+        <p class="lead"><span class="rw">Большой, камерный и репетиционный залы доступны для аренды. Организатор выбирает дату, зал и оставляет заявку онлайн — Дворец перезванивает уже с готовым ответом.</span></p>
+        <ul class="points" style="--m:var(--emerald)">
+          <li><span class="rw"><b>650 / 120 / 40 мест</b> — три зала под любой формат</span></li>
+          <li><span class="rw">Онлайн-заявка с выбором даты и зала</span></li>
+          <li><span class="rw">Прозрачные условия — без долгих созвонов</span></li>
+        </ul>
+      </div>
+      <div class="frame reveal" data-d="1" data-full="../screenshots/user/rent.webp" style="--terra:var(--emerald)">
+        <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+        <img src="../screenshots/user/rent-top.webp" alt="Страница аренды залов с онлайн-бронированием" loading="lazy">
+        <span class="tag">rent / Аренда</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 ИИ-ПОМОЩНИК -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap grid mirror">
+      <div class="copy">
+        <span class="kicker">07 · ИИ-помощник</span>
+        <h2><span class="rw">Цифровой</span> <span class="ac rw">консьерж</span><em><span class="rw">что не спит</span></em></h2>
+        <p class="lead"><span class="rw">Встроенный ИИ-помощник отвечает посетителям круглосуточно — қазақша и по-русски. Он знает расписание, кружки и условия аренды, потому что обучен на собственной базе знаний Дворца.</span></p>
+        <ul class="points">
+          <li><span class="rw">Отвечает <b>қазақша и по-русски</b></span></li>
+          <li><span class="rw"><b>Голосовой ввод</b> — спросить можно вслух</span></li>
+          <li><span class="rw">Собственная <b>база знаний</b>, без выдумок</span></li>
+        </ul>
+      </div>
+      <div class="frame adm shot reveal" data-d="1" data-full="../screenshots/admin/admin-chatbot.webp">
+        <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+        <img src="../screenshots/admin/admin-chatbot.webp" alt="Панель управления базой знаний ИИ-помощника" loading="lazy">
+        <span class="tag">admin / База знаний ИИ</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 ДВУЯЗЫЧИЕ (SPLIT) -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap">
+      <div style="text-align:center;margin-bottom:30px">
+        <span class="kicker" style="display:inline-block">08 · Двуязычие</span>
+        <h2 style="text-align:center"><span class="rw">Два языка —</span> <span class="ac rw">одна сцена</span></h2>
+      </div>
+      <div class="split">
+        <div>
+          <span class="langtag kz">ҚАЗ</span>
+          <div class="frame reveal" data-d="1" data-full="../screenshots/user/about.webp">
+            <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+            <img src="../screenshots/user/about-top.webp" alt="Страница «О нас» қазақ тілінде" loading="lazy">
+            <span class="tag">about / Біз туралы</span>
+          </div>
+        </div>
+        <div>
+          <span class="langtag ru">РУС</span>
+          <div class="frame reveal" data-d="2" data-full="../screenshots/user/clubs.webp">
+            <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+            <img src="../screenshots/user/clubs-top.webp" alt="Каталог кружков на русском языке" loading="lazy">
+            <span class="tag">clubs / по-русски</span>
+          </div>
+        </div>
+        <div class="split-foot">
+          <div class="caesura"><span class="ln"></span><span class="di"></span><span class="ln"></span></div>
+          <div class="glyphs">Ә Ғ Қ Ң Ө Ұ Ү І Һ</div>
+          <div class="glyphs-sub">Толық қазақша · Полностью по-русски — без потери ни одной буквы</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 АДМИНКА -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap grid">
+      <div>
+        <span class="kicker">09 · Админка / CMS</span>
+        <h2><span class="rw">Весь контент</span> <span class="ac rw">без программиста</span><em><span class="rw">17 разделов под рукой</span></em></h2>
+        <p class="lead"><span class="rw">Сотрудники Дворца управляют сайтом сами: добавляют события, кружки, новости и страницы через понятную панель. Роли admin и editor разграничивают доступ.</span></p>
+        <ul class="points">
+          <li><span class="rw"><b>17 разделов</b> управления в одной панели</span></li>
+          <li><span class="rw">Роли <b>admin / editor</b> — гибкий доступ</span></li>
+          <li><span class="rw">Редактирование без кода и без вызова специалиста</span></li>
+        </ul>
+      </div>
+      <div class="frame-duo">
+        <div class="frame adm big reveal" data-d="1" data-full="../screenshots/admin/admin-dashboard.webp">
+          <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+          <img src="../screenshots/admin/admin-dashboard.webp" alt="Главная панель администратора" loading="lazy">
+          <span class="tag">admin / Панель</span>
+        </div>
+        <div class="frame adm small reveal" data-d="2" data-full="../screenshots/admin/admin-events.webp">
+          <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+          <img src="../screenshots/admin/admin-events.webp" alt="Управление событиями в админке" loading="lazy">
+          <span class="tag">admin / События</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 АНАЛИТИКА + ИИ-БЮДЖЕТ -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap grid">
+      <div>
+        <span class="kicker">10 · Аналитика и ИИ-бюджет</span>
+        <h2><span class="rw">Цифры,</span> <span class="ac rw">что видно</span><em><span class="rw">посещаемость и расход ИИ</span></em></h2>
+        <p class="lead"><span class="rw">Руководство видит реальную картину: сколько людей заходит, какие страницы популярны и сколько тратится на работу ИИ-помощника — всё прозрачно и под контролем.</span></p>
+        <ul class="points">
+          <li><span class="rw"><b>546 просмотров</b> и топ-страницы в дашборде</span></li>
+          <li><span class="rw">Динамика посещаемости по дням</span></li>
+          <li><span class="rw">Прозрачный <b>контроль расхода ИИ</b></span></li>
+        </ul>
+      </div>
+      <div class="frame-duo">
+        <div class="frame adm big reveal" data-d="1" data-full="../screenshots/admin/admin-analytics.webp">
+          <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+          <img src="../screenshots/admin/admin-analytics.webp" alt="Аналитика посещаемости сайта" loading="lazy">
+          <span class="tag">admin / Аналитика</span>
+        </div>
+        <div class="frame adm small reveal" data-d="2" data-full="../screenshots/admin/admin-ai-usage.webp">
+          <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+          <img src="../screenshots/admin/admin-ai-usage.webp" alt="Контроль расхода ИИ-бюджета" loading="lazy">
+          <span class="tag">admin / ИИ-бюджет</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 TELEGRAM + ПЛАНИРОВЩИК -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap grid mirror">
+      <div class="copy">
+        <span class="kicker">11 · Telegram и планировщик</span>
+        <h2><span class="rw">Афиша сама</span> <span class="ac rw">идёт в Telegram</span><em><span class="rw">авто-постинг по расписанию</span></em></h2>
+        <p class="lead"><span class="rw">Планировщик публикует анонсы в Telegram-канал Дворца автоматически — по заданному расписанию и готовым SMM-шаблонам. Никто не забудет выложить афишу вовремя.</span></p>
+        <ul class="points">
+          <li><span class="rw"><b>Авто-постинг</b> в Telegram по расписанию</span></li>
+          <li><span class="rw">Готовые <b>SMM-шаблоны</b> оформления</span></li>
+          <li><span class="rw">Очередь публикаций — всё под контролем</span></li>
+        </ul>
+      </div>
+      <div class="frame adm shot reveal" data-d="1" data-full="../screenshots/admin/admin-scheduler.webp">
+        <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+        <img src="../screenshots/admin/admin-scheduler.webp" alt="Планировщик авто-публикаций в Telegram" loading="lazy">
+        <span class="tag">admin / Планировщик</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 КОНТАКТЫ + 2GIS -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap grid">
+      <div>
+        <span class="kicker">12 · Контакты и карта</span>
+        <h2><span class="rw">Двери</span> <span class="ac rw">открыты</span><em><span class="rw">маршрут до сцены</span></em></h2>
+        <p class="lead"><span class="rw">Адрес, телефоны и часы работы — на одной странице. Интерактивная карта 2GIS прокладывает маршрут до Дворца от любой точки города.</span></p>
+        <ul class="points" style="--m:var(--emerald)">
+          <li><span class="rw">пр. К.И. Сатпаева, <b>106</b>, г. Сатпаев</span></li>
+          <li><span class="rw">Регион <b>Ұлытау</b> · карта 2GIS с маршрутом</span></li>
+          <li><span class="rw">Телефоны, часы работы и форма обратной связи</span></li>
+        </ul>
+      </div>
+      <div class="frame reveal" data-d="1" data-full="../screenshots/user/contacts.webp">
+        <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+        <img src="../screenshots/user/contacts-top.webp" alt="Страница контактов с картой 2GIS" loading="lazy">
+        <span class="tag">contacts / Контакты</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 ТЕХНОЛОГИЧНОСТЬ -->
+  <section class="slide reveal" data-slide>
+    <div class="wrap">
+      <div style="text-align:center;max-width:680px;margin:0 auto">
+        <span class="kicker" style="display:inline-block">13 · Технологичность</span>
+        <h2 style="text-align:center"><span class="rw">Сделано</span> <span class="ac rw">основательно</span><em><span class="rw">фундамент, на котором стоит сцена</span></em></h2>
+      </div>
+      <div class="tech-grid reveal">
+        <div class="badge">
+          <div class="bm">SEO</div>
+          <div class="bg">⌘ <span>Двуязычный</span></div>
+          <div class="bd">Каждая страница оптимизирована и для қазақ, и для русского — Дворец находят в поиске на обоих языках.</div>
+        </div>
+        <div class="badge em">
+          <div class="bm">Безопасность</div>
+          <div class="bg">🛡 <span>CSP / HSTS</span></div>
+          <div class="bd">Современные политики безопасности и шифрование защищают данные посетителей и учреждения.</div>
+        </div>
+        <div class="badge">
+          <div class="bm">Адаптив</div>
+          <div class="bg">▢ <span>100%</span></div>
+          <div class="bd">Телефон, планшет, экран в фойе — сайт безупречно выглядит на любом устройстве.</div>
+        </div>
+        <div class="badge">
+          <div class="bm">Производительность</div>
+          <div class="bg">⚡ <span>Скорость</span></div>
+          <div class="bd">Лёгкие страницы и оптимизированные изображения — открывается мгновенно даже на слабой сети.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 ФИНАЛ -->
+  <section class="slide final reveal" data-slide>
+    <div class="final-gallery">
+      <img src="../screenshots/user/home-top.webp" alt="" aria-hidden="true" loading="lazy">
+      <img src="../screenshots/user/clubs-top.webp" alt="" aria-hidden="true" loading="lazy">
+      <img src="../screenshots/user/rent-top.webp" alt="" aria-hidden="true" loading="lazy">
+    </div>
+    <div class="wrap" style="position:relative;z-index:2">
+      <div class="caesura"><span class="ln"></span><span class="di star"></span><span class="ln"></span></div>
+      <h2 style="text-align:center"><span class="rw">Наследие —</span><span class="climax">на новой сцене</span></h2>
+      <p class="tot">Более 60 лет культуры, 22 коллектива и 758 участников — теперь с цифровой сценой, открытой каждому жителю Ұлытау круглосуточно.</p>
+      <div class="final-stats">
+        <div class="fs"><span class="fn" data-count="60" data-suffix="+">0</span><span class="fl">лет на сцене</span></div>
+        <div class="fs"><span class="fn" data-count="22">0</span><span class="fl">коллектива</span></div>
+        <div class="fs"><span class="fn" data-count="758">0</span><span class="fl">участников</span></div>
+        <div class="fs"><span class="fn" data-count="3">0</span><span class="fl">зала</span></div>
+      </div>
+      <p class="addr">Дворец горняков · пр. К.И. Сатпаева, 106 · Ұлытау</p>
+      <p class="signature">КГКП Центр культуры и творчества им. Ш. Дильдебаева <span class="d">·</span> г. Сатпаев <span class="d">·</span> Ұлытау</p>
+      <div class="eq" style="margin-inline:auto"><i></i><i></i><i></i><i></i></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="dots" id="dots"></div>
+<div class="counter" id="counter"><b>01</b> / 14</div>
+<div class="hint">← → · пробел · свайп</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="lb-close" id="lbClose" aria-label="Закрыть">✕</button>
+  <img id="lbImg" src="" alt="Увеличенный скриншот" />
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const slides = Array.from(document.querySelectorAll('[data-slide]'));
+  const N = slides.length;
+  let cur = 0;
+  let lbOpen = false;
+  const progress = document.getElementById('progress');
+  const counter = document.getElementById('counter');
+  const dotsWrap = document.getElementById('dots');
+  const reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  /* ----- build cover per-glyph ----- */
+  (function buildCover(){
+    const el = document.getElementById('coverH1');
+    const words = ['ДВОРЕЦ','ГОРНЯКОВ'];
+    let gi = 0;
+    words.forEach(word=>{
+      const w = document.createElement('span');
+      w.className='word';
+      for(const ch of word){
+        const g = document.createElement('span');
+        g.className='g';
+        g.textContent = ch;
+        g.style.transitionDelay = (gi*28)+'ms';
+        gi++;
+        w.appendChild(g);
+      }
+      el.appendChild(w);
+    });
+  })();
+
+  /* ----- wrap .rw spans into per-word .w ----- */
+  function wrapWords(root){
+    root.querySelectorAll('.rw').forEach(span=>{
+      if(span.dataset.wrapped) return;
+      // skip if contains element children other than <b> we want to keep simple: handle text + <b>
+      const html = span.innerHTML;
+      span.dataset.wrapped = '1';
+      // tokenize keeping <b>...</b> as atomic-ish: split on spaces but preserve tags
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      const words = [];
+      tmp.childNodes.forEach(node=>{
+        if(node.nodeType===3){ // text
+          node.textContent.split(/(\s+)/).forEach(t=>{ if(t!=='') words.push({t:'text',v:t}); });
+        } else {
+          words.push({t:'html',v:node.outerHTML});
+        }
+      });
+      span.innerHTML='';
+      let wi=0;
+      words.forEach(item=>{
+        if(item.t==='text' && item.v.trim()===''){ span.appendChild(document.createTextNode(item.v)); return; }
+        const w=document.createElement('span');
+        w.className='w';
+        if(item.t==='text') w.textContent=item.v; else w.innerHTML=item.v;
+        w.style.transitionDelay=(wi*40)+'ms';
+        wi++;
+        span.appendChild(w);
+        span.appendChild(document.createTextNode(' '));
+      });
+    });
+  }
+  slides.forEach(wrapWords);
+
+  /* ----- dots ----- */
+  for(let i=0;i<N;i++){
+    const d = document.createElement('i');
+    d.addEventListener('click',()=>go(i));
+    dotsWrap.appendChild(d);
+  }
+  const dots = Array.from(dotsWrap.children);
+
+  /* ----- count up ----- */
+  function countUp(el){
+    const target = parseInt(el.dataset.count,10);
+    const suffix = el.dataset.suffix || '';
+    if(reduce){ el.textContent = target + suffix; return; }
+    const dur = 900;
+    const start = performance.now();
+    function tick(now){
+      const t = Math.min((now-start)/dur,1);
+      const e = 1-Math.pow(1-t,3);
+      el.textContent = Math.round(target*e) + (t===1?suffix:'');
+      if(t<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ----- reveal ----- */
+  function playReveal(slide){
+    const revs = slide.classList.contains('reveal') ? [slide, ...slide.querySelectorAll('.reveal')] : Array.from(slide.querySelectorAll('.reveal'));
+    revs.forEach(r=>r.classList.remove('in'));
+    void slide.offsetWidth;
+    revs.forEach(r=>r.classList.add('in'));
+    slide.querySelectorAll('[data-count]').forEach(countUp);
+  }
+
+  /* ----- navigation ----- */
+  function go(i){
+    i = Math.max(0, Math.min(N-1, i));
+    if(i===cur && slides[i].classList.contains('active')) return;
+    slides[cur].classList.remove('active');
+    cur = i;
+    slides[cur].classList.add('active');
+    progress.style.width = ((cur+1)/N*100)+'%';
+    counter.innerHTML = '<b>'+String(cur+1).padStart(2,'0')+'</b> / '+String(N).padStart(2,'0');
+    dots.forEach((d,k)=>d.classList.toggle('on',k===cur));
+    playReveal(slides[cur]);
+  }
+
+  /* ----- lightbox ----- */
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  const lbCap = document.getElementById('lbCap');
+  const lbClose = document.getElementById('lbClose');
+
+  function openLB(src, cap){
+    lbImg.src = src;
+    lbCap.textContent = cap || '';
+    lightbox.classList.add('open');
+    lightbox.setAttribute('aria-hidden','false');
+    document.body.style.overflow='hidden';
+    lbOpen = true;
+  }
+  function closeLB(){
+    lightbox.classList.remove('open');
+    lightbox.setAttribute('aria-hidden','true');
+    document.body.style.overflow='';
+    lbOpen = false;
+    setTimeout(()=>{ if(!lbOpen) lbImg.src=''; },260);
+  }
+  document.querySelectorAll('.frame').forEach(frame=>{
+    const img = frame.querySelector('img');
+    if(!img) return;
+    frame.addEventListener('click',()=>{
+      const full = frame.dataset.full || img.getAttribute('src');
+      const tag = frame.querySelector('.tag');
+      openLB(full, tag ? tag.textContent : '');
+    });
+  });
+  lbClose.addEventListener('click', closeLB);
+  lightbox.addEventListener('click', e=>{ if(e.target===lightbox) closeLB(); });
+
+  /* ----- keyboard (hard guard) ----- */
+  window.addEventListener('keydown', e=>{
+    if(lbOpen){
+      if(e.key==='Escape'){ e.preventDefault(); closeLB(); }
+      return;
+    }
+    switch(e.key){
+      case 'ArrowRight': case ' ': case 'PageDown': e.preventDefault(); go(cur+1); break;
+      case 'ArrowLeft': case 'PageUp': e.preventDefault(); go(cur-1); break;
+      case 'Home': e.preventDefault(); go(0); break;
+      case 'End': e.preventDefault(); go(N-1); break;
+    }
+  });
+
+  /* ----- swipe ----- */
+  let tsx=0, tsy=0;
+  window.addEventListener('touchstart', e=>{ tsx=e.changedTouches[0].clientX; tsy=e.changedTouches[0].clientY; }, {passive:true});
+  window.addEventListener('touchend', e=>{
+    if(lbOpen) return;
+    const dx = e.changedTouches[0].clientX - tsx;
+    const dy = e.changedTouches[0].clientY - tsy;
+    if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)){
+      if(dx<0) go(cur+1); else go(cur-1);
+    }
+  }, {passive:true});
+
+  /* ----- init ----- */
+  slides[0].classList.add('active');
+  progress.style.width = (1/N*100)+'%';
+  dots[0].classList.add('on');
+  playReveal(slides[0]);
+})();
+</script>
+</body>
+</html>
