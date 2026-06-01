@@ -816,6 +816,7 @@ h1, h2, h3, h4 {
   --dg-pad-x:   clamp(20px, 4vw, 56px);
   --dg-radius:  6px;
   --dg-font:    var(--font-body);
+  --dg-topbar-h: 40px;
 }
 /* Светлая секция (chiaroscuro): перепривязка токенов, --dg-accent неизменен */
 .dg-home .section--light {
@@ -870,8 +871,10 @@ h1, h2, h3, h4 {
 }
 
 /* ═════════════ Top utility bar (партнёрские/гос-ссылки над навигацией) ═════════════ */
-/* Статичная (НЕ sticky) — честно уезжает при скролле, прилипает только header. */
+/* Sticky-связка с header: топбар липнет к top:0 (z 51, выше header'а на 1),
+   header — к top:var(--dg-topbar-h), чтобы топбар не уезжал при scroll/zoom. */
 .dg-topbar {
+  position: sticky; top: 0; z-index: 51;
   background: linear-gradient(180deg, #0b0e1a 0%, #090c14 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   font-family: var(--font-body); font-size: 12.5px;
@@ -918,7 +921,7 @@ h1, h2, h3, h4 {
 
 /* ═════════════ Header ═════════════ */
 .dg-header {
-  position: sticky; top: 0; z-index: 50;
+  position: sticky; top: var(--dg-topbar-h, 40px); z-index: 50;
   background: rgba(11, 15, 26, 0.97);
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
