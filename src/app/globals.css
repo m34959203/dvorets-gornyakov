@@ -872,15 +872,16 @@ h1, h2, h3, h4 {
 /* ═════════════ Top utility bar (партнёрские/гос-ссылки над навигацией) ═════════════ */
 .dg-topbar {
   background: #0a0d18; border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  font-family: var(--font-body); font-size: 11.5px;
+  font-family: var(--font-body); font-size: 12.5px;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
 }
 .dg-topbar-inner {
   display: flex; align-items: center; justify-content: center;
   flex-wrap: wrap; gap: 4px 28px; min-height: 38px; padding-block: 7px;
 }
 .dg-topbar-label {
-  color: #6B7280; letter-spacing: .18em; text-transform: uppercase;
-  font-weight: 500; white-space: nowrap; flex: none;
+  color: rgb(209, 213, 219); letter-spacing: .18em; text-transform: uppercase;
+  font-weight: 600; white-space: nowrap; flex: none;
 }
 .dg-topbar-links {
   display: flex; align-items: center; justify-content: center; gap: 6px 22px;
@@ -888,11 +889,12 @@ h1, h2, h3, h4 {
 }
 .dg-topbar-links::-webkit-scrollbar { display: none; }
 .dg-topbar-links a {
-  color: #9CA3AF; letter-spacing: .1em; text-transform: uppercase;
-  white-space: nowrap; transition: color .15s; padding: 3px 0;
+  color: rgb(229, 231, 235); letter-spacing: .08em; text-transform: uppercase;
+  font-weight: 500; white-space: nowrap; transition: color .15s; padding: 3px 0;
 }
-.dg-topbar-links a:hover { color: #E07A4A; }
+.dg-topbar-links a:hover { color: rgb(255, 255, 255); }
 @media (max-width: 768px) {
+  .dg-topbar { font-size: 11.5px; }
   .dg-topbar-label { display: none; }
   .dg-topbar-inner { justify-content: flex-start; }
   /* На мобильном — узкий горизонтальный скролл вместо переноса */
