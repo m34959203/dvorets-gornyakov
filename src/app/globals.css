@@ -816,7 +816,6 @@ h1, h2, h3, h4 {
   --dg-pad-x:   clamp(20px, 4vw, 56px);
   --dg-radius:  6px;
   --dg-font:    var(--font-body);
-  --dg-topbar-h: 40px;
 }
 /* Светлая секция (chiaroscuro): перепривязка токенов, --dg-accent неизменен */
 .dg-home .section--light {
@@ -871,19 +870,25 @@ h1, h2, h3, h4 {
 }
 
 /* ═════════════ Top utility bar (партнёрские/гос-ссылки над навигацией) ═════════════ */
+/* Статичная (НЕ sticky) — честно уезжает при скролле, прилипает только header. */
 .dg-topbar {
-  position: sticky; top: 0; z-index: 51;
-  background: #0a0d18; border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(180deg, #0b0e1a 0%, #090c14 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   font-family: var(--font-body); font-size: 12.5px;
   -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
 }
 .dg-topbar-inner {
   display: flex; align-items: center; justify-content: center;
-  flex-wrap: wrap; gap: 4px 28px; min-height: 38px; padding-block: 7px;
+  flex-wrap: wrap; gap: 4px 26px; min-height: 38px; padding-block: 7px;
 }
 .dg-topbar-label {
-  color: rgb(209, 213, 219); letter-spacing: .18em; text-transform: uppercase;
+  display: inline-flex; align-items: center;
+  color: rgb(209, 213, 219); letter-spacing: .2em; text-transform: uppercase;
   font-weight: 600; white-space: nowrap; flex: none;
+}
+.dg-topbar-label::before {
+  content: ""; width: 18px; height: 1px; margin-right: 12px;
+  background: #E07A4A; opacity: .75;
 }
 .dg-topbar-links {
   display: flex; align-items: center; justify-content: center; gap: 6px 22px;
@@ -891,10 +896,18 @@ h1, h2, h3, h4 {
 }
 .dg-topbar-links::-webkit-scrollbar { display: none; }
 .dg-topbar-links a {
+  position: relative;
   color: rgb(229, 231, 235); letter-spacing: .08em; text-transform: uppercase;
-  font-weight: 500; white-space: nowrap; transition: color .15s; padding: 3px 0;
+  font-weight: 500; white-space: nowrap; transition: color .18s ease; padding: 3px 1px;
 }
-.dg-topbar-links a:hover { color: rgb(255, 255, 255); }
+/* Аккуратное коралловое подчёркивание, выезжающее слева на hover */
+.dg-topbar-links a::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: #E07A4A; transform: scaleX(0); transform-origin: left;
+  transition: transform .22s ease;
+}
+.dg-topbar-links a:hover { color: #FFFFFF; }
+.dg-topbar-links a:hover::after { transform: scaleX(1); }
 @media (max-width: 768px) {
   .dg-topbar { font-size: 11.5px; }
   .dg-topbar-label { display: none; }
@@ -905,7 +918,7 @@ h1, h2, h3, h4 {
 
 /* ═════════════ Header ═════════════ */
 .dg-header {
-  position: sticky; top: var(--dg-topbar-h, 40px); z-index: 50;
+  position: sticky; top: 0; z-index: 50;
   background: rgba(11, 15, 26, 0.78);
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
