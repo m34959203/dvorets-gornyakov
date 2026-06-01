@@ -876,20 +876,20 @@ h1, h2, h3, h4 {
 }
 .dg-topbar-inner {
   display: flex; align-items: center; justify-content: center;
-  gap: 28px; min-height: 38px;
+  flex-wrap: wrap; gap: 4px 28px; min-height: 38px; padding-block: 7px;
 }
 .dg-topbar-label {
   color: #6B7280; letter-spacing: .18em; text-transform: uppercase;
   font-weight: 500; white-space: nowrap; flex: none;
 }
 .dg-topbar-links {
-  display: flex; align-items: center; justify-content: center; gap: 22px;
+  display: flex; align-items: center; justify-content: center; gap: 6px 22px;
   flex-wrap: wrap; min-width: 0; scrollbar-width: none;
 }
 .dg-topbar-links::-webkit-scrollbar { display: none; }
 .dg-topbar-links a {
   color: #9CA3AF; letter-spacing: .1em; text-transform: uppercase;
-  white-space: nowrap; transition: color .15s; padding: 10px 0;
+  white-space: nowrap; transition: color .15s; padding: 3px 0;
 }
 .dg-topbar-links a:hover { color: #E07A4A; }
 @media (max-width: 768px) {

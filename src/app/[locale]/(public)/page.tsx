@@ -267,7 +267,7 @@ export default async function HomePage({
             </div>
 
             <div className="feature-wrap">
-              <div className="feature">
+              <Link href={`/${locale}/events/${feature.id}`} className="feature">
                 <div className="feature-media">
                   <Image src={eventImage(feature.image_url, feature.event_type)} alt={titleOf(feature)} fill sizes="(max-width: 768px) 100vw, 50vw" />
                 </div>
@@ -288,11 +288,11 @@ export default async function HomePage({
                       <span className="val price">{T("Тегін", "Бесплатно")}</span>
                     </li>
                   </ul>
-                  <Link href={`/${locale}/events/${feature.id}`} className="feature-cta">
+                  <span className="feature-cta">
                     {T("Толығырақ", "Подробнее")} <DgIcon name="arrow" size={12} />
-                  </Link>
+                  </span>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </section>
@@ -314,7 +314,7 @@ export default async function HomePage({
 
             <div className="posters">
               {posters.map((e) => (
-                <article className="poster" key={e.id}>
+                <Link href={`/${locale}/events/${e.id}`} className="poster" key={e.id}>
                   <div className="poster-media">
                     <Image src={eventImage(e.image_url, e.event_type)} alt={titleOf(e)} fill sizes="(max-width: 768px) 50vw, 25vw" />
                   </div>
@@ -323,10 +323,10 @@ export default async function HomePage({
                     <li><DgIcon name="calendar" size={13} /> {posterDate(e)}</li>
                     <li><DgIcon name="coin" size={13} /> <span className="price">{T("Тегін", "Бесплатно")}</span></li>
                   </ul>
-                  <Link href={`/${locale}/events/${e.id}`} className="poster-cta">
+                  <span className="poster-cta">
                     {T("Толығырақ", "Подробнее")} <DgIcon name="arrow" size={11} />
-                  </Link>
-                </article>
+                  </span>
+                </Link>
               ))}
             </div>
           </div>

@@ -370,7 +370,7 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
           ) : (
             <div className="posters">
               {filtered.map((e) => (
-                <article className="poster" key={e.id}>
+                <Link href={e.href} className="poster" key={e.id}>
                   <div className="poster-media">
                     <Image src={e.image} alt={e.title} fill sizes="(max-width: 768px) 50vw, 25vw" />
                     {e.tag && <div className="poster-tag">{e.tag}</div>}
@@ -381,10 +381,10 @@ export default function DgEventsCatalog({ locale, items, monthWindow }: Props) {
                     <li><DgIcon name="pin" size={13} /> {e.hall}</li>
                     <li><DgIcon name="coin" size={13} /> <span className={e.free ? "price" : ""}>{e.price}</span></li>
                   </ul>
-                  <Link href={e.href} className="poster-cta">
+                  <span className="poster-cta">
                     {T("Толығырақ", "Подробнее")} <DgIcon name="arrow" size={11} />
-                  </Link>
-                </article>
+                  </span>
+                </Link>
               ))}
             </div>
           )}
