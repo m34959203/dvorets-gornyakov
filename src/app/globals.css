@@ -883,8 +883,8 @@ h1, h2, h3, h4 {
   font-weight: 500; white-space: nowrap; flex: none;
 }
 .dg-topbar-links {
-  display: flex; align-items: center; gap: 22px;
-  overflow-x: auto; scrollbar-width: none;
+  display: flex; align-items: center; justify-content: center; gap: 22px;
+  flex-wrap: wrap; min-width: 0; scrollbar-width: none;
 }
 .dg-topbar-links::-webkit-scrollbar { display: none; }
 .dg-topbar-links a {
@@ -895,6 +895,8 @@ h1, h2, h3, h4 {
 @media (max-width: 768px) {
   .dg-topbar-label { display: none; }
   .dg-topbar-inner { justify-content: flex-start; }
+  /* На мобильном — узкий горизонтальный скролл вместо переноса */
+  .dg-topbar-links { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; }
 }
 
 /* ═════════════ Header ═════════════ */
