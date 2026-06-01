@@ -164,7 +164,7 @@ export default async function Footer({ locale }: FooterProps) {
 
         <div className="dg-footer-bot">
           <div>© 2026 — {T("Тау-кеншілер сарайы. Барлық құқықтар қорғалған.", "Дворец горняков. Все права защищены.")}</div>
-          <Link href={`/${locale}/resources`}>{T("Кіру ережелері", "Правила посещения")}</Link>
+          <Link href={`/${locale}/rules`}>{T("Келу ережелері", "Правила посещения")}</Link>
         </div>
       </div>
     </footer>

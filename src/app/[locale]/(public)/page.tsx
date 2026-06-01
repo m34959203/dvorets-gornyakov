@@ -262,7 +262,7 @@ export default async function HomePage({
                 <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Маусымның <strong>басты</strong> оқиғасы", "Главное <strong>событие</strong> сезона") }} />
               </div>
               <Link href={`/${locale}/events`} className="section-link">
-                {T("Барлық афиша", "Вся афиша")} <DgIcon name="arrow" size={12} />
+                {T("Барлық афишалар", "Вся афиша")} <DgIcon name="arrow" size={12} />
               </Link>
             </div>
 
@@ -308,7 +308,7 @@ export default async function HomePage({
                 <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Жақын арадағы <strong>іс-шаралар</strong>", "Ближайшие <strong>мероприятия</strong>") }} />
               </div>
               <Link href={`/${locale}/events`} className="section-link">
-                {T("Барлық афиша", "Вся афиша")} <DgIcon name="arrow" size={12} />
+                {T("Барлық афишалар", "Вся афиша")} <DgIcon name="arrow" size={12} />
               </Link>
             </div>
 
@@ -342,7 +342,7 @@ export default async function HomePage({
               <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("<strong>Сарайдың</strong> шығармашылық ұжымдары", "Творческие составы <strong>Дворца</strong>") }} />
             </div>
             <Link href={`/${locale}/clubs`} className="section-link">
-              {T("Барлық ұжым", "Все составы")} <DgIcon name="arrow" size={12} />
+              {T("Барлық ұжымдар", "Все составы")} <DgIcon name="arrow" size={12} />
             </Link>
           </div>
         </div>
@@ -373,7 +373,7 @@ export default async function HomePage({
               <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Сегіз бағыт — <strong>барлық жасқа</strong>", "Восемь направлений <strong>для всех возрастов</strong>") }} />
             </div>
             <Link href={`/${locale}/clubs`} className="section-link">
-              {T("Барлық үйірме", "Все кружки")} <DgIcon name="arrow" size={12} />
+              {T("Барлық үйірмелер", "Все кружки")} <DgIcon name="arrow" size={12} />
             </Link>
           </div>
 
@@ -398,7 +398,7 @@ export default async function HomePage({
                 <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Іс-шараңызға арналған <strong>залдар</strong>", "Залы для <strong>вашего события</strong>") }} />
               </div>
               <Link href={`/${locale}/rent`} className="section-link">
-                {T("Барлық зал", "Все залы")} <DgIcon name="arrow" size={12} />
+                {T("Барлық залдар", "Все залы")} <DgIcon name="arrow" size={12} />
               </Link>
             </div>
 
@@ -443,7 +443,7 @@ export default async function HomePage({
             <div className="about-text">
               <div className="section-bar">
                 <div className="tag">— {T("Сарай туралы", "О дворце")} —</div>
-                <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Ұлытаудың <strong>басты</strong> мәдени үйі", "<strong>Главный</strong> культурный дом Улытау") }} />
+                <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Сәтбаев қаласының <strong>басты</strong> мәдени үйі", "<strong>Главный</strong> культурный дом города Сатпаев") }} />
               </div>
               <p style={{ marginTop: 28 }}>
                 <strong>{T("Ш. Ділдебаев атындағы Тау-кеншілер сарайы", "Дворец горняков им. Ш. Дильдебаева")}</strong>
@@ -482,7 +482,7 @@ export default async function HomePage({
                 <h2 className="h2" dangerouslySetInnerHTML={{ __html: T("Сарайдың <strong>соңғы</strong> жаңалықтары", "Последние <strong>новости</strong> Дворца") }} />
               </div>
               <Link href={`/${locale}/news`} className="section-link">
-                {T("Барлық жаңалық", "Все новости")} <DgIcon name="arrow" size={12} />
+                {T("Барлық жаңалықтар", "Все новости")} <DgIcon name="arrow" size={12} />
               </Link>
             </div>
 
