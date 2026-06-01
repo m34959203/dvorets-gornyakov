@@ -5,19 +5,15 @@ import { notFound } from "next/navigation";
 import {
   isValidLocale,
   type Locale,
-  getMessages,
   getLocalizedField,
 } from "@/lib/i18n";
 import { getOne, getMany } from "@/lib/db";
 import { eventImage } from "@/lib/event-image";
 import { localizeVenue, type VenuePair } from "@/lib/venue";
 import { eventJsonLd } from "@/lib/jsonld";
-import { buildEventIcs, icsDataUri } from "@/lib/ics";
 import JsonLd from "@/components/JsonLd";
-import ShareRow from "@/components/features/ShareRow";
 import DgPageHero from "@/components/layout/DgPageHero";
 import DgIcon from "@/components/layout/DgIcon";
-import EventSubscribe from "@/components/features/EventSubscribe";
 
 export const dynamic = "force-dynamic";
 
@@ -202,8 +198,6 @@ export default async function EventDetailPage({
 }) {
   const { locale: localeParam, id } = await params;
   const locale: Locale = isValidLocale(localeParam) ? localeParam : "kk";
-  const messages = getMessages(locale);
-  const t = messages.events;
   const T = (kk: string, ru: string) => (locale === "kk" ? kk : ru);
 
   const event = (await loadEvent(id)) ?? DEMO_EVENTS[id];
@@ -237,15 +231,6 @@ export default async function EventDetailPage({
   const shortDate = formatShortDate(event.start_date, locale);
   const cover = eventImage(event.image_url, event.event_type);
   const shareUrl = `${await getSiteBaseUrl()}/${locale}/events/${id}`;
-  const ics = buildEventIcs({
-    uid: event.id,
-    title,
-    start: event.start_date,
-    end: event.end_date,
-    location: venue,
-    description,
-    url: shareUrl,
-  });
 
   // Похожие события — 3 ближайших, кроме текущего
   const related = await getMany<EventRow>(
@@ -281,8 +266,7 @@ export default async function EventDetailPage({
 
       <section className="section" style={{ borderTop: 0 }}>
         <div className="dg-wrap">
-          <div className="detail-grid">
-            {/* ── Main column ─────────────────────────────────────── */}
+          <div style={{ maxWidth: 860, marginInline: "auto" }}>
             <main>
               <div className="detail-cover">
                 <Image src={cover} alt={title} fill sizes="(max-width: 900px) 100vw, 720px" />
@@ -325,30 +309,6 @@ export default async function EventDetailPage({
                 </div>
               )}
             </main>
-
-            {/* ── Aside ───────────────────────────────────────────── */}
-            <aside className="detail-aside">
-              <h3>
-                {T("Іс-шара туралы еске салу", "Напоминание о событии")}
-              </h3>
-              <EventSubscribe
-                eventId={event.id}
-                locale={locale}
-                labels={{
-                  subscribe: t.subscribe,
-                  subscribeSuccess: t.subscribeSuccess,
-                }}
-              />
-              <a
-                className="dg-btn dg-btn-ghost"
-                href={icsDataUri(ics)}
-                download={`event-${id}.ics`}
-                style={{ marginTop: 18, display: "inline-flex" }}
-              >
-                <DgIcon name="calendar" size={15} /> {T("Күнтізбеге қосу", "Добавить в календарь")}
-              </a>
-              <ShareRow url={shareUrl} title={title} locale={locale} />
-            </aside>
           </div>
 
           {/* Похожие события */}
@@ -362,16 +322,16 @@ export default async function EventDetailPage({
                 {related.map((e) => {
                   const rt = getLocalizedField(e as unknown as Record<string, unknown>, "title", locale);
                   return (
-                    <article className="poster" key={e.id}>
+                    <a href={`/${locale}/events/${e.id}`} className="poster" key={e.id}>
                       <div className="poster-media">
                         <Image src={eventImage(e.image_url, e.event_type)} alt={rt} fill sizes="(max-width: 768px) 50vw, 25vw" />
                       </div>
                       <h3 className="poster-title">{rt}</h3>
                       <p className="poster-meta" style={{ marginTop: 6 }}>{formatShortDate(e.start_date, locale)}</p>
-                      <a href={`/${locale}/events/${e.id}`} className="poster-cta">
+                      <span className="poster-cta">
                         {T("Толығырақ", "Подробнее")} <DgIcon name="arrow" size={11} />
-                      </a>
-                    </article>
+                      </span>
+                    </a>
                   );
                 })}
               </div>
